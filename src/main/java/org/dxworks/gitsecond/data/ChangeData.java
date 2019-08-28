@@ -1,4 +1,4 @@
-package org.dxworks.gitsecond;
+package org.dxworks.gitsecond.data;
 
 import lombok.*;
 import org.eclipse.jgit.diff.DiffEntry;

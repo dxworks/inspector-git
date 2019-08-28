@@ -1,5 +1,8 @@
 package org.dxworks.gitsecond;
 
+import org.dxworks.gitsecond.data.ChangeData;
+import org.dxworks.gitsecond.data.ChangesData;
+import org.dxworks.gitsecond.data.CommitData;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -38,6 +41,7 @@ public class GitClient {
 
     public static final String REPOS_PATH = Constants.APP_FOLDER_PATH + File.separator + "repos";
     private static final Logger log = LoggerFactory.getLogger(GitClient.class);
+    private final String could_not_parse_changes_correctly = "Could not parse changes correctly";
 
     public GitClient() {
         initializeReposPath();
@@ -60,7 +64,7 @@ public class GitClient {
         return Git.open(Paths.get(REPOS_PATH + File.separator + repoName + File.separator + ".git").toFile());
     }
 
-    public void checkoutRevisionForStudent(String revisionName, String repoName) {
+    public void checkoutRevisionForRepo(String revisionName, String repoName) {
         try {
             Git git = this.getRepositoryByProjectIdAndRepoName(repoName);
             git.checkout().setName(revisionName).call();
@@ -90,7 +94,7 @@ public class GitClient {
         cloneCommand.call();
     }
 
-    public String getFileContentForProjectAndRevision(String filePath, String repoName, String revisionName) throws IOException {
+    public String getFileContentForRepoAndRevision(String filePath, String repoName, String revisionName) throws IOException {
         Repository repository = this.getRepositoryByProjectIdAndRepoName(repoName).getRepository();
         ObjectId lastCommitId = repository.resolve(revisionName);
         RevWalk revWalk = new RevWalk(repository);
@@ -133,66 +137,102 @@ public class GitClient {
                 .authorEmail(revCommit.getAuthorIdent().getEmailAddress())
                 .date(new Date((long) revCommit.getCommitTime() * 1000L))
                 .message(revCommit.getFullMessage())
-                .changes(this.getCommitChanges(repository, revCommit)).build();
+                .changeSets(this.getCommitChanges(repository, revCommit))
+                .parentIds(Arrays.stream(revCommit.getParents()).map(RevCommit::getName).collect(Collectors.toList()))
+                .build();
     }
 
-    private List<ChangeData> getCommitChanges(Repository repository, RevCommit revCommit) {
+    private List<ChangesData> getCommitChanges(Repository repository, RevCommit revCommit) {
         ObjectReader reader = repository.newObjectReader();
-        AbstractTreeIterator parentTreeIterator = new CanonicalTreeParser();
         CanonicalTreeParser currentCommitTreeIterator = new CanonicalTreeParser();
-        List diffs = null;
 
         try {
+            currentCommitTreeIterator.reset(reader, revCommit.getTree().getId());
+
             if (revCommit.getParentCount() == 0) {
-                parentTreeIterator = new EmptyTreeIterator();
+                AbstractTreeIterator parentTreeIterator = new EmptyTreeIterator();
+                List<DiffEntry> diffs = getDiffsBetweenCommits(repository, parentTreeIterator, currentCommitTreeIterator);
+                List<ChangeData> changes = transformDiffsToChangeDatas(revCommit, repository, diffs, 0);
+                return Collections.singletonList(new ChangesData(null, changes));
             } else {
-                RevCommit parentCommit = revCommit.getParent(0);
-                ((CanonicalTreeParser) parentTreeIterator).reset(reader, parentCommit.getTree().getId());
+                List<ChangesData> changesData = Arrays.stream(revCommit.getParents())
+                        .map(parentCommit -> getChangesData(repository, reader, currentCommitTreeIterator, revCommit, parentCommit, revCommit.getParentCount() >= 2 ? Integer.MAX_VALUE : 0))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+
+                if (changesData.size() != revCommit.getParentCount()) {
+                    log.warn("Not all merge commit parents have been correctly parsed!");
+                }
+                return changesData;
             }
 
-            currentCommitTreeIterator.reset(reader, revCommit.getTree().getId());
-            DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE);
-            df.setRepository(repository);
-            df.setDiffComparator(RawTextComparator.DEFAULT);
-            df.setDetectRenames(true);
-            diffs = df.scan(parentTreeIterator, currentCommitTreeIterator);
-        } catch (IOException var11) {
-            var11.printStackTrace();
+        } catch (IOException e) {
+            log.error(could_not_parse_changes_correctly, e);
+            return Collections.emptyList();
         }
-
-        List<ChangeData> changes = new ArrayList();
-        Iterator var8 = diffs.iterator();
-
-        while (var8.hasNext()) {
-            DiffEntry diff = (DiffEntry) var8.next();
-            ChangeData repoChangeBlock = ChangeData.builder()
-                    .type(diff.getChangeType())
-                    .oldFileName(diff.getOldPath())
-                    .newFileName(diff.getNewPath().equals("/dev/null") ? diff.getOldPath() : diff.getNewPath())
-                    .build();
-            this.setNoOfLinesDeletedAndAdded(repository, diff, repoChangeBlock);
-            changes.add(repoChangeBlock);
-        }
-
-        return changes;
     }
 
-    private void setNoOfLinesDeletedAndAdded(Repository repository, DiffEntry diff, ChangeData repoChangeBlock) {
+    private ChangesData getChangesData(Repository repository, ObjectReader reader, CanonicalTreeParser currentCommitTreeIterator, RevCommit revCommit, RevCommit parentCommit, int contextLines) {
+        CanonicalTreeParser parentIterator = new CanonicalTreeParser();
+        try {
+            parentIterator.reset(reader, parentCommit.getTree().getId());
+            List<DiffEntry> diffsBetweenCommits = getDiffsBetweenCommits(repository, parentIterator, currentCommitTreeIterator);
+            List<ChangeData> changeDatas = transformDiffsToChangeDatas(revCommit, repository, diffsBetweenCommits, contextLines);
+
+            if (changeDatas != null) {
+                return new ChangesData(parentCommit.getName(), changeDatas);
+            } else {
+                return null;
+            }
+        } catch (IOException e) {
+            log.error(could_not_parse_changes_correctly, e);
+            return null;
+        } finally {
+            try {
+                currentCommitTreeIterator.reset(reader, revCommit.getTree().getId());
+            } catch (IOException e) {
+                log.error(could_not_parse_changes_correctly, e);
+            }
+        }
+    }
+
+    private List<ChangeData> transformDiffsToChangeDatas(RevCommit revCommit, Repository repository, List<DiffEntry> diffs, int contextLines) {
+        return diffs.stream().map(diff -> {
+            ChangeData changeData = ChangeData.builder()
+                    .type(diff.getChangeType())
+                    .oldFileName(diff.getOldPath())
+                    .commitID(revCommit.getName())
+                    .newFileName(diff.getNewPath().equals("/dev/null") ? diff.getOldPath() : diff.getNewPath())
+                    .build();
+            setNoOfLinesDeletedAndAdded(repository, diff, changeData, contextLines);
+            return changeData;
+        }).collect(Collectors.toList());
+    }
+
+    private List<DiffEntry> getDiffsBetweenCommits(Repository repository, AbstractTreeIterator parentTreeIterator, AbstractTreeIterator currentCommitTreeIterator) throws IOException {
+        DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE);
+        df.setRepository(repository);
+        df.setDiffComparator(RawTextComparator.DEFAULT);
+        df.setDetectRenames(true);
+        return df.scan(parentTreeIterator, currentCommitTreeIterator);
+    }
+
+    private void setNoOfLinesDeletedAndAdded(Repository repository, DiffEntry diff, ChangeData repoChangeBlock, int contextLines) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         DiffFormatter df = new DiffFormatter(out);
         df.setRepository(repository);
 
         try {
-            df.setContext(0);
+            df.setContext(contextLines);
             df.setDetectRenames(true);
             df.format(diff);
             RawText r = new RawText(out.toByteArray());
             r.getLineDelimiter();
             String modifications = out.toString();
             out.reset();
-            this.countAddedAndDeletedLines(modifications, repoChangeBlock);
-        } catch (IOException var8) {
-            var8.printStackTrace();
+            countAddedAndDeletedLines(modifications, repoChangeBlock);
+        } catch (IOException e) {
+            log.error("Diff between commits could not be parsed correctly!", e);
         }
 
     }
@@ -202,10 +242,8 @@ public class GitClient {
         int deletedLines = 0;
         List<String> lines = Arrays.asList(modifications.split("\n"));
         lines = this.trimList(lines);
-        Iterator var6 = lines.iterator();
 
-        while (var6.hasNext()) {
-            String line = (String) var6.next();
+        for (String line : lines) {
             if (line.startsWith("+")) {
                 ++addedLines;
             }

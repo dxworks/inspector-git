@@ -1,4 +1,4 @@
-package org.dxworks.gitsecond;
+package org.dxworks.gitsecond.data;
 
 import lombok.*;
 
@@ -20,5 +20,9 @@ public class CommitData {
 
     private List<String> parentIds;
 
-    private List<ChangeData> changes;
+    private List<ChangesData> changeSets;
+
+    public boolean isMergeCommit() {
+        return parentIds != null && parentIds.size() >= 2;
+    }
 }
