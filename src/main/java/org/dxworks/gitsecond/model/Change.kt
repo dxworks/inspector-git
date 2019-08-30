@@ -5,9 +5,14 @@ data class Change(var commit: Commit, var type: ChangeType, var file: File, var 
     var parent: Change? = if (file.changes.isEmpty()) null else file.changes.last()
 
     init {
+        println("Commit: ${commit.id}      beforeChange for ${file.fullyQualifiedName}")
+        println(annotatedLines.joinToString("\n") { "${it.lineNumber} ${it.content}" })
         if (!commit.isMergeCommit) {
             apply()
         }
+        println("Commit: ${commit.id}      after for ${file.fullyQualifiedName}")
+        println(annotatedLines.joinToString("\n") { "${it.lineNumber} ${it.content}" })
+        print("\n\n\n")
     }
 
     private fun apply() {
@@ -17,11 +22,11 @@ data class Change(var commit: Commit, var type: ChangeType, var file: File, var 
 
         lineChanges.filter { it.operation == LineOperation.ADD }.forEach {
             val annotatedLine = AnnotatedLine(commit, it.lineNumber, it.content)
-            if (it.lineNumber > newAnnotatedLines.size) {
-                newAnnotatedLines.add(annotatedLine)
-            } else {
-                newAnnotatedLines.add(it.lineNumber - 1, annotatedLine)
-            }
+//            if (it.lineNumber > newAnnotatedLines.size) {
+//                newAnnotatedLines.add(annotatedLine)
+//            } else {
+            newAnnotatedLines.add(it.lineNumber - 1, annotatedLine)
+//            }
         }
 
         reindex(newAnnotatedLines)

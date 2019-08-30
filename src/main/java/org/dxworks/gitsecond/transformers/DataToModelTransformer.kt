@@ -48,20 +48,6 @@ private fun addChangesToCommit(changeSets: List<ChangesData>, commit: Commit, pr
 
 fun getMergeCommitChanges(commit: Commit, changeSets: List<ChangesData>, project: Project): List<Change> {
     return changeSets.flatMap { it.changes }.map { changeData ->
-        //        val removeChanges: List<LineChange>
-//        val addChanges: List<LineChange>
-//        val file = getFileForChange(changeData, project)
-//        val last = file.changes.last()
-//        val annotatedLines = changeData.annotatedLines.map { line -> AnnotatedLine(project.commitRegistry.getByID(line.commitId)!!, line.lineNumber, line.content) }
-//        removeChanges = last.annotatedLines.filter { !annotatedLines.contains(it) }
-//                .map { LineChange(LineOperation.REMOVE, it.lineNumber, it.content) }
-//
-//        addChanges = annotatedLines.filter { last.annotatedLines.contains(it) }
-//                .map { LineChange(LineOperation.ADD, it.lineNumber, it.content) }
-//        val lineChanges: MutableList<LineChange> = ArrayList()
-//        lineChanges.addAll(removeChanges)
-//        lineChanges.addAll(addChanges)
-//
         val change = Change(commit = commit,
                 type = transformChangeType(changeData.type),
                 file = getFileForChange(changeData, project),
