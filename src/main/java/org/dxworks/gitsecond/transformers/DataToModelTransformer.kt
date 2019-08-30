@@ -28,25 +28,53 @@ fun createProject(commitDatas: List<CommitData>, projectId: String): Project {
 }
 
 private fun addChangesToCommit(changeSets: List<ChangesData>, commit: Commit, project: Project) {
-    commit.changes = changeSets
-            .flatMap { it.changes }
-            .map {
-                val change = Change(commit = commit,
-                        type = transformChangeType(it.type),
-                        file = getFileForChange(it, project),
-                        lines = ArrayList(), //getLinesFromDiff(it.diff),
-                        oldFilename = it.oldFileName,
-                        newFileName = it.newFileName)
-                change.file?.changes?.add(change)
-                change
-            }
+    commit.changes = if (commit.isMergeCommit)
+        getMergeCommitChanges(commit, changeSets, project)
+    else
+        changeSets.flatMap { it.changes }
+                .map {
+                    val annotatedLines = it.annotatedLines.map { line -> AnnotatedLine(commit, line.lineNumber, line.content) }.toMutableList()
+                    val change = Change(commit = commit,
+                            type = transformChangeType(it.type),
+                            file = getFileForChange(it, project),
+                            oldFilename = it.oldFileName,
+                            newFileName = it.newFileName,
+                            lineChanges = DiffParser(it.diff).lineChanges,
+                            annotatedLines = annotatedLines)
+                    change.file.changes.add(change)
+                    change
+                }
 }
 
-//private fun getLinesFromDiff(diff: String): List<Line> {
+fun getMergeCommitChanges(commit: Commit, changeSets: List<ChangesData>, project: Project): List<Change> {
+    return changeSets.flatMap { it.changes }.map { changeData ->
+        //        val removeChanges: List<LineChange>
+//        val addChanges: List<LineChange>
+//        val file = getFileForChange(changeData, project)
+//        val last = file.changes.last()
+//        val annotatedLines = changeData.annotatedLines.map { line -> AnnotatedLine(project.commitRegistry.getByID(line.commitId)!!, line.lineNumber, line.content) }
+//        removeChanges = last.annotatedLines.filter { !annotatedLines.contains(it) }
+//                .map { LineChange(LineOperation.REMOVE, it.lineNumber, it.content) }
 //
-//}
+//        addChanges = annotatedLines.filter { last.annotatedLines.contains(it) }
+//                .map { LineChange(LineOperation.ADD, it.lineNumber, it.content) }
+//        val lineChanges: MutableList<LineChange> = ArrayList()
+//        lineChanges.addAll(removeChanges)
+//        lineChanges.addAll(addChanges)
+//
+        val change = Change(commit = commit,
+                type = transformChangeType(changeData.type),
+                file = getFileForChange(changeData, project),
+                oldFilename = changeData.oldFileName,
+                newFileName = changeData.newFileName,
+                lineChanges = ArrayList(),
+                annotatedLines = changeData.annotatedLines.map { line -> AnnotatedLine(project.commitRegistry.getByID(line.commitId)!!, line.lineNumber, line.content) }.toMutableList())
+        change.file.changes.add(change)
+        change
+    }
+}
 
-private fun getFileForChange(changeData: ChangeData, project: Project): File? {
+private fun getFileForChange(changeData: ChangeData, project: Project): File {
 
     val changeType = transformChangeType(changeData.type)
 
@@ -76,7 +104,7 @@ private fun getFileForChange(changeData: ChangeData, project: Project): File? {
         }
     }
 
-    return file
+    return file!!
 }
 
 private fun transformChangeType(type: DiffEntry.ChangeType): ChangeType {

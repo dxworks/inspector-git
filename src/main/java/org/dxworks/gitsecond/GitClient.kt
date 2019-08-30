@@ -1,8 +1,10 @@
 package org.dxworks.gitsecond
 
+import org.dxworks.gitsecond.data.AnnotatedLineData
 import org.dxworks.gitsecond.data.ChangeData
 import org.dxworks.gitsecond.data.ChangesData
 import org.dxworks.gitsecond.data.CommitData
+import org.eclipse.jgit.api.BlameCommand
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.errors.GitAPIException
 import org.eclipse.jgit.diff.DiffEntry
@@ -27,6 +29,7 @@ import java.io.FileNotFoundException
 import java.io.IOException
 import java.nio.file.Paths
 import java.util.*
+import kotlin.collections.ArrayList
 
 class GitClient {
     private val could_not_parse_changes_correctly = "Could not parse changes correctly"
@@ -121,6 +124,35 @@ class GitClient {
         return emptyList()
     }
 
+    private fun blame(repo: Repository, filePath: String, commitId: String): MutableList<AnnotatedLineData> {
+        val gitObject = repo.resolve(commitId)
+        val blameCommand = BlameCommand(repo)
+        blameCommand.setFilePath(filePath)
+        blameCommand.setStartCommit(gitObject)
+        val blameResult = blameCommand.call()
+        val rawText = blameResult.resultContents
+        val length = rawText.size()
+
+        val lines: MutableList<AnnotatedLineData> = ArrayList()
+
+        for (i in 0 until length) {
+            val commit = blameResult.getSourceCommit(i)
+            val line = AnnotatedLineData(commit.name, i + 1, rawText.getString(i))
+            lines.add(line)
+        }
+
+        val blameContent = String(rawText.rawContent)
+        val blameLines = blameContent.split("\n")
+        val blameLength = blameLines.size
+
+
+//        lines.forEach {
+//            println("${it.lineNumber} ${it.commit?.date} ${it.commit?.author!!.id.name} ${it.content}")
+//        }
+
+        return lines
+    }
+
     private fun getCommitDetails(repository: Repository, revCommit: RevCommit): CommitData {
         return CommitData(id = revCommit.name,
                 authorName = revCommit.authorIdent.name,
@@ -141,11 +173,11 @@ class GitClient {
             if (revCommit.parentCount == 0) {
                 val parentTreeIterator = EmptyTreeIterator()
                 val diffs = getDiffsBetweenCommits(repository, parentTreeIterator, currentCommitTreeIterator)
-                val changes = transformDiffsToChangeDatas(revCommit, repository, diffs, 0)
+                val changes = transformDiffsToChangeDatas(revCommit, repository, diffs)
                 return listOf(ChangesData(null, changes))
             } else {
                 val changesData = revCommit.parents
-                        .map { getChangesData(repository, reader, currentCommitTreeIterator, revCommit, it, if (revCommit.parentCount >= 2) Integer.MAX_VALUE else 0) }
+                        .map { getChangesData(repository, reader, currentCommitTreeIterator, revCommit, it) }
                         .filter { Objects.nonNull(it) }
 
                 if (changesData.size != revCommit.parentCount) {
@@ -161,12 +193,12 @@ class GitClient {
 
     }
 
-    private fun getChangesData(repository: Repository, reader: ObjectReader, currentCommitTreeIterator: CanonicalTreeParser, revCommit: RevCommit, parentCommit: RevCommit, contextLines: Int): ChangesData? {
+    private fun getChangesData(repository: Repository, reader: ObjectReader, currentCommitTreeIterator: CanonicalTreeParser, revCommit: RevCommit, parentCommit: RevCommit): ChangesData? {
         val parentIterator = CanonicalTreeParser()
         try {
             parentIterator.reset(reader, parentCommit.tree.id)
             val diffsBetweenCommits = getDiffsBetweenCommits(repository, parentIterator, currentCommitTreeIterator)
-            val changeDatas = transformDiffsToChangeDatas(revCommit, repository, diffsBetweenCommits, contextLines)
+            val changeDatas = transformDiffsToChangeDatas(revCommit, repository, diffsBetweenCommits)
 
             return ChangesData(parentCommit.name, changeDatas)
         } catch (e: IOException) {
@@ -182,13 +214,14 @@ class GitClient {
         }
     }
 
-    private fun transformDiffsToChangeDatas(revCommit: RevCommit, repository: Repository, diffs: List<DiffEntry>, contextLines: Int): List<ChangeData> {
+    private fun transformDiffsToChangeDatas(revCommit: RevCommit, repository: Repository, diffs: List<DiffEntry>): List<ChangeData> {
         return diffs.map {
             val changeData = ChangeData(type = it.changeType,
                     oldFileName = it.oldPath,
                     newFileName = it.newPath,
-                    commitID = revCommit.name)
-            setNoOfLinesDeletedAndAdded(repository, it, changeData, contextLines)
+                    commitID = revCommit.name,
+                    annotatedLines = if (revCommit.parents.size > 1) blame(repository, it.newPath, revCommit.name) else ArrayList())
+            setDiff(repository, it, changeData)
             changeData
         }
     }
@@ -202,43 +235,22 @@ class GitClient {
         return df.scan(parentTreeIterator, currentCommitTreeIterator)
     }
 
-    private fun setNoOfLinesDeletedAndAdded(repository: Repository, diff: DiffEntry, repoChangeBlock: ChangeData, contextLines: Int) {
+    private fun setDiff(repository: Repository, diff: DiffEntry, repoChangeBlock: ChangeData) {
         val out = ByteArrayOutputStream()
         val df = DiffFormatter(out)
         df.setRepository(repository)
 
         try {
-            df.setContext(contextLines)
+            df.setContext(0)
             df.isDetectRenames = true
             df.format(diff)
             val modifications = out.toString()
             out.reset()
-            countAddedAndDeletedLines(modifications, repoChangeBlock)
+            repoChangeBlock.diff = modifications
         } catch (e: IOException) {
             log.error("DiffParser between commits could not be parsed correctly!", e)
         }
 
-    }
-
-    private fun countAddedAndDeletedLines(modifications: String, repoChangeBlock: ChangeData) {
-        var addedLines = 0
-        var deletedLines = 0
-        var lines = Arrays.asList(*modifications.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray())
-        lines = this.trimList(lines)
-
-        for (line in lines) {
-            if (line.startsWith("+")) {
-                ++addedLines
-            }
-
-            if (line.startsWith("-")) {
-                ++deletedLines
-            }
-        }
-
-        repoChangeBlock.diff = modifications
-        repoChangeBlock.addedLines = addedLines
-        repoChangeBlock.deletedLines = deletedLines
     }
 
     private fun trimList(lines: List<String>): List<String> {

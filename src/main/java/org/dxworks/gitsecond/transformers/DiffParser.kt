@@ -1,12 +1,14 @@
 package org.dxworks.gitsecond.transformers
 
+import org.dxworks.gitsecond.model.LineChange
+import org.dxworks.gitsecond.model.LineOperation
 import java.util.*
 import kotlin.collections.ArrayList
 
-class DiffParser(private val content: String) {
+class DiffParser(content: String) {
     private val lines: List<String> = Collections.unmodifiableList(content.split("\n"))
-    val addedLines: MutableList<Pair<Int, String>> = ArrayList()
-    val deletedLines: MutableList<Pair<Int, String>> = ArrayList()
+
+    val lineChanges: MutableList<LineChange> = ArrayList()
 
     init {
         lines.filter { it.startsWith("@@") }.forEach {
@@ -18,9 +20,9 @@ class DiffParser(private val content: String) {
 
             var diffLineIndex = firstLineIndex
             for (i in removeStart until (removeStart + removeSize))
-                deletedLines.add(Pair(i, lines[diffLineIndex++].removePrefix("-")))
+                lineChanges.add(LineChange(operation = LineOperation.REMOVE, lineNumber = i, content = lines[diffLineIndex++].removePrefix("-")))
             for (i in addStart until (addStart + addSize))
-                addedLines.add(Pair(i, lines[diffLineIndex++].removePrefix("+")))
+                lineChanges.add(LineChange(operation = LineOperation.ADD, lineNumber = i, content = lines[diffLineIndex++].removePrefix("+")))
         }
 
     }

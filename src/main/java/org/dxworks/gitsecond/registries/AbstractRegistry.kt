@@ -5,8 +5,8 @@ import java.util.*
 abstract class AbstractRegistry<TYPE, ID> {
     private val map: MutableMap<ID, TYPE> = HashMap()
 
-    val all: List<TYPE>
-        get() = map.values as List<TYPE>
+    val all: Collection<TYPE>
+        get() = map.values
 
     val allIDs: Set<ID>
         get() = map.keys

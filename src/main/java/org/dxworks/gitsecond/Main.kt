@@ -20,4 +20,10 @@ fun main(args: Array<String>) {
 
     val project = createProject(commitDatas, REPO_NAME)
     println(project)
+
+//    val blames = project.commitRegistry.all
+//            .filter { it.isMergeCommit }
+//            .flatMap { it.changes }
+//            .mapNotNull { change -> change.file?.let { gitClient.blame(REPO_NAME, it.fullyQualifiedName, change.commit.id, project) } }
+
 }
