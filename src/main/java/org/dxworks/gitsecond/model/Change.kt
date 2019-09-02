@@ -4,6 +4,10 @@ package org.dxworks.gitsecond.model
 data class Change(var commit: Commit, var type: ChangeType, var file: File, var oldFilename: String, var newFileName: String, var lineChanges: MutableList<LineChange>, var annotatedLines: List<AnnotatedLine>) {
     var parent: Change? = if (file.changes.isEmpty()) null else file.changes.last()
 
+//    private fun getParentChange(commit: Commit) : Change?{
+//        commit.parents.find{parentCommit -> parentCommit.changes.any { it.file == file }}
+//    }
+
     init {
         println("Commit: ${commit.id}      beforeChange for ${file.fullyQualifiedName}")
         println(annotatedLines.joinToString("\n") { "${it.lineNumber} ${it.content}" })
@@ -22,11 +26,7 @@ data class Change(var commit: Commit, var type: ChangeType, var file: File, var 
 
         lineChanges.filter { it.operation == LineOperation.ADD }.forEach {
             val annotatedLine = AnnotatedLine(commit, it.lineNumber, it.content)
-//            if (it.lineNumber > newAnnotatedLines.size) {
-//                newAnnotatedLines.add(annotatedLine)
-//            } else {
             newAnnotatedLines.add(it.lineNumber - 1, annotatedLine)
-//            }
         }
 
         reindex(newAnnotatedLines)

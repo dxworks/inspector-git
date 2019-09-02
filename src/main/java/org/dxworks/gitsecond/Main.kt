@@ -16,14 +16,11 @@ fun main(args: Array<String>) {
     }
 
     val commitDatas = gitClient.generateGitLogForDx(REPO_NAME).reversed()
-    println(commitDatas)
+    commitDatas.map { "${it.message} ${it.isMergeCommit}" }.forEach { println(it) }
 
     val project = createProject(commitDatas, REPO_NAME)
     println(project)
 
-//    val blames = project.commitRegistry.all
-//            .filter { it.isMergeCommit }
-//            .flatMap { it.changes }
-//            .mapNotNull { change -> change.file?.let { gitClient.blame(REPO_NAME, it.fullyQualifiedName, change.commit.id, project) } }
-
+//Show the entire history of a file (including history beyond renames):
+//$ git log --follow -p -- <file>
 }

@@ -47,14 +47,13 @@ class ProjectTest {
     }
 
     @Test
-    private fun `a random file from a random commit should be correctly built`(): Project {
+    private fun `a random file from a random commit should be correctly built`() {
         val file = project.fileRegistry.all.random()
         val commit = file.changes.random().commit
         val expectedContent = gitClient.getFileContentForRepoAndRevision(file.fullyQualifiedName, REPO_NAME, commit.id).trim()
         val myContent = file.contentForRevision(commit).trim()
 
         assertEquals(expectedContent, myContent)
-        return project
     }
 
 }

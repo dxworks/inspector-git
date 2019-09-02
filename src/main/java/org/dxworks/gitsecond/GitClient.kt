@@ -10,6 +10,7 @@ import org.eclipse.jgit.api.errors.GitAPIException
 import org.eclipse.jgit.diff.DiffEntry
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawTextComparator
+import org.eclipse.jgit.diff.RenameDetector
 import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.revwalk.RevCommit
@@ -170,11 +171,11 @@ class GitClient {
         try {
             currentCommitTreeIterator.reset(reader, revCommit.tree.id)
 
-            if (revCommit.parentCount == 0) {
+            return if (revCommit.parentCount == 0) {
                 val parentTreeIterator = EmptyTreeIterator()
                 val diffs = getDiffsBetweenCommits(repository, parentTreeIterator, currentCommitTreeIterator)
                 val changes = transformDiffsToChangeDatas(revCommit, repository, diffs)
-                return listOf(ChangesData(null, changes))
+                listOf(ChangesData(null, changes))
             } else {
                 val changesData = revCommit.parents
                         .map { getChangesData(repository, reader, currentCommitTreeIterator, revCommit, it) }
@@ -183,7 +184,7 @@ class GitClient {
                 if (changesData.size != revCommit.parentCount) {
                     log.warn("Not all merge commit parents have been correctly parsed!")
                 }
-                return changesData as List<ChangesData>
+                changesData as List<ChangesData>
             }
 
         } catch (e: IOException) {
@@ -199,6 +200,7 @@ class GitClient {
             parentIterator.reset(reader, parentCommit.tree.id)
             val diffsBetweenCommits = getDiffsBetweenCommits(repository, parentIterator, currentCommitTreeIterator)
             val changeDatas = transformDiffsToChangeDatas(revCommit, repository, diffsBetweenCommits)
+            cleanDataForRenames(changeDatas, revCommit, repository);
 
             return ChangesData(parentCommit.name, changeDatas)
         } catch (e: IOException) {
@@ -211,6 +213,16 @@ class GitClient {
                 log.error(could_not_parse_changes_correctly, e)
             }
 
+        }
+    }
+
+    private fun cleanDataForRenames(changeDatas: List<ChangeData>, revCommit: RevCommit, repository: Repository) {
+        val addChangeDatas = changeDatas.filter { it.type == DiffEntry.ChangeType.ADD }
+        val deleteChangeDatas = changeDatas.filter { it.type == DiffEntry.ChangeType.DELETE }
+
+        if (addChangeDatas.isNotEmpty() && deleteChangeDatas.isNotEmpty()) {
+            val git = Git(repository)
+//            val log = git.log().
         }
     }
 
@@ -234,6 +246,7 @@ class GitClient {
         df.isDetectRenames = true
         return df.scan(parentTreeIterator, currentCommitTreeIterator)
     }
+
 
     private fun setDiff(repository: Repository, diff: DiffEntry, repoChangeBlock: ChangeData) {
         val out = ByteArrayOutputStream()
