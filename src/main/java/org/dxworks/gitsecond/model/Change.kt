@@ -2,11 +2,11 @@ package org.dxworks.gitsecond.model
 
 
 data class Change(var commit: Commit, var type: ChangeType, var file: File, var oldFilename: String, var newFileName: String, var lineChanges: MutableList<LineChange>, var annotatedLines: List<AnnotatedLine>) {
-    var parent: Change? = if (file.changes.isEmpty()) null else file.changes.last()
+    var parent: Change? = if (type == ChangeType.ADD || file.changes.isEmpty()) null else getParentChange(commit.parents)
 
-//    private fun getParentChange(commit: Commit) : Change?{
-//        commit.parents.find{parentCommit -> parentCommit.changes.any { it.file == file }}
-//    }
+    private fun getParentChange(commits: List<Commit>) : Change{
+        return commits.flatMap { it.changes }.find { it.file == file } ?: getParentChange(commits.flatMap { it.parents })
+    }
 
     init {
         println("Commit: ${commit.id}      beforeChange for ${file.fullyQualifiedName}")

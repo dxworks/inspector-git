@@ -22,12 +22,6 @@ class ChangeParser(private val lines: MutableList<String>) {
         hunkParsers = createHunkParsers()
     }
 
-    private fun extractFileNames(): Pair<String, String> {
-        val oldFileNameLineIndex = lines.indexOfFirst { it.startsWith(oldFileNameLinePrefix) }
-        return Pair(first = lines.removeAt(oldFileNameLineIndex).removePrefix(oldFileNameLinePrefix).removePrefix("a"),
-                second = lines.removeAt(oldFileNameLineIndex).removePrefix(newFileNameLinePrefix).removePrefix("b"))
-    }
-
     private fun extractChangeType(): ChangeType {
         val changeTypeLine = lines.removeAt(0)
         return if (changeTypeLine.startsWith("new file mode")) {
@@ -44,11 +38,17 @@ class ChangeParser(private val lines: MutableList<String>) {
         } else ChangeType.MODIFY
     }
 
+    private fun extractFileNames(): Pair<String, String> {
+        val oldFileNameLineIndex = lines.indexOfFirst { it.startsWith(oldFileNameLinePrefix) }
+        return Pair(first = lines.removeAt(oldFileNameLineIndex).removePrefix(oldFileNameLinePrefix).removePrefix("a"),
+                second = lines.removeAt(oldFileNameLineIndex).removePrefix(newFileNameLinePrefix).removePrefix("b"))
+    }
+
     private fun createHunkParsers(): List<HunkParser> {
         return if (lines.isNotEmpty()) {
             val hunks: MutableList<MutableList<String>> = ArrayList()
             var currentHunkLines: MutableList<String> = ArrayList()
-            lines.forEach() {
+            lines.forEach {
                 if (it.startsWith("@")) {
                     currentHunkLines = ArrayList()
                     hunks.add(currentHunkLines)
