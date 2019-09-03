@@ -1,30 +1,35 @@
 package org.dxworks.gitsecond.parsers
 
-import java.nio.file.Files
+import org.dxworks.gitsecond.dto.CommitDTO
 import java.nio.file.Paths
 
-class LogParser(log: String) {
-    private val lines:List<String> = Files.readAllLines(Paths.get(log))
+class LogParser(gitInfoGatherer: GitInfoGatherer) {
+    private val lines = gitInfoGatherer.getLogs()
     private val COMMIT = "commit"
 
-    val commitParsers: List<CommitParser>
+    val commits: List<CommitDTO>
 
     init {
         val commits: MutableList<MutableList<String>> = ArrayList()
         var currentCommitLines: MutableList<String> = ArrayList()
-        lines.forEach() {
+        lines.forEach {
             if (it.startsWith(COMMIT)) {
                 currentCommitLines = ArrayList()
                 commits.add(currentCommitLines)
             }
-                currentCommitLines.add(it)
+            currentCommitLines.add(it)
         }
-        commitParsers = commits.map { CommitParser(it) }
-                println(commitParsers)
+        this.commits = commits.map { CommitParserFactory.create(it, gitInfoGatherer).parse().commit }
     }
 }
 
 fun main() {
-    val commitParsers = LogParser(System.getProperty("user.home") + "/Documents/dx/testLog.log").commitParsers
-    println(commitParsers)
+
+    val process = ProcessBuilder("bash", "-c", "git --version").start()
+    process.waitFor()
+    String(process.inputStream.readAllBytes()).also { println(it) }
+
+    val gitInfoGatherer = GitInfoGatherer(Paths.get(System.getProperty("user.home"), "Documents/dx/test"))
+    val commits = LogParser(gitInfoGatherer).commits
+    println(commits)
 }

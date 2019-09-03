@@ -1,45 +1,44 @@
 package org.dxworks.gitsecond.parsers
 
+import org.dxworks.gitsecond.dto.ChangeDTO
+import org.dxworks.gitsecond.dto.CommitDTO
 import org.dxworks.gitsecond.model.AuthorID
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
-import kotlin.collections.HashSet
 
-class CommitParser(private val lines: MutableList<String>) {
-    val isMergeCommit: Boolean
-    val commitId: String
-    val parentIds: List<String>
-    val authorId: AuthorID
-    val date: Date
-    val message: String
-    val changeParsers: List<ChangeParser>
-    val filesContentsAtMergeCommit: Map<String, String>
+abstract class CommitParser(protected val lines: MutableList<String>) {
+    private var parsed: Boolean = false
+    protected val commitId = extractCommitId()
 
-    init {
-        commitId = extractCommitId()
-        parentIds = extractParentIds()
-        isMergeCommit = parentIds.size > 1
-        authorId = extractAuthorId()
-        date = extractDate()
-        message = extractMessage()
-        changeParsers = if (isMergeCommit) ArrayList() else createChangeParsers()
-        filesContentsAtMergeCommit = if (isMergeCommit) getFilesContents() else HashMap()
+    lateinit var commit: CommitDTO
+        private set
+
+    fun parse(): CommitParser {
+        if (!parsed) {
+            commit = CommitDTO(
+                    commitId = commitId,
+                    parentIds = extractParentIds(),
+                    authorId = extractAuthorId(),
+                    date = extractDate(),
+                    message = extractMessage(),
+                    changes = extractChanges())
+            parsed = true
+        }
+        return this
     }
 
-    private fun getFilesContents(): Map<String, String> {
-        val changedFileNames = getChangedFileNames()
-        val filesMap: MutableMap<String, String> = HashMap()
+    abstract fun extractChanges(): List<ChangeDTO>
 
-
-
-        return filesMap
-    }
-
-    private fun getChangedFileNames(): Set<String> {
-        val changedFileNames: MutableSet<String> = HashSet()
-
-        return changedFileNames
+    protected fun getChanges(): List<MutableList<String>> {
+        val changes: MutableList<MutableList<String>> = ArrayList()
+        var currentChangeLines: MutableList<String> = ArrayList()
+        lines.forEach {
+            if (it.startsWith("diff ")) {
+                currentChangeLines = ArrayList()
+                changes.add(currentChangeLines)
+            }
+            currentChangeLines.add(it)
+        }
+        return changes
     }
 
     private fun extractCommitId(): String {
@@ -67,20 +66,5 @@ class CommitParser(private val lines: MutableList<String>) {
             message = "$message\n${lines.removeAt(0)}"
         }
         return message.trim()
-    }
-
-    private fun createChangeParsers(): List<ChangeParser> {
-        return if (lines.isNotEmpty()) {
-            val changes: MutableList<MutableList<String>> = ArrayList()
-            var currentChangeLines: MutableList<String> = ArrayList()
-            lines.forEach() {
-                if (it.startsWith("diff ")) {
-                    currentChangeLines = ArrayList()
-                    changes.add(currentChangeLines)
-                }
-                currentChangeLines.add(it)
-            }
-            changes.map { ChangeParser(it) }
-        } else ArrayList()
     }
 }

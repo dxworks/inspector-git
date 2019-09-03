@@ -1,28 +1,30 @@
 package org.dxworks.gitsecond.parsers
 
-import org.dxworks.gitsecond.model.LineChange
+import org.dxworks.gitsecond.dto.HunkDTO
+import org.dxworks.gitsecond.dto.LineChangeDTO
 import org.dxworks.gitsecond.model.LineOperation
 
 class HunkParser(val lines: MutableList<String>) {
 
-    val lineChanges: List<LineChange>
+    val hunk: HunkDTO
 
     init {
         val (removePair, addPair) = getRemoveAndAddHunkInfo(lines.removeAt(0))
-        this.lineChanges = extractLineChanges(removePair, addPair)
+        hunk = HunkDTO(
+                lineChanges = extractLineChanges(removePair, addPair))
     }
 
-    private fun extractLineChanges(removePair: Pair<Int, Int>, addPair: Pair<Int, Int>): List<LineChange> {
+    private fun extractLineChanges(removePair: Pair<Int, Int>, addPair: Pair<Int, Int>): List<LineChangeDTO> {
         val (removeStart, removeCount) = removePair
         val (addStart, addCount) = addPair
 
-        val lineChanges: MutableList<LineChange> = ArrayList()
+        val lineChanges: MutableList<LineChangeDTO> = ArrayList()
         var diffLineIndex = 0
 
         for (i in removeStart until (removeStart + removeCount))
-            lineChanges.add(LineChange(operation = LineOperation.REMOVE, lineNumber = i, content = lines[diffLineIndex++].removePrefix("-")))
+            lineChanges.add(LineChangeDTO(operation = LineOperation.REMOVE, lineNumber = i, content = lines[diffLineIndex++].removePrefix("-")))
         for (i in addStart until (addStart + addCount))
-            lineChanges.add(LineChange(operation = LineOperation.ADD, lineNumber = i, content = lines[diffLineIndex++].removePrefix("+")))
+            lineChanges.add(LineChangeDTO(operation = LineOperation.ADD, lineNumber = i, content = lines[diffLineIndex++].removePrefix("+")))
 
         return lineChanges
     }
