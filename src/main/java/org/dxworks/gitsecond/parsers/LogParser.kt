@@ -4,9 +4,10 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 class LogParser(log: String) {
-    private val lines:List<String> = Files.readAllLines(Paths.get(log)).filter { it.isNotBlank() }
-
+    private val lines:List<String> = Files.readAllLines(Paths.get(log))
     private val COMMIT = "commit"
+
+    val commitParsers: List<CommitParser>
 
     init {
         val commits: MutableList<MutableList<String>> = ArrayList()
@@ -18,11 +19,12 @@ class LogParser(log: String) {
             }
                 currentCommitLines.add(it)
         }
-        val commitParsers = commits.map { CommitParser(it) }
+        commitParsers = commits.map { CommitParser(it) }
                 println(commitParsers)
     }
 }
 
 fun main() {
-    LogParser(System.getProperty("user.home") + "/Documents/dx/testLog.log")
+    val commitParsers = LogParser(System.getProperty("user.home") + "/Documents/dx/testLog.log").commitParsers
+    println(commitParsers)
 }

@@ -3,45 +3,70 @@ package org.dxworks.gitsecond.parsers
 import org.dxworks.gitsecond.model.AuthorID
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.collections.HashSet
 
 class CommitParser(private val lines: MutableList<String>) {
-    val isMergeCommit: Boolean = lines.removeIf { it.startsWith("Merge") }
+    val isMergeCommit: Boolean
     val commitId: String
+    val parentIds: List<String>
     val authorId: AuthorID
     val date: Date
     val message: String
     val changeParsers: List<ChangeParser>
+    val filesContentsAtMergeCommit: Map<String, String>
 
     init {
         commitId = extractCommitId()
+        parentIds = extractParentIds()
+        isMergeCommit = parentIds.size > 1
         authorId = extractAuthorId()
         date = extractDate()
         message = extractMessage()
-        changeParsers = createChangeParsers()
+        changeParsers = if (isMergeCommit) ArrayList() else createChangeParsers()
+        filesContentsAtMergeCommit = if (isMergeCommit) getFilesContents() else HashMap()
+    }
+
+    private fun getFilesContents(): Map<String, String> {
+        val changedFileNames = getChangedFileNames()
+        val filesMap: MutableMap<String, String> = HashMap()
+
+
+
+        return filesMap
+    }
+
+    private fun getChangedFileNames(): Set<String> {
+        val changedFileNames: MutableSet<String> = HashSet()
+
+        return changedFileNames
     }
 
     private fun extractCommitId(): String {
-        val commitLine = lines.removeAt(0)
-        return commitLine.split(" ")[1]
+        return lines.removeAt(0).removePrefix("commit: ")
+    }
+
+    private fun extractParentIds(): List<String> {
+        return lines.removeAt(0).removePrefix("parents: ").split(" ")
     }
 
     private fun extractAuthorId(): AuthorID {
-        val authorLine = lines.removeAt(0).removePrefix("Author: ")
-        val authorDetails = authorLine.split(" <")
-        return AuthorID(name = authorDetails[0], email = authorDetails[1].removeSuffix(">"))
+        val authorName = lines.removeAt(0).removePrefix("author name: ")
+        val authorEmail = lines.removeAt(0).removePrefix("author email: ")
+        return AuthorID(authorEmail, authorName)
     }
 
     private fun extractDate(): Date {
-        val dateLine = lines.removeAt(0)
-        return Date(dateLine.removePrefix("Date: "))
+        return Date(lines.removeAt(0).removePrefix("date: "))
     }
 
     private fun extractMessage(): String {
+        lines.removeAt(0)
         var message: String = ""
         while (lines.isNotEmpty() && !lines[0].startsWith("diff ")) {
-            message += lines.removeAt(0).trim()
+            message = "$message\n${lines.removeAt(0)}"
         }
-        return message
+        return message.trim()
     }
 
     private fun createChangeParsers(): List<ChangeParser> {
