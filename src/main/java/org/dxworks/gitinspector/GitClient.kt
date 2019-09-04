@@ -6,7 +6,7 @@ import java.nio.file.Paths
 
 class GitClient(path: Path) {
     private val git = "git"
-    private val gitLogCommand = "$git log -M5% -c -U0 --format=\"commit: %H%nparents: %P%nauthor name: %an%nauthor email: %ae%ndate: %ad%nmessage:%n%s%n%b\""
+    private val gitLogCommand = "$git log -M5% -c -U0 --format=\"commit: %H%nparents: %P%nauthor name: %an%nauthor email: %ae%ndate: %at%nmessage:%n%s%n%b\""
     private val gitBlameCommand = "$git blame -l"
     private val processBuilder = ProcessBuilder()
 
@@ -38,6 +38,6 @@ fun main() {
         throw IllegalStateException("This program requires a git client")
 
     val gitClient = GitClient(Paths.get(System.getProperty("user.home"), "Documents/dx/test"))
-    val commits = LogParser(gitClient).commits
+    val commits = LogParser(gitClient).parse(gitClient.getLogs())
     println(commits)
 }

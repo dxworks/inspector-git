@@ -1,15 +1,13 @@
 package org.dxworks.gitsecond.transformers
 
-import org.dxworks.gitsecond.data.ChangeData
-import org.dxworks.gitsecond.data.ChangesData
-import org.dxworks.gitsecond.data.CommitData
+import org.dxworks.dto.ChangeDTO
+import org.dxworks.dto.CommitDTO
 import org.dxworks.gitsecond.model.*
-import org.eclipse.jgit.diff.DiffEntry
 
-fun createProject(commitDatas: List<CommitData>, projectId: String): Project {
+fun createProject(commitDtos: List<CommitDTO>, projectId: String): Project {
     val project = Project(projectId)
 
-    commitDatas.forEach {
+    commitDtos.forEach {
         val author = getCommitAuthor(it, project)
 
         val commit = Commit(id = it.id,
@@ -19,7 +17,7 @@ fun createProject(commitDatas: List<CommitData>, projectId: String): Project {
                 parents = getParentFromIds(it.parentIds, project),
                 changes = ArrayList())
 
-        addChangesToCommit(it.changeSets, commit, project)
+        addChangesToCommit(it.changes, commit, project)
         author.commits.add(commit)
         project.commitRegistry.add(commit)
     }
@@ -27,65 +25,63 @@ fun createProject(commitDatas: List<CommitData>, projectId: String): Project {
     return project
 }
 
-private fun addChangesToCommit(changeSets: List<ChangesData>, commit: Commit, project: Project) {
+private fun addChangesToCommit(changes: List<ChangeDTO>, commit: Commit, project: Project) {
     commit.changes = if (commit.isMergeCommit)
-        getMergeCommitChanges(commit, changeSets, project)
+        getMergeCommitChanges(commit, changes, project)
     else
-        changeSets.flatMap { it.changes }
-                .map {
-                    val annotatedLines = it.annotatedLines.map { line -> AnnotatedLine(commit, line.lineNumber, line.content) }.toMutableList()
-                    val change = Change(commit = commit,
-                            type = transformChangeType(it.type),
-                            file = getFileForChange(it, project),
-                            oldFilename = it.oldFileName,
-                            newFileName = it.newFileName,
-                            lineChanges = DiffParser(it.diff).lineChanges,
-                            annotatedLines = annotatedLines)
-                    change.file.changes.add(change)
-                    change
-                }
+        changes.map { changeDTO ->
+            val change = Change(commit = commit,
+                    type = changeDTO.type,
+                    file = getFileForChange(changeDTO, project),
+                    oldFilename = changeDTO.oldFileName,
+                    newFileName = changeDTO.newFileName,
+                    lineChanges = changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, it.lineNumber, it.content) }.toMutableList(),
+                    annotatedLines = changeDTO.annotatedLines.map { AnnotatedLine(commit, it.number, it.content) }.toMutableList())
+            change.file.changes.add(change)
+            change
+        }
 }
 
-fun getMergeCommitChanges(commit: Commit, changeSets: List<ChangesData>, project: Project): List<Change> {
-    return changeSets.flatMap { it.changes }.map { changeData ->
+fun getMergeCommitChanges(commit: Commit, changes: List<ChangeDTO>, project: Project): List<Change> {
+    return changes.map { changeDTO ->
         val change = Change(commit = commit,
-                type = transformChangeType(changeData.type),
-                file = getFileForChange(changeData, project),
-                oldFilename = changeData.oldFileName,
-                newFileName = changeData.newFileName,
+                type = changeDTO.type,
+                file = getFileForChange(changeDTO, project),
+                oldFilename = changeDTO.oldFileName,
+                newFileName = changeDTO.newFileName,
                 lineChanges = ArrayList(),
-                annotatedLines = changeData.annotatedLines.map { line -> AnnotatedLine(project.commitRegistry.getByID(line.commitId)!!, line.lineNumber, line.content) }.toMutableList())
+                annotatedLines = changeDTO.annotatedLines.map { AnnotatedLine(project.commitRegistry.getByID(it.commitId)!!, it.number, it.content) }.toMutableList())
         change.file.changes.add(change)
         change
     }
 }
 
-private fun getFileForChange(changeData: ChangeData, project: Project): File {
+private fun getFileForChange(change: ChangeDTO, project: Project): File {
 
-    val changeType = transformChangeType(changeData.type)
+    val changeType = change.type
 
     var file: File?
 
     when (changeType) {
         ChangeType.ADD -> {
-            file = project.fileRegistry.getByID(changeData.newFileName)
+            file = project.fileRegistry.getByID(change.newFileName)
             if (file == null) {
-                file = File(fullyQualifiedName = changeData.newFileName, changes = ArrayList())
+                file = File(fullyQualifiedName = change.newFileName, changes = ArrayList())
                 project.fileRegistry.add(file)
             }
         }
         ChangeType.RENAME -> {
-            file = project.fileRegistry.getByID(changeData.oldFileName)
+            file = project.fileRegistry.getByID(change.oldFileName)
             if (file == null) {
-                System.err.println("File not found for rename change: $changeData")
+                System.err.println("File not found for rename change: $change")
             } else {
-                file.fullyQualifiedName = changeData.newFileName
+                file.fullyQualifiedName = change.newFileName
             }
         }
         else -> {
-            file = project.fileRegistry.getByID(changeData.newFileName)
+            file = project.fileRegistry.getByID(change.newFileName)
             if (file == null) {
-                System.err.println("File not found for change: $changeData")
+                System.err.println("File not found for change: $change")
             }
         }
     }
@@ -93,18 +89,8 @@ private fun getFileForChange(changeData: ChangeData, project: Project): File {
     return file!!
 }
 
-private fun transformChangeType(type: DiffEntry.ChangeType): ChangeType {
-    return when (type) {
-        DiffEntry.ChangeType.ADD -> ChangeType.ADD
-        DiffEntry.ChangeType.COPY -> ChangeType.COPY
-        DiffEntry.ChangeType.DELETE -> ChangeType.DELETE
-        DiffEntry.ChangeType.MODIFY -> ChangeType.MODIFY
-        DiffEntry.ChangeType.RENAME -> ChangeType.RENAME
-    }
-}
-
-private fun getCommitAuthor(commitData: CommitData, project: Project): Author {
-    val authorID = AuthorID(name = commitData.authorName, email = commitData.authorEmail)
+private fun getCommitAuthor(commitDTO: CommitDTO, project: Project): Author {
+    val authorID = AuthorID(name = commitDTO.authorName, email = commitDTO.authorEmail)
 
     var author = project.authorRegistry.getByID(authorID)
     if (author == null) {
@@ -116,5 +102,5 @@ private fun getCommitAuthor(commitData: CommitData, project: Project): Author {
 }
 
 private fun getParentFromIds(parentIds: List<String>, project: Project): List<Commit> {
-    return parentIds.map { project.commitRegistry.getByID(it) }.filterNotNull()
+    return parentIds.mapNotNull { project.commitRegistry.getByID(it) }
 }

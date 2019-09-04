@@ -1,11 +1,11 @@
 package org.dxworks.dto
 
-import org.dxworks.gitsecond.model.AuthorID
 import java.util.*
 
-class CommitDTO(val commitId: String,
+class CommitDTO(val id: String,
                 val parentIds: List<String>,
-                val authorId: AuthorID,
+                val authorName: String,
+                val authorEmail: String,
                 val date: Date,
                 val message: String,
                 val changes: List<ChangeDTO>) {

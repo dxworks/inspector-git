@@ -14,11 +14,11 @@ abstract class ChangeParser : GitParser<ChangeDTO> {
         lines.removeAt(0)
         val (oldFileName, newFileName) = extractFileNames(lines)
         return ChangeDTO(
-                changeType = extractChangeType(lines),
+                type = extractChangeType(lines),
                 oldFileName = oldFileName,
                 newFileName = newFileName,
                 hunks = extractHunks(lines),
-                annotatedAnnotatedLines = extractAnnotatedLines(lines))
+                annotatedLines = extractAnnotatedLines(lines))
     }
 
     abstract fun extractHunks(lines: MutableList<String>): List<HunkDTO>
