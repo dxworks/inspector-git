@@ -1,4 +1,4 @@
-package org.dxworks.gitsecond.dto
+package org.dxworks.dto
 
 import org.dxworks.gitsecond.model.AuthorID
 import java.util.*

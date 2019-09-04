@@ -1,20 +1,12 @@
-package org.dxworks.gitsecond.parsers
+package org.dxworks.gitinspector.parsers.impl
 
-import org.dxworks.gitsecond.dto.HunkDTO
-import org.dxworks.gitsecond.dto.LineChangeDTO
+import org.dxworks.dto.LineChangeDTO
 import org.dxworks.gitsecond.model.LineOperation
+import org.dxworks.gitinspector.parsers.abstracts.HunkParser
 
-class HunkParser(val lines: MutableList<String>) {
-
-    val hunk: HunkDTO
-
-    init {
+class SimpleHunkParser : HunkParser() {
+    override fun extractLineChanges(lines: MutableList<String>): List<LineChangeDTO> {
         val (removePair, addPair) = getRemoveAndAddHunkInfo(lines.removeAt(0))
-        hunk = HunkDTO(
-                lineChanges = extractLineChanges(removePair, addPair))
-    }
-
-    private fun extractLineChanges(removePair: Pair<Int, Int>, addPair: Pair<Int, Int>): List<LineChangeDTO> {
         val (removeStart, removeCount) = removePair
         val (addStart, addCount) = addPair
 
@@ -33,13 +25,5 @@ class HunkParser(val lines: MutableList<String>) {
         val numbers = changeInfoLine.split("@ ")[1].split(" @")[0]
         val removeAndAddInfo = numbers.split(" ")
         return Pair(getNumbersPair(removeAndAddInfo[0]), getNumbersPair(removeAndAddInfo[1]))
-    }
-
-    private fun getNumbersPair(info: String): Pair<Int, Int> {
-        val numbers = info.substring(1)
-        val lineNumberAndCount = numbers.split(",")
-        val lineNumber = Integer.parseInt(lineNumberAndCount[0])
-        val lineCount = if (lineNumberAndCount.size < 2) 1 else Integer.parseInt(lineNumberAndCount[1])
-        return Pair(lineNumber, lineCount)
     }
 }
