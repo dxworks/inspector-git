@@ -12,7 +12,7 @@ class BlameParser(private val blame: List<String>) : ChangeParser() {
     override fun extractAnnotatedLines(lines: MutableList<String>): List<AnnotatedLineDTO> {
         return blame.filter { it.isNotBlank() }.map {
             val commitIdAndOther = it.split(" (")
-            val commitId = commitIdAndOther[0]
+            val commitId = commitIdAndOther[0].split(" ")[0]
             val authorAndContent = commitIdAndOther[1].split(") ")
             val content = authorAndContent[1]
             val authorTimeLineNo = authorAndContent[0]

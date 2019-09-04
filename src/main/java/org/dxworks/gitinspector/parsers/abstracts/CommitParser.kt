@@ -50,7 +50,7 @@ abstract class CommitParser : GitParser<CommitDTO> {
     }
 
     private fun extractDate(lines: MutableList<String>): Date {
-        return Date(lines.removeAt(0).removePrefix("date: ").toLong())
+        return Date(lines.removeAt(0).removePrefix("date: "))
     }
 
     private fun extractMessage(lines: MutableList<String>): String {

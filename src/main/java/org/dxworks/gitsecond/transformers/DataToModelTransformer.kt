@@ -18,9 +18,9 @@ fun createProject(projectDTO: ProjectDTO, projectId: String): Project {
                 parents = getParentFromIds(it.parentIds, project),
                 changes = ArrayList())
 
-        addChangesToCommit(it.changes, commit, project)
-        author.commits.add(commit)
         project.commitRegistry.add(commit)
+        author.commits.add(commit)
+        addChangesToCommit(it.changes, commit, project)
     }
 
     return project
@@ -34,7 +34,7 @@ private fun addChangesToCommit(changes: List<ChangeDTO>, commit: Commit, project
                 oldFilename = changeDTO.oldFileName,
                 newFileName = changeDTO.newFileName,
                 lineChanges = changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, it.lineNumber, it.content) }.toMutableList(),
-                annotatedLines = changeDTO.annotatedLines.map { AnnotatedLine(commit, it.number, it.content) }.toMutableList())
+                annotatedLines = changeDTO.annotatedLines.map { println("<${it.commitId}>"); AnnotatedLine(project.commitRegistry.getByID(it.commitId)!!, it.number, it.content) }.toMutableList())
         change.file.changes.add(change)
         change
     }

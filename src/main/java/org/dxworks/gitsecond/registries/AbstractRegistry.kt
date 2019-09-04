@@ -1,9 +1,10 @@
 package org.dxworks.gitsecond.registries
 
+import org.dxworks.gitsecond.model.Commit
 import java.util.*
 
 abstract class AbstractRegistry<TYPE, ID> {
-    private val map: MutableMap<ID, TYPE> = HashMap()
+    val map: MutableMap<ID, TYPE> = HashMap()
 
     val all: Collection<TYPE>
         get() = map.values
@@ -12,7 +13,7 @@ abstract class AbstractRegistry<TYPE, ID> {
         get() = map.keys
 
 
-    fun getByID(id: ID): TYPE? {
+    open fun getByID(id: ID): TYPE? {
         return map[id]
     }
 
