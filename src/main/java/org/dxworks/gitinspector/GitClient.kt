@@ -38,6 +38,6 @@ fun main() {
         throw IllegalStateException("This program requires a git client")
 
     val gitClient = GitClient(Paths.get(System.getProperty("user.home"), "Documents/dx/test"))
-    val commits = LogParser(gitClient).parse(gitClient.getLogs())
+    val commits = LogParser(gitClient).parse(gitClient.getLogs().toMutableList())
     println(commits)
 }

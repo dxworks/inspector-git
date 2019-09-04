@@ -16,6 +16,6 @@ class LogParser(private val gitClient: GitClient) : GitParser<ProjectDTO> {
             }
             currentCommitLines.add(it)
         }
-        return ProjectDTO(commits.map { CommitParserFactory.create(it, gitClient).parse(it) })
+        return ProjectDTO(commits.map { CommitParserFactory.create(it, gitClient).parse(it) }.reversed())
     }
 }

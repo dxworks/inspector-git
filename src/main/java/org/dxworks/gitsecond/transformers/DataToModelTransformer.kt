@@ -2,12 +2,13 @@ package org.dxworks.gitsecond.transformers
 
 import org.dxworks.dto.ChangeDTO
 import org.dxworks.dto.CommitDTO
+import org.dxworks.dto.ProjectDTO
 import org.dxworks.gitsecond.model.*
 
-fun createProject(commitDtos: List<CommitDTO>, projectId: String): Project {
+fun createProject(projectDTO: ProjectDTO, projectId: String): Project {
     val project = Project(projectId)
 
-    commitDtos.forEach {
+    projectDTO.commits.forEach {
         val author = getCommitAuthor(it, project)
 
         val commit = Commit(id = it.id,
@@ -26,31 +27,14 @@ fun createProject(commitDtos: List<CommitDTO>, projectId: String): Project {
 }
 
 private fun addChangesToCommit(changes: List<ChangeDTO>, commit: Commit, project: Project) {
-    commit.changes = if (commit.isMergeCommit)
-        getMergeCommitChanges(commit, changes, project)
-    else
-        changes.map { changeDTO ->
-            val change = Change(commit = commit,
-                    type = changeDTO.type,
-                    file = getFileForChange(changeDTO, project),
-                    oldFilename = changeDTO.oldFileName,
-                    newFileName = changeDTO.newFileName,
-                    lineChanges = changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, it.lineNumber, it.content) }.toMutableList(),
-                    annotatedLines = changeDTO.annotatedLines.map { AnnotatedLine(commit, it.number, it.content) }.toMutableList())
-            change.file.changes.add(change)
-            change
-        }
-}
-
-fun getMergeCommitChanges(commit: Commit, changes: List<ChangeDTO>, project: Project): List<Change> {
-    return changes.map { changeDTO ->
+    commit.changes = changes.map { changeDTO ->
         val change = Change(commit = commit,
                 type = changeDTO.type,
                 file = getFileForChange(changeDTO, project),
                 oldFilename = changeDTO.oldFileName,
                 newFileName = changeDTO.newFileName,
-                lineChanges = ArrayList(),
-                annotatedLines = changeDTO.annotatedLines.map { AnnotatedLine(project.commitRegistry.getByID(it.commitId)!!, it.number, it.content) }.toMutableList())
+                lineChanges = changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, it.lineNumber, it.content) }.toMutableList(),
+                annotatedLines = changeDTO.annotatedLines.map { AnnotatedLine(commit, it.number, it.content) }.toMutableList())
         change.file.changes.add(change)
         change
     }
@@ -75,7 +59,17 @@ private fun getFileForChange(change: ChangeDTO, project: Project): File {
             if (file == null) {
                 System.err.println("File not found for rename change: $change")
             } else {
+                project.fileRegistry.remove(file.fullyQualifiedName)
                 file.fullyQualifiedName = change.newFileName
+                project.fileRegistry.add(file)
+            }
+        }
+        ChangeType.DELETE -> {
+            file = project.fileRegistry.getByID(change.oldFileName)
+            if (file == null) {
+                System.err.println("File not found for change: $change")
+            } else {
+                file.isAlive = false
             }
         }
         else -> {

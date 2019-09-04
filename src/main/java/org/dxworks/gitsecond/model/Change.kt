@@ -1,11 +1,14 @@
 package org.dxworks.gitsecond.model
 
 
-data class Change(var commit: Commit, var type: ChangeType, var file: File, var oldFilename: String, var newFileName: String, var lineChanges: MutableList<LineChange>, var annotatedLines: List<AnnotatedLine>) {
+data class Change(var commit: Commit, var type: ChangeType, var file: File, var oldFilename: String, var newFileName: String, var lineChanges: List<LineChange>, var annotatedLines: List<AnnotatedLine>) {
     var parent: Change? = if (type == ChangeType.ADD || file.changes.isEmpty()) null else getParentChange(commit.parents)
+    val isRenameChange: Boolean
+        get() = type == ChangeType.RENAME
 
-    private fun getParentChange(commits: List<Commit>) : Change{
-        return commits.flatMap { it.changes }.find { it.file == file } ?: getParentChange(commits.flatMap { it.parents })
+    private fun getParentChange(commits: List<Commit>): Change {
+        return commits.flatMap { it.changes }.find { it.file == file }
+                ?: getParentChange(commits.flatMap { it.parents })
     }
 
     init {
@@ -39,7 +42,4 @@ data class Change(var commit: Commit, var type: ChangeType, var file: File, var 
         annotatedLines.forEachIndexed { index, annotatedLine -> annotatedLine.lineNumber = index + 1 }
     }
 
-    fun isRenameChange(): Boolean {
-        return type == ChangeType.RENAME
-    }
 }

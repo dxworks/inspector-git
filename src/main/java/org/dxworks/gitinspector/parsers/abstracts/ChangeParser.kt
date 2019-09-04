@@ -3,8 +3,8 @@ package org.dxworks.gitinspector.parsers.abstracts
 import org.dxworks.dto.AnnotatedLineDTO
 import org.dxworks.dto.ChangeDTO
 import org.dxworks.dto.HunkDTO
-import org.dxworks.gitsecond.model.ChangeType
 import org.dxworks.gitinspector.parsers.GitParser
+import org.dxworks.gitsecond.model.ChangeType
 
 abstract class ChangeParser : GitParser<ChangeDTO> {
     private val oldFileNameLinePrefix = "--- "
