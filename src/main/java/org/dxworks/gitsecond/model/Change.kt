@@ -12,14 +12,9 @@ data class Change(var commit: Commit, var type: ChangeType, var file: File, var 
     }
 
     init {
-        println("Commit: ${commit.id}      beforeChange for ${file.fullyQualifiedName}")
-        println(annotatedLines.joinToString("\n") { "${it.lineNumber} ${it.content}" })
         if (!commit.isMergeCommit) {
             apply()
         }
-        println("Commit: ${commit.id}      after for ${file.fullyQualifiedName}")
-        println(annotatedLines.joinToString("\n") { "${it.lineNumber} ${it.content}" })
-        print("\n\n\n")
     }
 
     private fun apply() {

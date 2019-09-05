@@ -34,7 +34,7 @@ private fun addChangesToCommit(changes: List<ChangeDTO>, commit: Commit, project
                 oldFilename = changeDTO.oldFileName,
                 newFileName = changeDTO.newFileName,
                 lineChanges = changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, it.lineNumber, it.content) }.toMutableList(),
-                annotatedLines = changeDTO.annotatedLines.map { println("<${it.commitId}>"); AnnotatedLine(project.commitRegistry.getByID(it.commitId)!!, it.number, it.content) }.toMutableList())
+                annotatedLines = changeDTO.annotatedLines.map { AnnotatedLine(project.commitRegistry.getByID(it.commitId)!!, it.number, it.content) }.toMutableList())
         change.file.changes.add(change)
         change
     }
