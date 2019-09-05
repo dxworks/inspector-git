@@ -20,7 +20,7 @@ data class Change(var commit: Commit, var type: ChangeType, var file: File, var 
     private fun apply() {
         val newAnnotatedLines = if (parent != null) ArrayList(parent!!.annotatedLines) else ArrayList()
         lineChanges.filter { it.operation == LineOperation.REMOVE }
-                .forEach { removeChange -> newAnnotatedLines.removeIf { it.lineNumber == removeChange.lineNumber && it.content == removeChange.content } }
+                .forEach { removeChange -> newAnnotatedLines.removeIf { it.number == removeChange.lineNumber && it.content == removeChange.content } }
 
         lineChanges.filter { it.operation == LineOperation.ADD }.forEach {
             val annotatedLine = AnnotatedLine(commit, it.lineNumber, it.content)
@@ -34,7 +34,7 @@ data class Change(var commit: Commit, var type: ChangeType, var file: File, var 
 
 
     private fun reindex(annotatedLines: MutableList<AnnotatedLine>) {
-        annotatedLines.forEachIndexed { index, annotatedLine -> annotatedLine.lineNumber = index + 1 }
+        annotatedLines.forEachIndexed { index, annotatedLine -> annotatedLine.number = index + 1 }
     }
 
 }

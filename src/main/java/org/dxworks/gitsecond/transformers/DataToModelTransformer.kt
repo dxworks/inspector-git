@@ -35,7 +35,7 @@ private fun addChangesToCommit(changes: List<ChangeDTO>, commit: Commit, project
                 newFileName = changeDTO.newFileName,
                 lineChanges = changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, it.lineNumber, it.content) }.toMutableList(),
                 annotatedLines = changeDTO.annotatedLines.map { AnnotatedLine(project.commitRegistry.getByID(it.commitId)!!, it.number, it.content) }.toMutableList())
-        change.file.changes.add(change)
+        change.file.addChange(change)
         change
     }
 }
@@ -50,7 +50,7 @@ private fun getFileForChange(change: ChangeDTO, project: Project): File {
         ChangeType.ADD -> {
             file = project.fileRegistry.getByID(change.newFileName)
             if (file == null) {
-                file = File(fullyQualifiedName = change.newFileName, changes = ArrayList())
+                file = File(fullyQualifiedName = change.newFileName)
                 project.fileRegistry.add(file)
             }
         }
