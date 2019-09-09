@@ -7,14 +7,17 @@ data class File(var fullyQualifiedName: String, var isAlive: Boolean = true) {
     val changes: MutableMap<String, Change> = HashMap()
     val aliases: MutableMap<String, String> = HashMap()
 
-    fun annotatedLinesForRevision(commit: Commit): List<AnnotatedLine>? {
+    fun annotatedLinesForRevision(commit: Commit): List<AnnotatedLine> {
         val change = changes[commit.id]
-        return change?.annotatedLines ?: getLastChange(commit.parents).annotatedLines
+        return change?.annotatedLines ?: getLastChangeAnnotatedLines(commit.parents)
     }
 
-    private fun getLastChange(commits: List<Commit>): Change {
-        return commits.mapNotNull { changes[it.id] }
-                .firstOrNull() ?: getLastChange(commits.flatMap { it.parents })
+    private fun getLastChangeAnnotatedLines(commits: List<Commit>): List<AnnotatedLine> {
+        return if (commits.isEmpty())
+            return emptyList()
+        else
+            commits.mapNotNull { changes[it.id] }
+                    .firstOrNull()?.annotatedLines ?: getLastChangeAnnotatedLines(commits.flatMap { it.parents })
     }
 
     fun addChange(change: Change) {

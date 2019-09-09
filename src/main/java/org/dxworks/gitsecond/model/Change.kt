@@ -6,8 +6,9 @@ data class Change(var commit: Commit, var type: ChangeType, var file: File, var 
     val isRenameChange: Boolean
         get() = type == ChangeType.RENAME
 
-    private fun getParentChange(commits: List<Commit>): Change {
-        return commits.flatMap { it.changes }.find { it.file == file }
+    private fun getParentChange(commits: List<Commit>): Change? {
+        return if (commits.isEmpty()) null
+        else commits.flatMap { it.changes }.find { it.file == file }
                 ?: getParentChange(commits.flatMap { it.parents })
     }
 
@@ -23,8 +24,7 @@ data class Change(var commit: Commit, var type: ChangeType, var file: File, var 
                 .forEach { removeChange -> newAnnotatedLines.removeIf { it.number == removeChange.lineNumber && it.content == removeChange.content } }
 
         lineChanges.filter { it.operation == LineOperation.ADD }.forEach {
-            val annotatedLine = AnnotatedLine(commit, it.lineNumber, it.content)
-            newAnnotatedLines.add(it.lineNumber - 1, annotatedLine)
+            newAnnotatedLines.add(AnnotatedLine(commit, it.lineNumber, it.content))
         }
 
         reindex(newAnnotatedLines)

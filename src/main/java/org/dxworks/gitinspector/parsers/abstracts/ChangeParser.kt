@@ -1,20 +1,27 @@
 package org.dxworks.gitinspector.parsers.abstracts
 
+import lombok.extern.slf4j.Slf4j
 import org.dxworks.dto.AnnotatedLineDTO
 import org.dxworks.dto.ChangeDTO
 import org.dxworks.dto.HunkDTO
 import org.dxworks.gitinspector.parsers.GitParser
 import org.dxworks.gitsecond.model.ChangeType
+import org.slf4j.LoggerFactory
 
+@Slf4j
 abstract class ChangeParser : GitParser<ChangeDTO> {
-    private val oldFileNameLinePrefix = "--- "
-    private val newFileNameLinePrefix = "+++ "
+    companion object {
+        private val LOG = LoggerFactory.getLogger(ChangeParser::class.java)
+    }
+
+    private val devNull = "dev/null"
 
     override fun parse(lines: MutableList<String>): ChangeDTO {
-        lines.removeAt(0)
-        val (oldFileName, newFileName) = extractFileNames(lines)
+        val type = extractChangeType(lines)
+        val (oldFileName, newFileName) = extractFileNames(lines, type)
+        LOG.info("Parsing $type change: $oldFileName -> $newFileName")
         return ChangeDTO(
-                type = extractChangeType(lines),
+                type = type,
                 oldFileName = oldFileName,
                 newFileName = newFileName,
                 hunks = extractHunks(lines),
@@ -28,40 +35,54 @@ abstract class ChangeParser : GitParser<ChangeDTO> {
     protected fun getHunks(lines: MutableList<String>): List<MutableList<String>> {
         val hunks: MutableList<MutableList<String>> = ArrayList()
         var currentHunkLines: MutableList<String> = ArrayList()
-        lines.forEach {
-            if (it.startsWith("@")) {
-                currentHunkLines = ArrayList()
-                hunks.add(currentHunkLines)
+        LOG.info("Extracting hunks")
+        val firstHunkIndex = lines.indexOfFirst { it.startsWith("@") }
+        return if (firstHunkIndex == -1)
+            emptyList()
+        else {
+            lines.subList(firstHunkIndex, lines.size).forEach {
+                if (it.startsWith("@")) {
+                    currentHunkLines = ArrayList()
+                    hunks.add(currentHunkLines)
+                }
+                currentHunkLines.add(it)
             }
-            currentHunkLines.add(it)
+            LOG.info("Found ${hunks.size} hunks")
+            hunks
         }
-        return hunks
     }
 
     private fun extractChangeType(lines: MutableList<String>): ChangeType {
-        val changeTypeLine = lines.removeAt(0)
-        return when {
-            changeTypeLine.startsWith("new file mode") -> {
-                lines.removeAt(0)
-                ChangeType.ADD
-            }
-            changeTypeLine.startsWith("deleted file mode") -> {
-                lines.removeAt(0)
-                ChangeType.DELETE
-            }
-            changeTypeLine.startsWith("similarity index") -> {
-                lines.removeAt(0)
-                lines.removeAt(0)
-                lines.removeAt(0)
-                ChangeType.RENAME
-            }
-            else -> ChangeType.MODIFY
+        var changeTypeLine = lines.find { it.startsWith("new file mode") }
+        if (changeTypeLine != null)
+            return ChangeType.ADD
+        changeTypeLine = lines.find { it.startsWith("deleted file mode") }
+        if (changeTypeLine != null)
+            return ChangeType.DELETE
+        changeTypeLine = lines.find { it.startsWith("similarity index") }
+        if (changeTypeLine != null)
+            return ChangeType.RENAME
+        return ChangeType.MODIFY
+    }
+
+
+    private fun extractFileNames(lines: MutableList<String>, type: ChangeType): Pair<String, String> {
+        val diffLine = lines.removeAt(0)
+        return when (type) {
+            ChangeType.ADD -> extractFileNames(diffLine, fromName = devNull)
+            ChangeType.DELETE -> extractFileNames(diffLine, toName = devNull)
+            else -> extractFileNames(diffLine)
         }
     }
 
-    private fun extractFileNames(lines: MutableList<String>): Pair<String, String> {
-        val oldFileNameLineIndex = lines.indexOfFirst { it.startsWith(oldFileNameLinePrefix) }
-        return Pair(first = lines.removeAt(oldFileNameLineIndex).removePrefix(oldFileNameLinePrefix).removePrefix("a"),
-                second = lines.removeAt(oldFileNameLineIndex).removePrefix(newFileNameLinePrefix).removePrefix("b"))
+    private fun extractFileNames(line: String, fromName: String? = null, toName: String? = null): Pair<String, String> {
+        val fromNameIndex = line.indexOf("a/") + 2
+        val lastSpaceIndex = line.lastIndexOf(" ")
+        val toNameIndex = lastSpaceIndex + 3
+        return if (line.contains("--combined")) {
+            val fileName = line.substring(lastSpaceIndex).trim()
+            Pair(fileName, fileName)
+        } else Pair((fromName ?: line.substring(fromNameIndex, lastSpaceIndex)).trim(),
+                (toName ?: line.substring(toNameIndex)).trim())
     }
 }

@@ -1,13 +1,22 @@
 package org.dxworks.gitinspector.parsers.abstracts
 
+import lombok.extern.slf4j.Slf4j
 import org.dxworks.dto.ChangeDTO
 import org.dxworks.dto.CommitDTO
 import org.dxworks.gitinspector.parsers.GitParser
+import org.dxworks.gitinspector.parsers.LogParser
+import org.slf4j.LoggerFactory
 import java.util.*
 
+@Slf4j
 abstract class CommitParser : GitParser<CommitDTO> {
+    companion object {
+        private val LOG = LoggerFactory.getLogger(CommitParser::class.java)
+    }
+
     override fun parse(lines: MutableList<String>): CommitDTO {
         val commitId = extractCommitId(lines)
+        LOG.info("Parsing commit with id: $commitId")
         return CommitDTO(
                 id = commitId,
                 parentIds = extractParentIds(lines),
@@ -23,6 +32,7 @@ abstract class CommitParser : GitParser<CommitDTO> {
     protected fun getChanges(lines: MutableList<String>): List<MutableList<String>> {
         val changes: MutableList<MutableList<String>> = ArrayList()
         var currentChangeLines: MutableList<String> = ArrayList()
+        LOG.info("Extracting changes")
         lines.forEach {
             if (it.startsWith("diff ")) {
                 currentChangeLines = ArrayList()
@@ -30,6 +40,7 @@ abstract class CommitParser : GitParser<CommitDTO> {
             }
             currentChangeLines.add(it)
         }
+        LOG.info("Found ${changes.size} changes")
         return changes
     }
 

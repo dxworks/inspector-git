@@ -6,8 +6,7 @@ import org.dxworks.gitsecond.registries.FileRegistry
 
 class Project(val projectID: String) {
 
-    val authorRegistry: AuthorRegistry = AuthorRegistry()
-    val commitRegistry: CommitRegistry = CommitRegistry()
-    val fileRegistry: FileRegistry = FileRegistry()
-
+    val authorRegistry = AuthorRegistry()
+    val commitRegistry = CommitRegistry()
+    val fileRegistry = FileRegistry()
 }
