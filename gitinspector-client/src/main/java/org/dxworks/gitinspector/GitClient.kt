@@ -38,7 +38,7 @@ class GitClient(path: Path) {
     }
 
     fun affectedFiles(revision: String): List<String> {
-        val command = "$gitBlameCommand $revision"
+        val command = "$gitAffectedFilesCommand $revision"
         LOG.info("Running  command: $command")
         return runCommand(command)
     }
