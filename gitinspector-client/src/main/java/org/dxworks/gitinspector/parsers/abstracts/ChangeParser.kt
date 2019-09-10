@@ -2,19 +2,18 @@ package org.dxworks.gitinspector.parsers.abstracts
 
 import lombok.extern.slf4j.Slf4j
 import org.dxworks.gitinspector.dto.AnnotatedLineDTO
-import org.dxworks.gitinspector.parsers.GitParser
-import org.slf4j.LoggerFactory
 import org.dxworks.gitinspector.dto.ChangeDTO
 import org.dxworks.gitinspector.dto.HunkDTO
 import org.dxworks.gitinspector.enums.ChangeType
+import org.dxworks.gitinspector.parsers.GitParser
+import org.dxworks.gitinspector.utils.devNull
+import org.slf4j.LoggerFactory
 
 @Slf4j
 abstract class ChangeParser : GitParser<ChangeDTO> {
     companion object {
         private val LOG = LoggerFactory.getLogger(ChangeParser::class.java)
     }
-
-    private val devNull = "dev/null"
 
     override fun parse(lines: MutableList<String>): ChangeDTO {
         val type = extractChangeType(lines)

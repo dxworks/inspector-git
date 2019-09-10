@@ -1,34 +1,41 @@
 package org.dxworks.gitinspector.model
 
-import org.dxworks.gitinspector.model.AnnotatedLine
+import org.dxworks.gitinspector.enums.ChangeType
+import org.dxworks.gitinspector.utils.devNull
 import java.nio.file.Path
 import java.nio.file.Paths
 
-data class File(var fullyQualifiedName: String, var isAlive: Boolean = true) {
-    val changes: MutableMap<String, Change> = HashMap()
-    val aliases: MutableMap<String, String> = HashMap()
+data class File(var fullyQualifiedName: String, val changes: MutableList<Change> = ArrayList()) {
+    val name: String
+        get() = fullyQualifiedName.split("/").last()
 
-    fun annotatedLinesForRevision(commit: Commit): List<AnnotatedLine> {
-        val change = changes[commit.id]
-        return change?.annotatedLines ?: getLastChangeAnnotatedLines(commit.parents)
+    val path: Path
+        get() = Paths.get(fullyQualifiedName)
+
+    fun alias(commit: Commit): String {
+        return getLastChange(commit)?.newFileName ?: devNull
+    }
+
+    fun isAlive(commit: Commit): Boolean {
+        val type = getLastChange(commit)?.type
+        return type != null && type != ChangeType.DELETE
+    }
+
+    fun annotatedLines(commit: Commit): List<AnnotatedLine> {
+        return getLastChange(commit)?.annotatedLines ?: emptyList()
+    }
+
+    fun getLastChange(commit: Commit): Change? {
+        return if (changes.isEmpty() || changes.first().commit.date > commit.date) null
+        else changes.firstOrNull { it.commit == commit }
+                ?: commit.parents.mapNotNull { getLastChange(it) }.firstOrNull()
     }
 
     private fun getLastChangeAnnotatedLines(commits: List<Commit>): List<AnnotatedLine> {
         return if (commits.isEmpty())
             return emptyList()
         else
-            commits.mapNotNull { changes[it.id] }
+            commits.mapNotNull { commit -> commit.changes.find { it.commit == commit } }
                     .firstOrNull()?.annotatedLines ?: getLastChangeAnnotatedLines(commits.flatMap { it.parents })
     }
-
-    fun addChange(change: Change) {
-        changes[change.commit.id] = change
-        aliases[change.commit.id] = change.newFileName
-    }
-
-
-    var name = fullyQualifiedName.split("/").last()
-
-    val path: Path
-        get() = Paths.get(fullyQualifiedName)
 }

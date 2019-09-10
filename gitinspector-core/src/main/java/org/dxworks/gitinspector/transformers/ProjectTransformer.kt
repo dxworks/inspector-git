@@ -12,9 +12,9 @@ import org.dxworks.gitinspector.model.*
 import org.slf4j.LoggerFactory
 
 @Slf4j
-class OptimusSecond() {
+class ProjectTransformer() {
     companion object {
-        private val LOG = LoggerFactory.getLogger(OptimusSecond::class.java)
+        private val LOG = LoggerFactory.getLogger(ProjectTransformer::class.java)
 
         fun createProject(projectDTO: ProjectDTO, projectId: String): Project {
             val project = Project(projectId)
@@ -50,7 +50,7 @@ class OptimusSecond() {
                         newFileName = changeDTO.newFileName,
                         lineChanges = changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, it.lineNumber, it.content) }.toMutableList(),
                         annotatedLines = changeDTO.annotatedLines.map { AnnotatedLine(project.commitRegistry.getByID(it.commitId)!!, it.number, it.content) }.toMutableList())
-                change.file.addChange(change)
+                change.file.changes.add(change)
                 LOG.info("Change created")
                 change
             }
@@ -81,11 +81,8 @@ class OptimusSecond() {
                 }
                 ChangeType.DELETE -> {
                     file = project.fileRegistry.getByID(change.oldFileName)
-                    if (file == null) {
+                    if (file == null)
                         System.err.println("File not found for change: $change")
-                    } else {
-                        file.isAlive = false
-                    }
                 }
                 else -> {
                     file = project.fileRegistry.getByID(change.newFileName)
