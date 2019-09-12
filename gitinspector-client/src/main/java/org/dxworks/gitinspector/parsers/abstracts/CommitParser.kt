@@ -17,19 +17,20 @@ abstract class CommitParser : GitParser<CommitDTO> {
     override fun parse(lines: MutableList<String>): CommitDTO {
         val commitId = extractCommitId(lines)
         LOG.info("Parsing commit with id: $commitId")
+        val parentIds = extractParentIds(lines)
         return CommitDTO(
                 id = commitId,
-                parentIds = extractParentIds(lines),
+                parentIds = parentIds,
                 authorName = extractAuthorName(lines),
                 authorEmail = extractAuthorEmail(lines),
                 date = extractDate(lines),
                 message = extractMessage(lines),
-                changes = extractChanges(lines, commitId))
+                changes = extractChanges(lines, commitId, parentIds))
     }
 
-    abstract fun extractChanges(lines: MutableList<String>, commitId: String): List<ChangeDTO>
+    abstract fun extractChanges(lines: MutableList<String>, commitId: String, parentIds: List<String>): List<ChangeDTO>
 
-    protected fun getChanges(lines: MutableList<String>): List<MutableList<String>> {
+    protected fun getChanges(lines: List<String>): List<MutableList<String>> {
         val changes: MutableList<MutableList<String>> = ArrayList()
         var currentChangeLines: MutableList<String> = ArrayList()
         LOG.info("Extracting changes")

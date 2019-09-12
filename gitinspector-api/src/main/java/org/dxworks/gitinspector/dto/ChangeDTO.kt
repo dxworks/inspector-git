@@ -6,4 +6,6 @@ class ChangeDTO(val oldFileName: String,
                 val newFileName: String,
                 val type: ChangeType,
                 val hunks: List<HunkDTO>,
-                val annotatedLines: List<AnnotatedLineDTO>)
+                var annotatedLines: List<AnnotatedLineDTO> = ArrayList(),
+                val otherCommitId: String,
+                val isBinary: Boolean)

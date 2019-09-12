@@ -3,7 +3,7 @@ package org.dxworks.gitinspector.model
 import org.dxworks.gitinspector.enums.ChangeType
 import org.dxworks.gitinspector.enums.LineOperation
 
-data class Change(var commit: Commit, var type: ChangeType, var file: File, var oldFilename: String, var newFileName: String, var lineChanges: List<LineChange>, var annotatedLines: List<AnnotatedLine>) {
+data class Change(val commit: Commit, val type: ChangeType, val file: File, val otherCommit: Commit, val oldFilename: String, val newFileName: String, var lineChanges: List<LineChange>, var annotatedLines: List<AnnotatedLine>) {
     var parent: Change? = if (type == ChangeType.ADD || file.changes.isEmpty()) null else file.getLastChange(commit)
     val isRenameChange: Boolean
         get() = type == ChangeType.RENAME

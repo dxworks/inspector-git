@@ -5,9 +5,6 @@ import org.dxworks.gitinspector.dto.ChangeDTO
 import org.dxworks.gitinspector.dto.CommitDTO
 import org.dxworks.gitinspector.dto.ProjectDTO
 import org.dxworks.gitinspector.enums.ChangeType
-import org.dxworks.gitinspector.model.AnnotatedLine
-import org.dxworks.gitinspector.model.LineChange
-import org.dxworks.gitinspector.model.Project
 import org.dxworks.gitinspector.model.*
 import org.slf4j.LoggerFactory
 
@@ -43,9 +40,11 @@ class ProjectTransformer() {
         private fun addChangesToCommit(changes: List<ChangeDTO>, commit: Commit, project: Project) {
             commit.changes = changes.map { changeDTO ->
                 LOG.info("Creating ${changeDTO.type} change for file: ${changeDTO.oldFileName} -> ${changeDTO.newFileName}")
-                val change = Change(commit = commit,
+                val change = Change(
+                        commit = commit,
                         type = changeDTO.type,
                         file = getFileForChange(changeDTO, project),
+                        otherCommit = commit.parents.find { it.id == changeDTO.otherCommitId }!!,
                         oldFilename = changeDTO.oldFileName,
                         newFileName = changeDTO.newFileName,
                         lineChanges = changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, it.lineNumber, it.content) }.toMutableList(),
@@ -58,49 +57,47 @@ class ProjectTransformer() {
 
         private fun getFileForChange(change: ChangeDTO, project: Project): File {
             LOG.info("Getting file")
-            val changeType = change.type
-
-            var file: File?
-
-            when (changeType) {
+            return when (change.type) {
                 ChangeType.ADD -> {
-                    file = project.fileRegistry.getByID(change.newFileName)
+                    var file = project.fileRegistry.getByID(change.newFileName)
                     if (file == null) {
-                        file = File(fullyQualifiedName = change.newFileName)
+                        file = File(change.newFileName, change.isBinary)
                         project.fileRegistry.add(file)
                     }
+                    file
                 }
                 ChangeType.RENAME -> {
-                    file = project.fileRegistry.getByID(change.oldFileName)
+                    val file = project.fileRegistry.getByID(change.oldFileName)
                     if (file == null) {
                         System.err.println("File not found for rename change: $change")
                     } else {
                         file.fullyQualifiedName = change.newFileName
                         project.fileRegistry.add(file)
                     }
+                    file!!
                 }
                 ChangeType.DELETE -> {
-                    file = project.fileRegistry.getByID(change.oldFileName)
+                    val file = project.fileRegistry.getByID(change.oldFileName)
                     if (file == null)
                         System.err.println("File not found for change: $change")
+                    file!!
                 }
                 else -> {
-                    file = project.fileRegistry.getByID(change.newFileName)
+                    val file = project.fileRegistry.getByID(change.newFileName)
                     if (file == null) {
                         System.err.println("File not found for change: $change")
                     }
+                    file!!
                 }
             }
-
-            return file!!
         }
 
         private fun getCommitAuthor(commitDTO: CommitDTO, project: Project): Author {
-            val authorID = AuthorID(name = commitDTO.authorName, email = commitDTO.authorEmail)
+            val authorID = AuthorID(commitDTO.authorEmail, commitDTO.authorName)
 
             var author = project.authorRegistry.getByID(authorID)
             if (author == null) {
-                author = Author(id = authorID, commits = ArrayList())
+                author = Author(authorID)
                 project.authorRegistry.add(author)
             }
 

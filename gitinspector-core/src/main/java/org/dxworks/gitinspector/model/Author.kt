@@ -1,6 +1,6 @@
 package org.dxworks.gitinspector.model
 
-data class Author(var id: AuthorID, var commits: MutableList<Commit>) {
+data class Author(var id: AuthorID, var commits: MutableList<Commit> = ArrayList()) {
     var parent: Author? = null
     var children: MutableList<Author> = ArrayList()
 

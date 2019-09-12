@@ -5,7 +5,7 @@ import org.dxworks.gitinspector.utils.devNull
 import java.nio.file.Path
 import java.nio.file.Paths
 
-data class File(var fullyQualifiedName: String, val changes: MutableList<Change> = ArrayList()) {
+data class File(var fullyQualifiedName: String, val isBinary: Boolean, val changes: MutableList<Change> = ArrayList()) {
     val name: String
         get() = fullyQualifiedName.split("/").last()
 

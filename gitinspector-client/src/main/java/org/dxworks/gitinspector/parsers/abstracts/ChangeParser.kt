@@ -1,16 +1,16 @@
 package org.dxworks.gitinspector.parsers.abstracts
 
 import lombok.extern.slf4j.Slf4j
-import org.dxworks.gitinspector.dto.AnnotatedLineDTO
 import org.dxworks.gitinspector.dto.ChangeDTO
 import org.dxworks.gitinspector.dto.HunkDTO
 import org.dxworks.gitinspector.enums.ChangeType
 import org.dxworks.gitinspector.parsers.GitParser
+import org.dxworks.gitinspector.parsers.impl.SimpleHunkParser
 import org.dxworks.gitinspector.utils.devNull
 import org.slf4j.LoggerFactory
 
 @Slf4j
-abstract class ChangeParser : GitParser<ChangeDTO> {
+abstract class ChangeParser(private val otherCommitId: String) : GitParser<ChangeDTO> {
     companion object {
         private val LOG = LoggerFactory.getLogger(ChangeParser::class.java)
     }
@@ -19,17 +19,24 @@ abstract class ChangeParser : GitParser<ChangeDTO> {
         val type = extractChangeType(lines)
         val (oldFileName, newFileName) = extractFileNames(lines, type)
         LOG.info("Parsing $type change: $oldFileName -> $newFileName")
-        return ChangeDTO(
+        val changeDTO = ChangeDTO(
                 type = type,
                 oldFileName = oldFileName,
                 newFileName = newFileName,
                 hunks = extractHunks(lines),
-                annotatedLines = extractAnnotatedLines(lines))
+                otherCommitId = otherCommitId,
+                isBinary = lines.any { it.startsWith("Binary files") })
+        addAnnotatedLines(changeDTO)
+        return changeDTO
     }
 
-    abstract fun extractHunks(lines: MutableList<String>): List<HunkDTO>
+    abstract fun addAnnotatedLines(changeDTO: ChangeDTO)
 
-    abstract fun extractAnnotatedLines(lines: MutableList<String>): List<AnnotatedLineDTO>
+    private fun extractHunks(lines: MutableList<String>): List<HunkDTO> {
+        return if (lines.isNotEmpty()) {
+            getHunks(lines).map { SimpleHunkParser().parse(it) }
+        } else emptyList()
+    }
 
     protected fun getHunks(lines: MutableList<String>): List<MutableList<String>> {
         val hunks: MutableList<MutableList<String>> = ArrayList()

@@ -16,8 +16,13 @@ class GitClient(path: Path) {
     }
 
     private val git = "git"
-    private val gitLogCommand = "$git log -M25% -c -U0 --encoding=UTF-8 --format=\"commit: %H%nparents: %P%nauthor name: %an%nauthor email: %ae%ndate: %ad%nmessage:%n%s%n%b\""
+    private val renameDetectionThreshold = "-M25%"
+    private val contextThreshold = "-U0"
+
+
+    private val gitLogCommand = "$git log $renameDetectionThreshold -c $contextThreshold --encoding=UTF-8 --format=\"commit: %H%nparents: %P%nauthor name: %an%nauthor email: %ae%ndate: %ad%nmessage:%n%s%n%b\""
     private val gitAffectedFilesCommand = "$git log -m -1 --name-only --pretty=\"format:\""
+    private val gitDiffCommand = "$git diff $renameDetectionThreshold $contextThreshold"
     private val gitBlameCommand = "$git blame -l"
     private val processBuilder = ProcessBuilder()
 
@@ -25,32 +30,25 @@ class GitClient(path: Path) {
         processBuilder.directory(path.toFile())
     }
 
-    fun getLogs(): List<String> {
-        val command = gitLogCommand
-        LOG.info("Running log command: $command")
-        return runCommand(command)
-    }
+    fun getLogs(): List<String> = runCommand(gitLogCommand)
+
+    fun diff(parent: String, revision: String, file: String): List<String> = runCommand("$gitDiffCommand $parent $revision -- $file")
 
     fun blame(revision: String, file: String): List<String> {
-        val command = "$gitBlameCommand $file $revision"
-        LOG.info("Running blame command: $command")
-        return runCommand(command)
+        return runCommand("$gitBlameCommand $file $revision")
     }
 
-    fun affectedFiles(revision: String): List<String> {
-        val command = "$gitAffectedFilesCommand $revision"
-        LOG.info("Running  command: $command")
-        return runCommand(command)
-    }
+    fun affectedFiles(revision: String): List<String> = runCommand("$gitAffectedFilesCommand $revision")
 
     private fun runCommand(command: String): List<String> {
-        processBuilder.command("bash", "-c", "$command")
+        LOG.info("Running command: $command")
+        processBuilder.command("bash", "-c", command)
         val process = processBuilder.start()
         val reader = BufferedReader(process.inputStream.reader())
         val lines: MutableList<String> = ArrayList()
         reader.forEachLine { lines.add(it) }
         return if (process.waitFor() == 0) {
-            LOG.info("Blame command finished")
+            LOG.info("Command completed")
             lines
         } else {
             LOG.error("Command completed with errors")
