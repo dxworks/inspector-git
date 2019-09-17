@@ -9,7 +9,7 @@ import org.dxworks.inspectorgit.model.*
 import org.slf4j.LoggerFactory
 
 @Slf4j
-class ProjectTransformer() {
+class ProjectTransformer {
     companion object {
         private val LOG = LoggerFactory.getLogger(ProjectTransformer::class.java)
 
@@ -19,16 +19,26 @@ class ProjectTransformer() {
             projectDTO.commits.forEach {
                 LOG.info("Creating commit with id: ${it.id}")
 
-                val author = getCommitAuthor(it, project)
+                val author = getAuthor(it, project)
+                LOG.info("Parsed author")
+                val committer = getCommitter(it, project)
+                LOG.info("Parsed committer")
+
                 val commit = Commit(id = it.id,
                         message = it.message,
-                        date = it.date,
+                        authorDate = it.authorDate,
+                        committerDate = it.committerDate,
                         author = author,
+                        committer = committer,
                         parents = getParentFromIds(it.parentIds, project),
                         changes = ArrayList())
 
+                LOG.info("Adding commit to registry and authors")
                 project.commitRegistry.add(commit)
                 author.commits.add(commit)
+                if (committer != author)
+                    committer.commits.add(commit)
+
                 addChangesToCommit(it.changes, commit, project)
 
                 LOG.info("Done creating commit with id: ${it.id}")
@@ -38,14 +48,17 @@ class ProjectTransformer() {
         }
 
         private fun addChangesToCommit(changes: List<ChangeDTO>, commit: Commit, project: Project) {
-            commit.changes = changes.map { changeDTO ->
+            LOG.info("Filtering changes")
+            val filteredChanges = filterChanges(commit, changes, project)
+            LOG.info("Done filtering changes")
+            commit.changes = filteredChanges.map { changeDTO ->
                 LOG.info("Creating ${changeDTO.type} change for file: ${changeDTO.oldFileName} -> ${changeDTO.newFileName}")
                 val change = Change(
                         commit = commit,
                         type = changeDTO.type,
                         file = getFileForChange(changeDTO, project),
                         otherCommit = if (changeDTO.otherCommitId.isEmpty()) null else commit.parents.find { it.id == changeDTO.otherCommitId }!!,
-                        oldFilename = changeDTO.oldFileName,
+                        oldFileName = changeDTO.oldFileName,
                         newFileName = changeDTO.newFileName,
                         lineChanges = getLineChanges(changeDTO),
                         annotatedLines = getAnnotatedLines(changeDTO, project))
@@ -53,6 +66,36 @@ class ProjectTransformer() {
                 LOG.info("Change created")
                 change
             }
+        }
+
+        private fun filterChanges(commit: Commit, changes: List<ChangeDTO>, project: Project): List<ChangeDTO> {
+            return if (commit.isMergeCommit) {
+                LOG.info("Getting potentially renamed files")
+                val potentiallyRenamedFiles = changes.filter { it.type == ChangeType.ADD }
+                        .mapNotNull { project.fileRegistry.getByID(it.newFileName) }.distinctBy { it.fullyQualifiedName }
+                LOG.info("Found: ${potentiallyRenamedFiles.size}")
+                LOG.info("Getting rename changes")
+                val renameChanges = potentiallyRenamedFiles.mapNotNull { it.changes.find { change -> change.isRenameChange } }
+                val newFileNames = renameChanges.map { it.newFileName }
+                val oldFileNames = renameChanges.map { it.oldFileName }
+                LOG.info("Found: ${renameChanges.size}")
+                LOG.info("filtering legit changes")
+                val legitChanges = changes.filter { !((it.type == ChangeType.ADD && newFileNames.contains(it.newFileName)) || (it.type == ChangeType.DELETE && oldFileNames.contains(it.oldFileName))) }
+                val fakeAddChanges = changes.filter { (it.type == ChangeType.ADD && newFileNames.contains(it.newFileName)) }
+                LOG.info("Found: ${legitChanges.size}")
+                LOG.info("Substituting ${fakeAddChanges.size} add-delete pairs with rename changes")
+                legitChanges + fakeAddChanges.map {
+                    val renameChange = renameChanges.find { rc -> rc.newFileName == it.newFileName }!!
+                    ChangeDTO(oldFileName = renameChange.oldFileName,
+                            newFileName = renameChange.newFileName,
+                            type = ChangeType.RENAME,
+                            otherCommitId = it.otherCommitId,
+                            isBinary = it.isBinary,
+                            hunks = emptyList(),
+                            annotatedLines = it.annotatedLines
+                    )
+                }
+            } else changes
         }
 
         private fun getLineChanges(changeDTO: ChangeDTO) =
@@ -100,9 +143,15 @@ class ProjectTransformer() {
             }
         }
 
-        private fun getCommitAuthor(commitDTO: CommitDTO, project: Project): Author {
-            val authorID = AuthorID(commitDTO.authorEmail, commitDTO.authorName)
+        private fun getAuthor(commitDTO: CommitDTO, project: Project): Author {
+            return getAuthor(project, AuthorID(commitDTO.authorEmail, commitDTO.authorName))
+        }
 
+        private fun getCommitter(commitDTO: CommitDTO, project: Project): Author {
+            return getAuthor(project, AuthorID(commitDTO.committerEmail, commitDTO.committerName))
+        }
+
+        private fun getAuthor(project: Project, authorID: AuthorID): Author {
             var author = project.authorRegistry.getByID(authorID)
             if (author == null) {
                 author = Author(authorID)
