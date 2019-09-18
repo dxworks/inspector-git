@@ -1,17 +1,15 @@
 package org.dxworks.inspectorgit.registries
 
-import org.dxworks.inspectorgit.model.Commit
 import java.util.*
 
 abstract class AbstractRegistry<TYPE, ID> {
-    val map: MutableMap<ID, TYPE> = HashMap()
+    private val map: MutableMap<ID, TYPE> = HashMap()
 
     val all: Collection<TYPE>
         get() = map.values
 
     val allIDs: Set<ID>
         get() = map.keys
-
 
     open fun getByID(id: ID): TYPE? {
         return map[id]

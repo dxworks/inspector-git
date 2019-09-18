@@ -49,9 +49,9 @@ class ProjectTransformer {
 
         private fun addChangesToCommit(changes: List<ChangeDTO>, commit: Commit, project: Project) {
             LOG.info("Filtering changes")
-            val filteredChanges = filterChanges(commit, changes, project)
+            val admittedChanges = if (commit.isMergeCommit) filterChanges(changes, project) else changes
             LOG.info("Done filtering changes")
-            commit.changes = filteredChanges.map { changeDTO ->
+            commit.changes = admittedChanges.map { changeDTO ->
                 LOG.info("Creating ${changeDTO.type} change for file: ${changeDTO.oldFileName} -> ${changeDTO.newFileName}")
                 val change = Change(
                         commit = commit,
@@ -68,38 +68,37 @@ class ProjectTransformer {
             }
         }
 
-        private fun filterChanges(commit: Commit, changes: List<ChangeDTO>, project: Project): List<ChangeDTO> {
-            return if (commit.isMergeCommit) {
-                LOG.info("Getting potentially renamed files")
-                val potentiallyRenamedFiles = changes.filter { it.type == ChangeType.ADD }
-                        .mapNotNull { project.fileRegistry.getByID(it.newFileName) }.distinctBy { it.fullyQualifiedName }
-                LOG.info("Found: ${potentiallyRenamedFiles.size}")
-                LOG.info("Getting rename changes")
-                val renameChanges = potentiallyRenamedFiles.mapNotNull { it.changes.find { change -> change.isRenameChange } }
-                val newFileNames = renameChanges.map { it.newFileName }
-                val oldFileNames = renameChanges.map { it.oldFileName }
-                LOG.info("Found: ${renameChanges.size}")
-                LOG.info("filtering legit changes")
-                val legitChanges = changes.filter { !((it.type == ChangeType.ADD && newFileNames.contains(it.newFileName)) || (it.type == ChangeType.DELETE && oldFileNames.contains(it.oldFileName))) }
-                val fakeAddChanges = changes.filter { (it.type == ChangeType.ADD && newFileNames.contains(it.newFileName)) }
-                LOG.info("Found: ${legitChanges.size}")
-                LOG.info("Substituting ${fakeAddChanges.size} add-delete pairs with rename changes")
-                legitChanges + fakeAddChanges.map {
-                    val renameChange = renameChanges.find { rc -> rc.newFileName == it.newFileName }!!
-                    ChangeDTO(oldFileName = renameChange.oldFileName,
-                            newFileName = renameChange.newFileName,
-                            type = ChangeType.RENAME,
-                            otherCommitId = it.otherCommitId,
-                            isBinary = it.isBinary,
-                            hunks = emptyList(),
-                            annotatedLines = it.annotatedLines
-                    )
-                }
-            } else changes
+        private fun filterChanges(changes: List<ChangeDTO>, project: Project): List<ChangeDTO> {
+            LOG.info("Getting potentially renamed files")
+            val potentiallyRenamedFiles = changes.filter { it.type == ChangeType.ADD }
+                    .mapNotNull { project.fileRegistry.getByID(it.newFileName) }.distinctBy { it.fullyQualifiedName }
+            LOG.info("Found: ${potentiallyRenamedFiles.size}")
+            LOG.info("Getting rename changes")
+            val renameChanges = potentiallyRenamedFiles.mapNotNull { it.changes.find { change -> change.isRenameChange } }
+            val newFileNames = renameChanges.map { it.newFileName }
+            val oldFileNames = renameChanges.map { it.oldFileName }
+            LOG.info("Found: ${renameChanges.size}")
+            LOG.info("filtering legit changes")
+            val legitChanges = changes.filter { !((it.type == ChangeType.ADD && newFileNames.contains(it.newFileName)) || (it.type == ChangeType.DELETE && oldFileNames.contains(it.oldFileName))) }
+            val fakeAddChanges = changes.filter { (it.type == ChangeType.ADD && newFileNames.contains(it.newFileName)) }
+            LOG.info("Found: ${legitChanges.size}")
+            LOG.info("Substituting ${fakeAddChanges.size} add-delete pairs with rename changes")
+            return legitChanges + fakeAddChanges.map {
+                val renameChange = renameChanges.find { rc -> rc.newFileName == it.newFileName }!!
+                ChangeDTO(oldFileName = renameChange.oldFileName,
+                        newFileName = renameChange.newFileName,
+                        type = ChangeType.RENAME,
+                        otherCommitId = it.otherCommitId,
+                        isBinary = it.isBinary,
+                        hunks = emptyList(),
+                        annotatedLines = it.annotatedLines
+                )
+            }
         }
 
-        private fun getLineChanges(changeDTO: ChangeDTO) =
-                changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, it.lineNumber, it.content) }.toMutableList()
+        private fun getLineChanges(changeDTO: ChangeDTO): MutableList<LineChange> {
+            return changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, it.lineNumber, it.content) }.toMutableList()
+        }
 
         private fun getAnnotatedLines(changeDTO: ChangeDTO, project: Project): MutableList<AnnotatedLine> {
             LOG.info("Calculating annotated lines")
@@ -157,7 +156,6 @@ class ProjectTransformer {
                 author = Author(authorID)
                 project.authorRegistry.add(author)
             }
-
             return author
         }
 

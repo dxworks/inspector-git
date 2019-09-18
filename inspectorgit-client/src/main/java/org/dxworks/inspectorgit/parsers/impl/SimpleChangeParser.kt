@@ -6,5 +6,4 @@ import org.dxworks.inspectorgit.parsers.abstracts.ChangeParser
 
 class SimpleChangeParser(otherCommitId: String) : ChangeParser(otherCommitId) {
     override fun addAnnotatedLines(changeDTO: ChangeDTO){}
-
 }

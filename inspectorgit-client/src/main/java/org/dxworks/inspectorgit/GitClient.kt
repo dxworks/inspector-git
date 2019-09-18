@@ -19,7 +19,6 @@ class GitClient(path: Path) {
     private val renameDetectionThreshold = "-M25%"
     private val contextThreshold = "-U0"
 
-
     private val gitLogCommand = "$git log $renameDetectionThreshold -c $contextThreshold --encoding=UTF-8 --format=\"commit: %H%nparents: %P%nauthor name: %an%nauthor email: %ae%nauthor date: %ad%ncommitter name: %cn%ncommitter email: %ce%ncommitter date: %cd%nmessage:%n%s%n%b\""
     private val gitAffectedFilesCommand = "$git log $renameDetectionThreshold -m -1 --name-only --pretty=\"format:\""
     private val gitDiffCommand = "$git diff $renameDetectionThreshold $contextThreshold"

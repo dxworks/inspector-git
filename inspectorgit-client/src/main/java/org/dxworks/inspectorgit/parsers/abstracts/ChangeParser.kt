@@ -38,7 +38,7 @@ abstract class ChangeParser(private val otherCommitId: String) : GitParser<Chang
         } else emptyList()
     }
 
-    protected fun getHunks(lines: MutableList<String>): List<MutableList<String>> {
+    private fun getHunks(lines: MutableList<String>): List<MutableList<String>> {
         val hunks: MutableList<MutableList<String>> = ArrayList()
         var currentHunkLines: MutableList<String> = ArrayList()
         LOG.info("Extracting hunks")
@@ -70,7 +70,6 @@ abstract class ChangeParser(private val otherCommitId: String) : GitParser<Chang
             return ChangeType.RENAME
         return ChangeType.MODIFY
     }
-
 
     private fun extractFileNames(lines: MutableList<String>, type: ChangeType): Pair<String, String> {
         val diffLine = lines.removeAt(0)
