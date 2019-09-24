@@ -14,9 +14,9 @@ class SimpleHunkParser : HunkParser() {
         var diffLineIndex = 0
 
         for (i in removeStart until (removeStart + removeCount))
-            lineChanges.add(LineChangeDTO(operation = LineOperation.REMOVE, lineNumber = i, content = lines[diffLineIndex++].removePrefix("-")))
+            lineChanges.add(LineChangeDTO(operation = LineOperation.REMOVE, number = i, content = lines[diffLineIndex++].removePrefix("-")))
         for (i in addStart until (addStart + addCount))
-            lineChanges.add(LineChangeDTO(operation = LineOperation.ADD, lineNumber = i, content = lines[diffLineIndex++].removePrefix("+")))
+            lineChanges.add(LineChangeDTO(operation = LineOperation.ADD, number = i, content = lines[diffLineIndex++].removePrefix("+")))
 
         return lineChanges
     }

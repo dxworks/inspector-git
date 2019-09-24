@@ -91,13 +91,14 @@ class ProjectTransformer {
                         otherCommitId = it.otherCommitId,
                         isBinary = it.isBinary,
                         hunks = emptyList(),
-                        annotatedLines = it.annotatedLines
+                        annotatedLines = it.annotatedLines,
+                        isBlame = it.isBlame
                 )
             }
         }
 
         private fun getLineChanges(changeDTO: ChangeDTO): MutableList<LineChange> {
-            return changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, it.lineNumber, it.content) }.toMutableList()
+            return changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, it.number, it.content) }.toMutableList()
         }
 
         private fun getAnnotatedLines(changeDTO: ChangeDTO, project: Project): MutableList<AnnotatedLine> {

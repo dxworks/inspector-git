@@ -5,7 +5,6 @@ import org.dxworks.inspectorgit.dto.ChangeDTO
 import org.dxworks.inspectorgit.dto.HunkDTO
 import org.dxworks.inspectorgit.enums.ChangeType
 import org.dxworks.inspectorgit.parsers.GitParser
-import org.dxworks.inspectorgit.parsers.impl.SimpleHunkParser
 import org.dxworks.inspectorgit.utils.devNull
 import org.slf4j.LoggerFactory
 
@@ -15,6 +14,8 @@ abstract class ChangeParser(private val otherCommitId: String) : GitParser<Chang
         private val LOG = LoggerFactory.getLogger(ChangeParser::class.java)
     }
 
+    open val isBlameParser = false
+
     override fun parse(lines: MutableList<String>): ChangeDTO {
         val type = extractChangeType(lines)
         val (oldFileName, newFileName) = extractFileNames(lines, type)
@@ -23,22 +24,19 @@ abstract class ChangeParser(private val otherCommitId: String) : GitParser<Chang
                 type = type,
                 oldFileName = oldFileName,
                 newFileName = newFileName,
-                hunks = extractHunks(lines),
                 otherCommitId = otherCommitId,
-                isBinary = lines.any { it.startsWith("Binary files") })
+                isBinary = lines.any { it.startsWith("Binary files") },
+                isBlame = isBlameParser)
         addAnnotatedLines(changeDTO)
+        addHunks(lines, changeDTO)
         return changeDTO
     }
 
-    abstract fun addAnnotatedLines(changeDTO: ChangeDTO)
+    protected abstract fun addAnnotatedLines(changeDTO: ChangeDTO)
 
-    private fun extractHunks(lines: MutableList<String>): List<HunkDTO> {
-        return if (lines.isNotEmpty()) {
-            getHunks(lines).map { SimpleHunkParser().parse(it) }
-        } else emptyList()
-    }
+    protected abstract fun addHunks(lines: MutableList<String>, changeDTO: ChangeDTO)
 
-    private fun getHunks(lines: MutableList<String>): List<MutableList<String>> {
+    protected fun getHunks(lines: MutableList<String>): List<MutableList<String>> {
         val hunks: MutableList<MutableList<String>> = ArrayList()
         var currentHunkLines: MutableList<String> = ArrayList()
         LOG.info("Extracting hunks")

@@ -4,10 +4,25 @@ import org.dxworks.inspectorgit.GitClient
 import org.dxworks.inspectorgit.dto.AnnotatedLineDTO
 import org.dxworks.inspectorgit.dto.ChangeDTO
 import org.dxworks.inspectorgit.dto.HunkDTO
+import org.dxworks.inspectorgit.dto.LineChangeDTO
+import org.dxworks.inspectorgit.enums.LineOperation
 import org.dxworks.inspectorgit.parsers.abstracts.ChangeParser
 import org.dxworks.inspectorgit.utils.devNull
+import java.util.*
 
 class BlameParser(private val gitClient: GitClient, private val commitId: String, otherCommitId: String) : ChangeParser(otherCommitId) {
+    override val isBlameParser: Boolean
+        get() = true
+
+    override fun addHunks(lines: MutableList<String>, changeDTO: ChangeDTO) {
+        val newAnnotatedLines = changeDTO.annotatedLines.filter { it.commitId == commitId }
+        if (newAnnotatedLines.isNotEmpty()) {
+            changeDTO.hunks = Collections.singletonList(HunkDTO(newAnnotatedLines
+                    .map { LineChangeDTO(LineOperation.ADD, it.number, it.content) }))
+            changeDTO.isBlame = false
+        }
+    }
+
     override fun addAnnotatedLines(changeDTO: ChangeDTO) {
         if (changeDTO.newFileName != devNull && !changeDTO.isBinary) {
             changeDTO.annotatedLines = gitClient.blame(commitId, changeDTO.newFileName)
