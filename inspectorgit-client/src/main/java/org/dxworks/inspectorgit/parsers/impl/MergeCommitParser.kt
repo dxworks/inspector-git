@@ -8,9 +8,20 @@ class MergeCommitParser(private val gitClient: GitClient) : CommitParser() {
 
     override fun extractChanges(lines: MutableList<String>, commitId: String, parentIds: List<String>): List<ChangeDTO> {
         val parentAndFile: List<Pair<String, String>> = getAffectedFilesByParent(commitId, parentIds)
+        val blameChanges = getBlameChanges(parentAndFile, commitId)
+        val mergeChanges = if (lines.isNotEmpty()) getMergeChanges(lines, parentIds) else emptyList()
+        return blameChanges + mergeChanges
+    }
+
+    private fun getBlameChanges(parentAndFile: List<Pair<String, String>>, commitId: String): List<ChangeDTO> {
         return parentAndFile.map { Pair(it.first, gitClient.diff(it.first, commitId, it.second)) }
                 .filter { it.second.isNotEmpty() }
                 .map { BlameParser(gitClient, commitId, it.first).parse(it.second.toMutableList()) }
+    }
+
+    private fun getMergeChanges(lines: MutableList<String>, parentIds: List<String>): List<ChangeDTO> {
+        val changes = getChanges(lines)
+        return parentIds.mapIndexed { index, parentCommitId -> changes.map { MergeChangeParser(index, parentIds.size, parentCommitId).parse(it) } }.flatten()
     }
 
     private fun getAffectedFilesByParent(commitId: String, parentIds: List<String>): List<Pair<String, String>> {

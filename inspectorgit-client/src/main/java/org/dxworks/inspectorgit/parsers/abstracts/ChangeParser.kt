@@ -2,14 +2,13 @@ package org.dxworks.inspectorgit.parsers.abstracts
 
 import lombok.extern.slf4j.Slf4j
 import org.dxworks.inspectorgit.dto.ChangeDTO
-import org.dxworks.inspectorgit.dto.HunkDTO
 import org.dxworks.inspectorgit.enums.ChangeType
 import org.dxworks.inspectorgit.parsers.GitParser
 import org.dxworks.inspectorgit.utils.devNull
 import org.slf4j.LoggerFactory
 
 @Slf4j
-abstract class ChangeParser(private val otherCommitId: String) : GitParser<ChangeDTO> {
+abstract class ChangeParser(private val parentCommitId: String) : GitParser<ChangeDTO> {
     companion object {
         private val LOG = LoggerFactory.getLogger(ChangeParser::class.java)
     }
@@ -24,7 +23,7 @@ abstract class ChangeParser(private val otherCommitId: String) : GitParser<Chang
                 type = type,
                 oldFileName = oldFileName,
                 newFileName = newFileName,
-                otherCommitId = otherCommitId,
+                parentCommitId = parentCommitId,
                 isBinary = lines.any { it.startsWith("Binary files") },
                 isBlame = isBlameParser)
         addAnnotatedLines(changeDTO)

@@ -2,11 +2,10 @@ package org.dxworks.inspectorgit
 
 import org.dxworks.inspectorgit.dto.ProjectDTO
 import org.dxworks.inspectorgit.transformers.ProjectTransformer
-import org.dxworks.inspectorgit.utils.DTO_FOLDER_PATH
-import org.dxworks.inspectorgit.utils.Helper
+import org.dxworks.inspectorgit.utils.FileSystemUtils
+import org.dxworks.inspectorgit.utils.JsonUtils
 
 fun main() {
-    val project = ProjectTransformer.createProject(Helper.jsonFromFile(DTO_FOLDER_PATH.resolve("kafka.json"), ProjectDTO::class.java), "kafka")
+    val project = ProjectTransformer.createProject(JsonUtils.jsonFromFile(FileSystemUtils.getDtoFileFor("kafka", "trunk"), ProjectDTO::class.java), "kafka")
     println(project)
-//    Helper.deleteFile(DTO_FOLDER_PATH.resolve("kafka.json"))
 }

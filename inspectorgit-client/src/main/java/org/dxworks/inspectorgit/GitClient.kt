@@ -2,8 +2,8 @@ package org.dxworks.inspectorgit
 
 import lombok.extern.slf4j.Slf4j
 import org.dxworks.inspectorgit.parsers.LogParser
-import org.dxworks.inspectorgit.utils.DTO_FOLDER_PATH
-import org.dxworks.inspectorgit.utils.Helper
+import org.dxworks.inspectorgit.utils.FileSystemUtils
+import org.dxworks.inspectorgit.utils.JsonUtils
 import org.dxworks.inspectorgit.utils.OsUtils
 import org.slf4j.LoggerFactory
 import java.io.BufferedReader
@@ -24,11 +24,16 @@ class GitClient(path: Path) {
     private val gitAffectedFilesCommand = "$git log $renameDetectionThreshold -m -1 --name-only --pretty=\"format:\""
     private val gitDiffCommand = "$git diff $renameDetectionThreshold $contextThreshold"
     private val gitBlameCommand = "$git blame -l"
+    private val gitBranchCommand = "$git branch"
     private val processBuilder = ProcessBuilder()
+
+    val repoName = path.fileName.toString()
 
     init {
         processBuilder.directory(path.toFile())
     }
+
+    val branch: String = runCommand(gitBranchCommand).find { it.startsWith("* ") }!!.removePrefix("* ")
 
     fun getLogs(): List<String> = runCommand(gitLogCommand)
 
@@ -60,5 +65,5 @@ class GitClient(path: Path) {
 fun main() {
     val gitClient = GitClient(Paths.get(System.getProperty("user.home"), "Documents", "DX", "kafkaRepo", "kafka"))
     val projectDTO = LogParser(gitClient).parse(gitClient.getLogs().toMutableList())
-    Helper.toJsonFile(DTO_FOLDER_PATH.resolve("kafka.json"), projectDTO)
+    JsonUtils.toJsonFile(FileSystemUtils.getDtoFileFor(gitClient.repoName, gitClient.branch), projectDTO)
 }

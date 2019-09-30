@@ -1,15 +1,16 @@
 package org.dxworks.inspectorgit.parsers.impl
 
 import org.dxworks.inspectorgit.dto.ChangeDTO
-import org.dxworks.inspectorgit.dto.HunkDTO
 import org.dxworks.inspectorgit.parsers.abstracts.ChangeParser
 
-class SimpleChangeParser(parentCommitId: String) : ChangeParser(parentCommitId) {
-    override fun addAnnotatedLines(changeDTO: ChangeDTO) {}
-
+class MergeChangeParser(private val parentIndex: Int, private val numberOfParents: Int, parentCommitId: String) : ChangeParser(parentCommitId) {
     override fun addHunks(lines: MutableList<String>, changeDTO: ChangeDTO) {
         changeDTO.hunks = if (lines.isNotEmpty()) {
-            getHunks(lines).map { SimpleHunkParser().parse(it) }
+            getHunks(lines).map { MergeHunkParser(parentIndex, numberOfParents).parse(it) }
         } else emptyList()
+    }
+
+    override fun addAnnotatedLines(changeDTO: ChangeDTO) {
+
     }
 }

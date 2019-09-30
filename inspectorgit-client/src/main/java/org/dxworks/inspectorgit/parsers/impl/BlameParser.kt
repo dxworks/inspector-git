@@ -10,7 +10,7 @@ import org.dxworks.inspectorgit.parsers.abstracts.ChangeParser
 import org.dxworks.inspectorgit.utils.devNull
 import java.util.*
 
-class BlameParser(private val gitClient: GitClient, private val commitId: String, otherCommitId: String) : ChangeParser(otherCommitId) {
+class BlameParser(private val gitClient: GitClient, private val commitId: String, parentCommitId: String) : ChangeParser(parentCommitId) {
     override val isBlameParser: Boolean
         get() = true
 

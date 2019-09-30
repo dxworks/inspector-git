@@ -9,9 +9,9 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 @Slf4j
-class Helper {
+class JsonUtils {
     companion object {
-        private val LOG = LoggerFactory.getLogger(Helper::class.java)
+        private val LOG = LoggerFactory.getLogger(JsonUtils::class.java)
 
         fun toJsonFile(path: Path, entity: Any) {
             Files.createDirectories(path.parent)
@@ -33,8 +33,4 @@ class Helper {
             }
         }
     }
-}
-
-fun main() {
-    Helper.toJsonFile(Paths.get("/home/darius/Documents/dx/kafka/1caaf6db400df7e37b7f0416bb83ab451018a5c8.json"), Helper.jsonFromFile(DTO_FOLDER_PATH.resolve("kafka.json"), ProjectDTO::class.java).commits.filter{it.id == "3f432cd01c4728396f277e33897f6f898c530c99"})
 }
