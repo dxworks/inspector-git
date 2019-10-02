@@ -64,6 +64,6 @@ class GitClient(path: Path) {
 
 fun main() {
     val gitClient = GitClient(Paths.get(System.getProperty("user.home"), "Documents", "DX", "kafkaRepo", "kafka"))
-    val projectDTO = LogParser(gitClient).parse(gitClient.getLogs().toMutableList())
+    val projectDTO = LogParser(gitClient).parse(gitClient.getLogs())
     JsonUtils.toJsonFile(FileSystemUtils.getDtoFileFor(gitClient.repoName, gitClient.branch), projectDTO)
 }

@@ -1,6 +1,5 @@
 package org.dxworks.inspectorgit.utils
 
-import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -19,5 +18,7 @@ class FileSystemUtils {
         fun getDtoFileFor(repoName: String, branch: String): Path {
             return getDtoFolderPathFor(repoName).resolve("$branch.json")
         }
+
+        fun deleteFile(path: Path) = path.toFile().delete()
     }
 }
