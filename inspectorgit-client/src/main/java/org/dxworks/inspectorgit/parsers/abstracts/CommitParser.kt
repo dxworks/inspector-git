@@ -6,8 +6,6 @@ import org.dxworks.inspectorgit.dto.CommitDTO
 import org.dxworks.inspectorgit.parsers.GitParser
 import org.slf4j.LoggerFactory
 import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Slf4j
@@ -20,24 +18,25 @@ abstract class CommitParser : GitParser<CommitDTO> {
     private val committer = "committer"
     private val dateFormat = "EEE MMM d HH:mm:ss yyyy Z"
 
-    override fun parse(lines: MutableList<String>): CommitDTO {
-        val commitId = extractCommitId(lines)
+    override fun parse(lines: List<String>): CommitDTO {
+        val mutableLines = lines.toMutableList()
+        val commitId = extractCommitId(mutableLines)
         LOG.info("Parsing commit with id: $commitId")
-        val parentIds = extractParentIds(lines)
+        val parentIds = extractParentIds(mutableLines)
         return CommitDTO(
                 id = commitId,
                 parentIds = parentIds,
-                authorName = extractName(lines, author),
-                authorEmail = extractEmail(lines, author),
-                authorDate = extractDate(lines, author),
-                committerName = extractName(lines, committer),
-                committerEmail = extractEmail(lines, committer),
-                committerDate = extractDate(lines, committer),
-                message = extractMessage(lines),
-                changes = extractChanges(lines, commitId, parentIds))
+                authorName = extractName(mutableLines, author),
+                authorEmail = extractEmail(mutableLines, author),
+                authorDate = extractDate(mutableLines, author),
+                committerName = extractName(mutableLines, committer),
+                committerEmail = extractEmail(mutableLines, committer),
+                committerDate = extractDate(mutableLines, committer),
+                message = extractMessage(mutableLines),
+                changes = extractChanges(mutableLines, commitId, parentIds))
     }
 
-    abstract fun extractChanges(lines: MutableList<String>, commitId: String, parentIds: List<String>): List<ChangeDTO>
+    abstract fun extractChanges(lines: List<String>, commitId: String, parentIds: List<String>): List<ChangeDTO>
 
     protected fun getChanges(lines: List<String>): List<MutableList<String>> {
         val changes: MutableList<MutableList<String>> = ArrayList()

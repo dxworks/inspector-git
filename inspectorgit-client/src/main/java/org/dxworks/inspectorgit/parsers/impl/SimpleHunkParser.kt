@@ -5,13 +5,13 @@ import org.dxworks.inspectorgit.enums.LineOperation
 import org.dxworks.inspectorgit.parsers.abstracts.HunkParser
 
 class SimpleHunkParser : HunkParser() {
-    override fun extractLineChanges(lines: MutableList<String>): List<LineChangeDTO> {
-        val (removePair, addPair) = getRemoveAndAddHunkInfo(lines.removeAt(0))
+    override fun extractLineChanges(lines: List<String>): List<LineChangeDTO> {
+        val (removePair, addPair) = getRemoveAndAddHunkInfo(lines[0])
         val (removeStart, removeCount) = removePair
         val (addStart, addCount) = addPair
 
         val lineChanges: MutableList<LineChangeDTO> = ArrayList()
-        var diffLineIndex = 0
+        var diffLineIndex = 1
 
         for (i in removeStart until (removeStart + removeCount))
             lineChanges.add(LineChangeDTO(operation = LineOperation.REMOVE, number = i, content = lines[diffLineIndex++].removePrefix("-")))

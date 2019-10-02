@@ -14,7 +14,7 @@ class BlameParser(private val gitClient: GitClient, private val commitId: String
     override val isBlameParser: Boolean
         get() = true
 
-    override fun addHunks(lines: MutableList<String>, changeDTO: ChangeDTO) {
+    override fun addHunks(lines: List<String>, changeDTO: ChangeDTO) {
         val newAnnotatedLines = changeDTO.annotatedLines.filter { it.commitId == commitId }
         if (newAnnotatedLines.isNotEmpty()) {
             changeDTO.hunks = Collections.singletonList(HunkDTO(newAnnotatedLines

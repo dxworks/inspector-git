@@ -15,7 +15,7 @@ abstract class ChangeParser(private val parentCommitId: String) : GitParser<Chan
 
     open val isBlameParser = false
 
-    override fun parse(lines: MutableList<String>): ChangeDTO {
+    override fun parse(lines: List<String>): ChangeDTO {
         val type = extractChangeType(lines)
         val (oldFileName, newFileName) = extractFileNames(lines, type)
         LOG.info("Parsing $type change: $oldFileName -> $newFileName")
@@ -33,9 +33,9 @@ abstract class ChangeParser(private val parentCommitId: String) : GitParser<Chan
 
     protected abstract fun addAnnotatedLines(changeDTO: ChangeDTO)
 
-    protected abstract fun addHunks(lines: MutableList<String>, changeDTO: ChangeDTO)
+    protected abstract fun addHunks(lines: List<String>, changeDTO: ChangeDTO)
 
-    protected fun getHunks(lines: MutableList<String>): List<MutableList<String>> {
+    protected fun getHunks(lines: List<String>): List<List<String>> {
         val hunks: MutableList<MutableList<String>> = ArrayList()
         var currentHunkLines: MutableList<String> = ArrayList()
         LOG.info("Extracting hunks")
@@ -55,7 +55,7 @@ abstract class ChangeParser(private val parentCommitId: String) : GitParser<Chan
         }
     }
 
-    private fun extractChangeType(lines: MutableList<String>): ChangeType {
+    private fun extractChangeType(lines: List<String>): ChangeType {
         var changeTypeLine = lines.find { it.startsWith("new file mode") }
         if (changeTypeLine != null)
             return ChangeType.ADD
@@ -68,8 +68,8 @@ abstract class ChangeParser(private val parentCommitId: String) : GitParser<Chan
         return ChangeType.MODIFY
     }
 
-    private fun extractFileNames(lines: MutableList<String>, type: ChangeType): Pair<String, String> {
-        val diffLine = lines.removeAt(0)
+    private fun extractFileNames(lines: List<String>, type: ChangeType): Pair<String, String> {
+        val diffLine = lines[0]
         return when (type) {
             ChangeType.ADD -> extractFileNames(diffLine, fromName = devNull)
             ChangeType.DELETE -> extractFileNames(diffLine, toName = devNull)

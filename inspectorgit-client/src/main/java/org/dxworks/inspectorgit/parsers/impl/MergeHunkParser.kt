@@ -8,7 +8,7 @@ class MergeHunkParser(private val parentIndex: Int, private val numberOfParents:
     private val minus = '-'
     private val plus = "+"
 
-    override fun extractLineChanges(lines: MutableList<String>): List<LineChangeDTO> {
+    override fun extractLineChanges(lines: List<String>): List<LineChangeDTO> {
         val (fromFileRange, toFileRange) = getFileRanges(lines)
         return getFromLineChanges(fromFileRange, getFromLines(lines)) + getToLineChanges(toFileRange, getToLines(lines))
     }
@@ -37,7 +37,7 @@ class MergeHunkParser(private val parentIndex: Int, private val numberOfParents:
         return lines.filter { it.substring(0, numberOfParents).contains(plus) }
     }
 
-    private fun getFileRanges(lines: MutableList<String>): Pair<Pair<Int, Int>, Pair<Int, Int>> {
+    private fun getFileRanges(lines: List<String>): Pair<Pair<Int, Int>, Pair<Int, Int>> {
         val fileRangeNumbers = lines[0].split("@ ")[1].split(" @")[0]
         val fileRangeSplitNumbers = fileRangeNumbers.split(" ")
         val fromFileRange = getNumbersPair(fileRangeSplitNumbers[parentIndex])

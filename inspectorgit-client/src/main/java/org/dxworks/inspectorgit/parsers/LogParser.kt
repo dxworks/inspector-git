@@ -13,7 +13,7 @@ class LogParser(private val gitClient: GitClient) : GitParser<ProjectDTO> {
 
     private val commit = "commit: "
 
-    override fun parse(lines: MutableList<String>): ProjectDTO {
+    override fun parse(lines: List<String>): ProjectDTO {
         val commits: MutableList<MutableList<String>> = ArrayList()
         var currentCommitLines: MutableList<String> = ArrayList()
         LOG.info("Extracting commits")
