@@ -35,7 +35,7 @@ abstract class ChangeParser(private val parentCommitId: String) : GitParser<Chan
 
     protected abstract fun addHunks(lines: List<String>, changeDTO: ChangeDTO)
 
-    protected fun getHunks(lines: List<String>): List<List<String>> {
+    protected fun extractHunks(lines: List<String>): List<List<String>> {
         val hunks: MutableList<MutableList<String>> = ArrayList()
         var currentHunkLines: MutableList<String> = ArrayList()
         LOG.info("Extracting hunks")
@@ -81,6 +81,7 @@ abstract class ChangeParser(private val parentCommitId: String) : GitParser<Chan
         val fromNameIndex = line.indexOf("a/") + 2
         val lastSpaceIndex = line.lastIndexOf(" ")
         val toNameIndex = lastSpaceIndex + 3
+
         return if (line.contains("--combined")) {
             val fileName = line.substring(lastSpaceIndex).trim()
             Pair(fileName, fileName)

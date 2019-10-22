@@ -9,7 +9,7 @@ class CommitParserFactory {
     companion object {
         private const val parents = "parents: "
 
-        fun create(lines: MutableList<String>, gitClient: GitClient): CommitParser {
+        fun create(lines: List<String>, gitClient: GitClient): CommitParser {
             return if (getParents(lines).size > 1) MergeCommitParser(gitClient) else SimpleCommitParser()
         }
 

@@ -14,19 +14,19 @@ class BlameParser(private val gitClient: GitClient, private val commitId: String
     override val isBlameParser: Boolean
         get() = true
 
+    override fun addAnnotatedLines(changeDTO: ChangeDTO) {
+        if (changeDTO.newFileName != devNull && !changeDTO.isBinary) {
+            changeDTO.annotatedLines = gitClient.blame(commitId, changeDTO.newFileName)
+                    .filter { it.isNotBlank() }.map { parseAnnotatedLine(it) }
+        }
+    }
+
     override fun addHunks(lines: List<String>, changeDTO: ChangeDTO) {
         val newAnnotatedLines = changeDTO.annotatedLines.filter { it.commitId == commitId }
         if (newAnnotatedLines.isNotEmpty()) {
             changeDTO.hunks = Collections.singletonList(HunkDTO(newAnnotatedLines
                     .map { LineChangeDTO(LineOperation.ADD, it.number, it.content) }))
             changeDTO.isBlame = false
-        }
-    }
-
-    override fun addAnnotatedLines(changeDTO: ChangeDTO) {
-        if (changeDTO.newFileName != devNull && !changeDTO.isBinary) {
-            changeDTO.annotatedLines = gitClient.blame(commitId, changeDTO.newFileName)
-                    .filter { it.isNotBlank() }.map { parseAnnotatedLine(it) }
         }
     }
 

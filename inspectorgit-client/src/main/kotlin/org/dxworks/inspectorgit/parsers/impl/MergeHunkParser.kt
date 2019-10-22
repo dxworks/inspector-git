@@ -13,14 +13,14 @@ class MergeHunkParser(private val parentIndex: Int, private val numberOfParents:
         return getFromLineChanges(fromFileRange, getFromLines(lines)) + getToLineChanges(toFileRange, getToLines(lines))
     }
 
-    private fun getToLineChanges(toFileRange: Pair<Int, Int>, lines: List<String>): List<LineChangeDTO> {
-        val toFileRangeStart = toFileRange.first
-        return lines.mapIndexed { i, line -> LineChangeDTO(LineOperation.ADD, toFileRangeStart + i, line.substring(numberOfParents)) }
-    }
-
     private fun getFromLineChanges(fromFileRange: Pair<Int, Int>, lines: List<String>): List<LineChangeDTO> {
         val fromFileRangeStart = fromFileRange.first
         return lines.mapIndexed { i, line -> LineChangeDTO(LineOperation.REMOVE, fromFileRangeStart + i, line.substring(numberOfParents)) }
+    }
+
+    private fun getToLineChanges(toFileRange: Pair<Int, Int>, lines: List<String>): List<LineChangeDTO> {
+        val toFileRangeStart = toFileRange.first
+        return lines.mapIndexed { i, line -> LineChangeDTO(LineOperation.ADD, toFileRangeStart + i, line.substring(numberOfParents)) }
     }
 
     private fun getFromLines(lines: List<String>): List<String> {

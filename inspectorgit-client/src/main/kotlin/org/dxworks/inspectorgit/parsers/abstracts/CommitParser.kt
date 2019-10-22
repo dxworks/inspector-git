@@ -33,12 +33,12 @@ abstract class CommitParser : GitParser<CommitDTO> {
                 committerEmail = extractEmail(mutableLines, committer),
                 committerDate = extractDate(mutableLines, committer),
                 message = extractMessage(mutableLines),
-                changes = extractChanges(mutableLines, commitId, parentIds))
+                changes = getChanges(mutableLines, commitId, parentIds))
     }
 
-    abstract fun extractChanges(lines: List<String>, commitId: String, parentIds: List<String>): List<ChangeDTO>
+    abstract fun getChanges(lines: List<String>, commitId: String, parentIds: List<String>): List<ChangeDTO>
 
-    protected fun getChanges(lines: List<String>): List<MutableList<String>> {
+    protected fun extractChanges(lines: List<String>): List<List<String>> {
         val changes: MutableList<MutableList<String>> = ArrayList()
         var currentChangeLines: MutableList<String> = ArrayList()
         LOG.info("Extracting changes")
@@ -53,21 +53,17 @@ abstract class CommitParser : GitParser<CommitDTO> {
         return changes
     }
 
-    private fun extractCommitId(lines: MutableList<String>): String {
-        return lines.removeAt(0).removePrefix("commit: ")
-    }
+    private fun extractCommitId(lines: MutableList<String>) =
+            lines.removeAt(0).removePrefix("commit: ")
 
-    private fun extractParentIds(lines: MutableList<String>): List<String> {
-        return lines.removeAt(0).removePrefix("parents: ").split(" ")
-    }
+    private fun extractParentIds(lines: MutableList<String>) =
+            lines.removeAt(0).removePrefix("parents: ").split(" ")
 
-    private fun extractName(lines: MutableList<String>, devType: String): String {
-        return lines.removeAt(0).removePrefix("$devType name: ")
-    }
+    private fun extractName(lines: MutableList<String>, devType: String) =
+            lines.removeAt(0).removePrefix("$devType name: ")
 
-    private fun extractEmail(lines: MutableList<String>, devType: String): String {
-        return lines.removeAt(0).removePrefix("$devType email: ")
-    }
+    private fun extractEmail(lines: MutableList<String>, devType: String) =
+            lines.removeAt(0).removePrefix("$devType email: ")
 
 
     private fun extractDate(lines: MutableList<String>, devType: String): Date {

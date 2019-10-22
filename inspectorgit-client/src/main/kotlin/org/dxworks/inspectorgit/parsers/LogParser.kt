@@ -14,6 +14,12 @@ class LogParser(private val gitClient: GitClient) : GitParser<ProjectDTO> {
     private val commit = "commit: "
 
     override fun parse(lines: List<String>): ProjectDTO {
+        val commits = extractCommits(lines)
+        LOG.info("Found ${commits.size} commits")
+        return ProjectDTO(commits.map { CommitParserFactory.create(it, gitClient).parse(it) }.reversed())
+    }
+
+    private fun extractCommits(lines: List<String>): List<List<String>> {
         val commits: MutableList<MutableList<String>> = ArrayList()
         var currentCommitLines: MutableList<String> = ArrayList()
         LOG.info("Extracting commits")
@@ -24,7 +30,6 @@ class LogParser(private val gitClient: GitClient) : GitParser<ProjectDTO> {
             }
             currentCommitLines.add(it)
         }
-        LOG.info("Found ${commits.size} commits")
-        return ProjectDTO(commits.map { CommitParserFactory.create(it, gitClient).parse(it) }.reversed())
+        return commits
     }
 }

@@ -7,6 +7,7 @@ import org.dxworks.inspectorgit.utils.JsonUtils
 import org.dxworks.inspectorgit.utils.OsUtils
 import org.slf4j.LoggerFactory
 import java.io.BufferedReader
+import java.io.InputStream
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -39,19 +40,17 @@ class GitClient(path: Path) {
 
     fun diff(parent: String, revision: String, file: String): List<String> = runCommand("$gitDiffCommand $parent $revision -- $file")
 
-    fun blame(revision: String, file: String): List<String> {
-        return runCommand("$gitBlameCommand $file $revision")
-    }
+    fun blame(revision: String, file: String): List<String> = runCommand("$gitBlameCommand $file $revision")
 
     fun affectedFiles(revision: String): List<String> = runCommand("$gitAffectedFilesCommand $revision")
 
     private fun runCommand(command: String): List<String> {
         LOG.info("Running command: $command")
+
         processBuilder.command(OsUtils.commandInterpreterPrefix, OsUtils.interpreterArg, command)
         val process = processBuilder.start()
-        val reader = BufferedReader(process.inputStream.reader())
-        val lines: MutableList<String> = ArrayList()
-        reader.forEachLine { lines.add(it) }
+        val lines = getLines(process.inputStream)
+
         return if (process.waitFor() == 0) {
             LOG.info("Command completed")
             lines
@@ -59,6 +58,13 @@ class GitClient(path: Path) {
             LOG.error("Command completed with errors")
             emptyList()
         }
+    }
+
+    private fun getLines(inputStream: InputStream): List<String> {
+        val reader = BufferedReader(inputStream.reader())
+        val lines: MutableList<String> = ArrayList()
+        reader.forEachLine { lines.add(it) }
+        return lines
     }
 }
 
