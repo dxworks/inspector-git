@@ -1,0 +1,10 @@
+data class JiraIssueDTO(
+        var key: String?,
+        var issueType: String?,
+        var parentKey: String?,
+        var status: String?,
+        var startDate: String?,
+        var endDate: String?,
+        var summary: String?,
+        var description: String?,
+        var components: List<String>?)

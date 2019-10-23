@@ -22,6 +22,7 @@ internal class LogParserTest {
         val projectDTO = LogParser(gitClient).parse(gitClient.getLogs())
         val actual = JsonUtils.toJson(projectDTO)
         val expected = resourcesPath.resolve("gitLogTest.json").toFile().readLines().first()
+        targetRepoPath.toFile().delete()
         assertEquals(expected, actual)
     }
 }
