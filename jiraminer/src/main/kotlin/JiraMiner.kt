@@ -11,8 +11,6 @@ import java.util.*
 import kotlin.collections.HashMap
 
 private const val API_BASE = "/rest/api/2/"
-
-private const val JIRA_ISSUES = "Jira Issues"
 private val FIELDS = listOf("issuetype", "created", "updated", "status", "parent", "components", "summary", "description")
 private const val JIRA_URL_FIELD = "url"
 private const val JIRA_PROJECT_FIELD = "project"

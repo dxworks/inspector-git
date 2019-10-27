@@ -11,16 +11,17 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>org.dxworks</groupId>
+    <groupId>org.dxworks.inspectorgit</groupId>
     <artifactId>inspectorgit</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <module>inspectorgit-api</module>
-        <module>inspectorgit-client</module>
-        <module>inspectorgit-core</module>
-        <module>inspectorgit-pullrequests</module>
-        <module>inspectorgit-jiraminer</module>
+        <module>api</module>
+        <module>client</module>
+        <module>core</module>
+        <module>pullrequests</module>
+        <module>jiraminer</module>
+        <module>analyzers</module>
     </modules>
 
     <properties>
@@ -126,7 +127,7 @@
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-test</artifactId>
+            <artifactId>kotlin-test-junit</artifactId>
             <version>${kotlin.version}</version>
             <scope>test</scope>
         </dependency>
