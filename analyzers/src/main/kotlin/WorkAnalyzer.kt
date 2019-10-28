@@ -14,6 +14,7 @@ class WorkAnalyzer {
                 val removeChanges = change.lineChanges.filter { it.operation == LineOperation.REMOVE }
                 val newWork = addChanges.filter { removeChanges.none { rc -> rc.lineNumber == it.lineNumber } }
                 val otherWork = addChanges.subtract(newWork)
+
             }
         }
     }

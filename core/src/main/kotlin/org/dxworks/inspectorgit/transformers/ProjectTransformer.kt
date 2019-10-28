@@ -3,8 +3,10 @@ package org.dxworks.inspectorgit.transformers
 import lombok.extern.slf4j.Slf4j
 import org.dxworks.inspectorgit.dto.ChangeDTO
 import org.dxworks.inspectorgit.dto.CommitDTO
+import org.dxworks.inspectorgit.dto.LineChangeDTO
 import org.dxworks.inspectorgit.dto.ProjectDTO
 import org.dxworks.inspectorgit.enums.ChangeType
+import org.dxworks.inspectorgit.enums.LineOperation
 import org.dxworks.inspectorgit.model.*
 import org.slf4j.LoggerFactory
 
@@ -53,15 +55,17 @@ class ProjectTransformer {
             LOG.info("Done filtering changes")
             commit.changes = admittedChanges.map { changeDTO ->
                 LOG.info("Creating ${changeDTO.type} change for file: ${changeDTO.oldFileName} -> ${changeDTO.newFileName}")
+                val annotatedLines = getAnnotatedLines(changeDTO, project)
+                val file = getFileForChange(changeDTO, project)
                 val change = Change(
                         commit = commit,
                         type = changeDTO.type,
-                        file = getFileForChange(changeDTO, project),
+                        file = file,
                         parentCommit = if (changeDTO.parentCommitId.isEmpty()) null else commit.parents.find { it.id == changeDTO.parentCommitId }!!,
                         oldFileName = changeDTO.oldFileName,
                         newFileName = changeDTO.newFileName,
-                        lineChanges = getLineChanges(changeDTO),
-                        annotatedLines = getAnnotatedLines(changeDTO, project))
+                        lineChanges = getLineChanges(changeDTO, annotatedLines, commit, file),
+                        annotatedLines = annotatedLines)
                 change.file.changes.add(change)
                 LOG.info("Change created")
                 change
@@ -97,8 +101,16 @@ class ProjectTransformer {
             }
         }
 
-        private fun getLineChanges(changeDTO: ChangeDTO): MutableList<LineChange> {
-            return changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, it.number, it.content) }.toMutableList()
+        private fun getLineChanges(changeDTO: ChangeDTO, annotatedLines: MutableList<AnnotatedLine>, commit: Commit, file: File): MutableList<LineChange> {
+            return changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, it.number, getAnnotatedLine(it, annotatedLines, commit, file)) }.toMutableList()
+        }
+
+        private fun getAnnotatedLine(lineChangeDTO: LineChangeDTO, annotatedLines: MutableList<AnnotatedLine>, commit: Commit, file: File): AnnotatedLine {
+            return if (lineChangeDTO.operation == LineOperation.ADD)
+                annotatedLines.getOrElse(lineChangeDTO.number) {
+                    AnnotatedLine(commit, lineChangeDTO.number, lineChangeDTO.content)
+                }
+            else file.getLastChange(commit)!!.annotatedLines[lineChangeDTO.number - 1]
         }
 
         private fun getAnnotatedLines(changeDTO: ChangeDTO, project: Project): MutableList<AnnotatedLine> {

@@ -25,9 +25,19 @@ data class File(var fullyQualifiedName: String, val isBinary: Boolean, val chang
         return getLastChange(commit)?.annotatedLines ?: emptyList()
     }
 
+    fun getLastChange() = getLastChange(null)
+
     tailrec fun getLastChange(commit: Commit?): Change? {
-        return if (commit == null || changes.isEmpty()) null
-        else changes.find { it.commit == commit }
-                ?: getLastChange(commit.parents.firstOrNull())
+        return when {
+            changes.isEmpty() -> null
+            commit == null -> return changes.last()
+            else -> {
+                val change = changes.find { it.commit == commit }
+                if (change != null) change else {
+                    val parent = commit.parents.firstOrNull()
+                    if (parent == null) null else getLastChange(parent)
+                }
+            }
+        }
     }
 }

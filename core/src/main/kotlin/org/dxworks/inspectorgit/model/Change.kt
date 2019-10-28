@@ -11,7 +11,7 @@ data class Change(val commit: Commit,
                   val newFileName: String,
                   val lineChanges: List<LineChange>,
                   var annotatedLines: List<AnnotatedLine>) {
-    var parent: Change? = file.getLastChange(commit)
+    val parent: Change? = file.getLastChange(commit)
 
     val isRenameChange: Boolean
         get() = type == ChangeType.RENAME
@@ -23,14 +23,12 @@ data class Change(val commit: Commit,
     }
 
     private fun apply() {
-        val newAnnotatedLines = if (parent != null) ArrayList(parent!!.annotatedLines) else ArrayList()
-        lineChanges.filter { it.operation == LineOperation.REMOVE }
-                .forEach { removeChange -> newAnnotatedLines.removeIf { it.number == removeChange.lineNumber && it.content == removeChange.content } }
+        val newAnnotatedLines = parent?.annotatedLines
+                ?.map { AnnotatedLine(it.commit, it.number, it.content) }?.toMutableList() ?: ArrayList()
+        newAnnotatedLines.removeAll(lineChanges.filter { it.operation == LineOperation.REMOVE }.map { it.annotatedLine })
 
-        lineChanges.filter { it.operation == LineOperation.ADD }.forEach {
-            val annotatedLine = AnnotatedLine(commit, it.lineNumber, it.content)
-            newAnnotatedLines.add(it.lineNumber - 1, annotatedLine)
-        }
+        lineChanges.filter { it.operation == LineOperation.ADD }
+                .forEach { newAnnotatedLines.add(it.lineNumber - 1, it.annotatedLine) }
 
         reindex(newAnnotatedLines)
         annotatedLines = newAnnotatedLines
