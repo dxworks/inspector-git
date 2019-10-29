@@ -5,12 +5,13 @@ import org.dxworks.inspectorgit.utils.devNull
 import java.nio.file.Path
 import java.nio.file.Paths
 
-data class File(var fullyQualifiedName: String, val isBinary: Boolean, val changes: MutableList<Change> = ArrayList()) {
-    val name: String
-        get() = fullyQualifiedName.split("/").last()
+data class File(val isBinary: Boolean, val changes: MutableList<Change> = ArrayList()) {
+    fun fullyQualifiedName(commit: Commit?): String? = getLastChange(commit)?.newFileName
 
-    val path: Path
-        get() = Paths.get(fullyQualifiedName)
+    fun name(commit: Commit?): String? = fullyQualifiedName(commit)?.split("/")?.last()
+
+    fun path(commit: Commit?): Path? = fullyQualifiedName(commit)?.let { Paths.get(it) }
+
 
     fun alias(commit: Commit): String {
         return getLastChange(commit)?.newFileName ?: devNull

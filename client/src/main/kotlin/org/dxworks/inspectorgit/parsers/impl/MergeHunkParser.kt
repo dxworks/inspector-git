@@ -15,19 +15,26 @@ class MergeHunkParser(private val parentIndex: Int, private val numberOfParents:
 
     private fun getFromLineChanges(fromFileRange: Pair<Int, Int>, lines: List<String>): List<LineChangeDTO> {
         val fromFileRangeStart = fromFileRange.first
-        return lines.mapIndexed { i, line -> LineChangeDTO(LineOperation.REMOVE, fromFileRangeStart + i, line.substring(numberOfParents)) }
+        return lines.mapIndexedNotNull { i, line ->
+            if (line[parentIndex] == minus)
+                LineChangeDTO(LineOperation.REMOVE, fromFileRangeStart + i, line.substring(numberOfParents))
+            else null
+        };
     }
 
     private fun getToLineChanges(toFileRange: Pair<Int, Int>, lines: List<String>): List<LineChangeDTO> {
         val toFileRangeStart = toFileRange.first
-        return lines.mapIndexed { i, line -> LineChangeDTO(LineOperation.ADD, toFileRangeStart + i, line.substring(numberOfParents)) }
+        return lines.mapIndexedNotNull { i, line ->
+            if (line[parentIndex].toString() == plus)
+                LineChangeDTO(LineOperation.ADD, toFileRangeStart + i, line.substring(numberOfParents))
+            else null
+        }
     }
 
     private fun getFromLines(lines: List<String>): List<String> {
         val pluses = plus.repeat(numberOfParents)
         return lines.filter {
-            it.startsWith(pluses) ||
-                    it[parentIndex] == minus ||
+            it[parentIndex] == minus ||
                     it.startsWith(pluses.replaceRange(parentIndex, parentIndex + 1, " "))
 
         }
