@@ -19,7 +19,7 @@ class MergeHunkParser(private val parentIndex: Int, private val numberOfParents:
             if (line[parentIndex] == minus)
                 LineChangeDTO(LineOperation.REMOVE, fromFileRangeStart + i, line.substring(numberOfParents))
             else null
-        };
+        }
     }
 
     private fun getToLineChanges(toFileRange: Pair<Int, Int>, lines: List<String>): List<LineChangeDTO> {

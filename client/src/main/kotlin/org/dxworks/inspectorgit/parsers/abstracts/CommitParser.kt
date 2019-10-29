@@ -73,7 +73,7 @@ abstract class CommitParser : GitParser<CommitDTO> {
 
     private fun extractMessage(lines: MutableList<String>): String {
         lines.removeAt(0)
-        var message: String = ""
+        var message = ""
         while (lines.isNotEmpty() && !lines[0].startsWith("diff ")) {
             message = "$message\n${lines.removeAt(0)}"
         }

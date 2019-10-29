@@ -28,7 +28,7 @@ data class Change(val commit: Commit,
         newAnnotatedLines.removeAll(lineChanges.filter { it.operation == LineOperation.REMOVE }.map { it.annotatedLine })
 
         lineChanges.filter { it.operation == LineOperation.ADD }
-                .forEach { newAnnotatedLines.add(it.lineNumber - 1, it.annotatedLine) }
+                .forEach { newAnnotatedLines.add(it.annotatedLine.number - 1, it.annotatedLine) }
 
         reindex(newAnnotatedLines)
         annotatedLines = newAnnotatedLines

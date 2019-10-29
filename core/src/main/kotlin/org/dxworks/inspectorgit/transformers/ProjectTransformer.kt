@@ -104,7 +104,7 @@ class ProjectTransformer {
         }
 
         private fun getLineChanges(changeDTO: ChangeDTO, annotatedLines: MutableList<AnnotatedLine>, commit: Commit, file: File, parentCommit: Commit?): MutableList<LineChange> {
-            return changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, it.number, getAnnotatedLine(it, annotatedLines, commit, file, parentCommit)) }.toMutableList()
+            return changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, getAnnotatedLine(it, annotatedLines, commit, file, parentCommit)) }.toMutableList()
         }
 
         private fun getAnnotatedLine(lineChangeDTO: LineChangeDTO, annotatedLines: MutableList<AnnotatedLine>, commit: Commit, file: File, parentCommit: Commit?): AnnotatedLine {

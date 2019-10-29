@@ -12,7 +12,7 @@ class WorkAnalyzer {
             commit.changes.forEach { change ->
                 val addChanges = change.lineChanges.filter { it.operation == LineOperation.ADD }
                 val removeChanges = change.lineChanges.filter { it.operation == LineOperation.REMOVE }
-                val newWork = addChanges.filter { removeChanges.none { rc -> rc.lineNumber == it.lineNumber } }
+                val newWork = addChanges.filter { removeChanges.none { rc -> rc.annotatedLine == it.annotatedLine } }
                 val otherWork = addChanges.subtract(newWork)
 
             }
