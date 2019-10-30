@@ -37,4 +37,28 @@ data class Change(val commit: Commit,
     private fun reindex(annotatedLines: MutableList<AnnotatedLine>) {
         annotatedLines.forEachIndexed { index, annotatedLine -> annotatedLine.number = index + 1 }
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Change
+
+        if (type != other.type) return false
+        if (oldFileName != other.oldFileName) return false
+        if (newFileName != other.newFileName) return false
+        if (lineChanges != other.lineChanges) return false
+        if (annotatedLines != other.annotatedLines) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = type.hashCode()
+        result = 31 * result + oldFileName.hashCode()
+        result = 31 * result + newFileName.hashCode()
+        result = 31 * result + lineChanges.hashCode()
+        result = 31 * result + annotatedLines.hashCode()
+        return result
+    }
 }

@@ -59,7 +59,7 @@ class WorkAnalyzer(private val project: Project, private val recentWorkDuration:
 }
 
 fun main() {
-    val project = ProjectTransformer.createProject(JsonUtils.jsonFromFile(FileSystemUtils.getDtoFileFor("kafka", "trunk"), ProjectDTO::class.java), "kafka")
+    val project = ProjectTransformer(JsonUtils.jsonFromFile(FileSystemUtils.getDtoFileFor("kafka", "trunk"), ProjectDTO::class.java), "kafka").transform()
     val results = WorkAnalyzer(project, Period.ofWeeks(6), Period.ofMonths(2)).analyze()
     print("New work: ")
     println(results.map { it.newWork.size }.toIntArray().sum())

@@ -23,6 +23,10 @@ abstract class AbstractRegistry<TYPE, ID> {
         return map.put(getID(entity), entity)
     }
 
+    fun addAll(entities: Collection<TYPE>) {
+        entities.forEach { map[getID(it)] = it }
+    }
+
     fun remove(id: ID): TYPE? {
         return map.remove(id)
     }
