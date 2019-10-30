@@ -5,7 +5,6 @@ import org.dxworks.inspectorgit.dto.ChangeDTO
 import org.dxworks.inspectorgit.dto.CommitDTO
 import org.dxworks.inspectorgit.parsers.GitParser
 import org.slf4j.LoggerFactory
-import java.text.SimpleDateFormat
 import java.util.*
 
 @Slf4j
@@ -16,7 +15,6 @@ abstract class CommitParser : GitParser<CommitDTO> {
 
     private val author = "author"
     private val committer = "committer"
-    private val dateFormat = "EEE MMM d HH:mm:ss yyyy Z"
 
     override fun parse(lines: List<String>): CommitDTO {
         val mutableLines = lines.toMutableList()
@@ -66,10 +64,8 @@ abstract class CommitParser : GitParser<CommitDTO> {
             lines.removeAt(0).removePrefix("$devType email: ")
 
 
-    private fun extractDate(lines: MutableList<String>, devType: String): Date {
-        val timeStamp = lines.removeAt(0).removePrefix("$devType date: ").trim()
-        return SimpleDateFormat(dateFormat).parse(timeStamp)
-    }
+    private fun extractDate(lines: MutableList<String>, devType: String): String =
+            lines.removeAt(0).removePrefix("$devType date: ").trim()
 
     private fun extractMessage(lines: MutableList<String>): String {
         lines.removeAt(0)

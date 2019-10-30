@@ -10,10 +10,14 @@ import org.dxworks.inspectorgit.enums.LineOperation
 import org.dxworks.inspectorgit.model.*
 import org.dxworks.inspectorgit.registries.FileRegistry
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Slf4j
 class ProjectTransformer {
     companion object {
+        private const val dateFormat = "EEE MMM d HH:mm:ss yyyy Z"
+
         private val LOG = LoggerFactory.getLogger(ProjectTransformer::class.java)
 
         fun createProject(projectDTO: ProjectDTO, projectId: String): Project {
@@ -29,8 +33,8 @@ class ProjectTransformer {
 
                 val commit = Commit(id = it.id,
                         message = it.message,
-                        authorDate = it.authorDate,
-                        committerDate = it.committerDate,
+                        authorDate = parseDate(it.authorDate),
+                        committerDate = parseDate(it.committerDate),
                         author = author,
                         committer = committer,
                         parents = getParentFromIds(it.parentIds, project),
@@ -49,6 +53,9 @@ class ProjectTransformer {
 
             return project
         }
+
+        private fun parseDate(timestamp: String) =
+                LocalDateTime.parse(timestamp, DateTimeFormatter.ofPattern(dateFormat))
 
         private fun addChangesToCommit(changes: List<ChangeDTO>, commit: Commit, project: Project) {
             LOG.info("Filtering changes")
