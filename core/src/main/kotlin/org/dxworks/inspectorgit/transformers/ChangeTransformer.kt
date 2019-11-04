@@ -33,6 +33,7 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
     }
 
     private fun getLineChanges(changeDTO: ChangeDTO, annotatedLines: MutableList<AnnotatedLine>, commit: Commit, file: File, parentCommit: Commit?): MutableList<LineChange> {
+        LOG.info("Calculating ;ine changes")
         return changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, getAnnotatedLine(it, annotatedLines, commit, file, parentCommit)) }.toMutableList()
     }
 

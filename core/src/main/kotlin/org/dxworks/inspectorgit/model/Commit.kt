@@ -11,12 +11,7 @@ data class Commit(var id: String,
                   val committer: Author,
                   var parents: List<Commit>,
                   var changes: List<Change>) {
-    fun olderThan(age: Period): Boolean {
-        return committerDate.isBefore(LocalDateTime.now().minus(age))
-    }
-
-    val isMergeCommit: Boolean
-        get() = parents.size > 1
+    fun olderThan(age: Period) = committerDate.isBefore(LocalDateTime.now().minus(age))
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -28,6 +23,8 @@ data class Commit(var id: String,
         if (message != other.message) return false
         if (authorDate != other.authorDate) return false
         if (committerDate != other.committerDate) return false
+        if (author != other.author) return false
+        if (committer != other.committer) return false
 
         return true
     }
@@ -37,6 +34,12 @@ data class Commit(var id: String,
         result = 31 * result + message.hashCode()
         result = 31 * result + authorDate.hashCode()
         result = 31 * result + committerDate.hashCode()
+        result = 31 * result + author.hashCode()
+        result = 31 * result + committer.hashCode()
         return result
     }
+
+    val isMergeCommit: Boolean
+        get() = parents.size > 1
+
 }
