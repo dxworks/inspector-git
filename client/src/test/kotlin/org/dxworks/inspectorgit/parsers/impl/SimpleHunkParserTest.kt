@@ -3,8 +3,8 @@ package org.dxworks.inspectorgit.parsers.impl
 import org.dxworks.inspectorgit.dto.LineChangeDTO
 import org.dxworks.inspectorgit.enums.LineOperation
 import org.dxworks.inspectorgit.resourcesPath
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 internal class SimpleHunkParserTest {
 

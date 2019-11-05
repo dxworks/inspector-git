@@ -1,11 +1,9 @@
 package org.dxworks.inspectorgit.parsers
 
-import lombok.extern.slf4j.Slf4j
 import org.dxworks.inspectorgit.GitClient
 import org.dxworks.inspectorgit.dto.ProjectDTO
 import org.slf4j.LoggerFactory
 
-@Slf4j
 class LogParser(private val gitClient: GitClient) : GitParser<ProjectDTO> {
     companion object {
         private val LOG = LoggerFactory.getLogger(LogParser::class.java)

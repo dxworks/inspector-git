@@ -6,6 +6,8 @@ import org.dxworks.inspectorgit.utils.FileSystemUtils
 import org.dxworks.inspectorgit.utils.JsonUtils
 
 fun main() {
-    val project = ProjectTransformer(JsonUtils.jsonFromFile(FileSystemUtils.getDtoFileFor("kafka", "trunk"), ProjectDTO::class.java), "kafka").transform()
+
+    val projectDTO = JsonUtils.jsonFromFile(FileSystemUtils.getDtoFilePathFor("kafka", "trunk"), ProjectDTO::class.java)
+    val project = ProjectTransformer(projectDTO, "kafka").transform()
     println(project.hashCode())
 }

@@ -1,11 +1,9 @@
 package org.dxworks.inspectorgit.utils
 
 import com.google.gson.Gson
-import lombok.extern.slf4j.Slf4j
 import java.nio.file.Files
 import java.nio.file.Path
 
-@Slf4j
 class JsonUtils {
     companion object {
         fun toJsonFile(path: Path, entity: Any) {

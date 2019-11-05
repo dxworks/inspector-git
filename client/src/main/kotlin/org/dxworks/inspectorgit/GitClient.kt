@@ -1,6 +1,5 @@
 package org.dxworks.inspectorgit
 
-import lombok.extern.slf4j.Slf4j
 import org.dxworks.inspectorgit.parsers.LogParser
 import org.dxworks.inspectorgit.utils.FileSystemUtils
 import org.dxworks.inspectorgit.utils.JsonUtils
@@ -11,7 +10,6 @@ import java.io.InputStream
 import java.nio.file.Path
 import java.nio.file.Paths
 
-@Slf4j
 class GitClient(path: Path) {
     companion object {
         private val LOG = LoggerFactory.getLogger(GitClient::class.java)
@@ -71,5 +69,5 @@ class GitClient(path: Path) {
 fun main() {
     val gitClient = GitClient(Paths.get(System.getProperty("user.home"), "Documents", "DX", "kafkaRepo", "kafka"))
     val projectDTO = LogParser(gitClient).parse(gitClient.getLogs())
-    JsonUtils.toJsonFile(FileSystemUtils.getDtoFileFor(gitClient.repoName, gitClient.branch), projectDTO)
+    JsonUtils.toJsonFile(FileSystemUtils.getDtoFilePathFor(gitClient.repoName, gitClient.branch), projectDTO)
 }

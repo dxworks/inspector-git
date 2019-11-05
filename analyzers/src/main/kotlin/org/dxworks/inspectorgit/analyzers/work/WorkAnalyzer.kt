@@ -59,7 +59,7 @@ class WorkAnalyzer(private val configuration: WorkAnalyzerConfiguration) {
 
 fun main() {
     val workAnalyzer = WorkAnalyzer(WorkAnalyzerConfiguration(mapOf(Pair("recentWorkPeriod", "2m"), Pair("legacyCodeAge", "4m"))))
-    val project = ProjectTransformer(JsonUtils.jsonFromFile(FileSystemUtils.getDtoFileFor("kafka", "trunk"), ProjectDTO::class.java), "kafka").transform()
+    val project = ProjectTransformer(JsonUtils.jsonFromFile(FileSystemUtils.getDtoFilePathFor("kafka", "trunk"), ProjectDTO::class.java), "kafka").transform()
     val results = workAnalyzer.analyze(project)
     print("New work: ")
     println(results.map { it.newWork.size }.toIntArray().sum())

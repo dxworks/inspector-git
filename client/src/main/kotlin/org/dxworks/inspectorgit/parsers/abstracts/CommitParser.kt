@@ -1,13 +1,11 @@
 package org.dxworks.inspectorgit.parsers.abstracts
 
-import lombok.extern.slf4j.Slf4j
 import org.dxworks.inspectorgit.dto.ChangeDTO
 import org.dxworks.inspectorgit.dto.CommitDTO
 import org.dxworks.inspectorgit.parsers.GitParser
 import org.slf4j.LoggerFactory
 import java.util.*
 
-@Slf4j
 abstract class CommitParser : GitParser<CommitDTO> {
     companion object {
         private val LOG = LoggerFactory.getLogger(CommitParser::class.java)
