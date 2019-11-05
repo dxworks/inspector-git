@@ -3,7 +3,7 @@ package org.dxworks.inspectorgit.analyzers.work
 import org.dxworks.inspectorgit.configuration.Configuration
 import java.time.Period
 
-class WorkAnalyzerConfiguration(configuration: Map<String, String>) : Configuration(configuration) {
+class WorkAnalyzerConfiguration(configuration: Map<String, String>) : Configuration() {
     private val recentWorkPeriodField = "recentWorkPeriod"
     private val legacyCodeAgeField = "legacyCodeAge"
     private val periodRegex = Regex("^[1-9]+[0-9]*([dwmy])\$")

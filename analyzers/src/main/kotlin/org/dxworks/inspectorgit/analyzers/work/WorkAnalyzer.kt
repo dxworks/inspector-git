@@ -12,11 +12,11 @@ import org.dxworks.inspectorgit.types.CodeChange
 import org.dxworks.inspectorgit.utils.FileSystemUtils
 import org.dxworks.inspectorgit.utils.JsonUtils
 
-class WorkAnalyzer(private val project: Project, private val configuration: WorkAnalyzerConfiguration) {
+class WorkAnalyzer(private val configuration: WorkAnalyzerConfiguration) {
 
     private var results: MutableMap<Commit, WorkAnalyzerResult> = HashMap()
 
-    fun analyze(): Collection<WorkAnalyzerResult> {
+    fun analyze(project: Project): Collection<WorkAnalyzerResult> {
         results = HashMap()
         project.commitRegistry.all.sortedBy { it.committerDate }.map { analyze(it) }
         return results.values
@@ -58,9 +58,9 @@ class WorkAnalyzer(private val project: Project, private val configuration: Work
 }
 
 fun main() {
+    val workAnalyzer = WorkAnalyzer(WorkAnalyzerConfiguration(mapOf(Pair("recentWorkPeriod", "2m"), Pair("legacyCodeAge", "4m"))))
     val project = ProjectTransformer(JsonUtils.jsonFromFile(FileSystemUtils.getDtoFileFor("kafka", "trunk"), ProjectDTO::class.java), "kafka").transform()
-    val workAnalyzer = WorkAnalyzer(project, WorkAnalyzerConfiguration(mapOf(Pair("recentWorkPeriod", "2m"), Pair("legacyCodeAge", "3m"))))
-    val results = workAnalyzer.analyze()
+    val results = workAnalyzer.analyze(project)
     print("New work: ")
     println(results.map { it.newWork.size }.toIntArray().sum())
     print("Legacy refactor: ")
