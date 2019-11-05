@@ -1,4 +1,4 @@
-package org.dxworks.inspectorgit.analyzers
+package org.dxworks.inspectorgit.analyzers.work
 
 import org.dxworks.inspectorgit.dto.ProjectDTO
 import org.dxworks.inspectorgit.enums.LineOperation
@@ -11,9 +11,8 @@ import org.dxworks.inspectorgit.transformers.ProjectTransformer
 import org.dxworks.inspectorgit.types.CodeChange
 import org.dxworks.inspectorgit.utils.FileSystemUtils
 import org.dxworks.inspectorgit.utils.JsonUtils
-import java.time.Period
 
-class WorkAnalyzer(private val project: Project, private val recentWorkDuration: Period, private val legacyCodeAge: Period) {
+class WorkAnalyzer(private val project: Project, private val configuration: WorkAnalyzerConfiguration) {
 
     private var results: MutableMap<Commit, WorkAnalyzerResult> = HashMap()
 
@@ -33,12 +32,12 @@ class WorkAnalyzer(private val project: Project, private val recentWorkDuration:
             val brandNewWork = addedLines.filter { removedLines.none { removedLine -> removedLine.number == it.number } }
 
             val codeChangingWork = addedLines.subtract(brandNewWork).map { CodeChange(it, getReplacedLine(removedLines, it)) }
-            val legacyRefactor = codeChangingWork.filter { it.removedLine.commit.olderThan(legacyCodeAge) }
+            val legacyRefactor = codeChangingWork.filter { it.removedLine.commit.olderThan(configuration.legacyCodeAge) }
 
-            val recentChanges = codeChangingWork.filter { !it.removedLine.commit.olderThan(recentWorkDuration) }
+            val recentChanges = codeChangingWork.filter { !it.removedLine.commit.olderThan(configuration.recentWorkPeriod) }
             val helpOthers = recentChanges.filter { it.removedLine.commit.author != commit.author }
 
-            val recentRemovedLines = removedLines.filter { !it.commit.olderThan(recentWorkDuration) }
+            val recentRemovedLines = removedLines.filter { !it.commit.olderThan(configuration.recentWorkPeriod) }
             recentRemovedLines.forEach {
                 val result = results[it.commit]!!
                 result.newWork.remove(it)
@@ -60,7 +59,8 @@ class WorkAnalyzer(private val project: Project, private val recentWorkDuration:
 
 fun main() {
     val project = ProjectTransformer(JsonUtils.jsonFromFile(FileSystemUtils.getDtoFileFor("kafka", "trunk"), ProjectDTO::class.java), "kafka").transform()
-    val results = WorkAnalyzer(project, Period.ofWeeks(6), Period.ofMonths(2)).analyze()
+    val workAnalyzer = WorkAnalyzer(project, WorkAnalyzerConfiguration(mapOf(Pair("recentWorkPeriod", "2m"), Pair("legacyCodeAge", "3m"))))
+    val results = workAnalyzer.analyze()
     print("New work: ")
     println(results.map { it.newWork.size }.toIntArray().sum())
     print("Legacy refactor: ")
