@@ -1,14 +1,12 @@
 package org.dxworks.inspectorgit.analyzers.work
 
-import org.dxworks.inspectorgit.dto.ProjectDTO
-import org.dxworks.inspectorgit.enums.LineOperation
+import org.dxworks.inspectorgit.client.dto.ProjectDTO
+import org.dxworks.inspectorgit.client.enums.LineOperation
 import org.dxworks.inspectorgit.model.AnnotatedLine
 import org.dxworks.inspectorgit.model.Change
 import org.dxworks.inspectorgit.model.Commit
 import org.dxworks.inspectorgit.model.Project
-import org.dxworks.inspectorgit.results.WorkAnalyzerResult
 import org.dxworks.inspectorgit.transformers.ProjectTransformer
-import org.dxworks.inspectorgit.types.CodeChange
 import org.dxworks.inspectorgit.utils.FileSystemUtils
 import org.dxworks.inspectorgit.utils.JsonUtils
 

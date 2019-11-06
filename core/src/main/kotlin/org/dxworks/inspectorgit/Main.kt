@@ -1,6 +1,6 @@
 package org.dxworks.inspectorgit
 
-import org.dxworks.inspectorgit.dto.ProjectDTO
+import org.dxworks.inspectorgit.client.dto.ProjectDTO
 import org.dxworks.inspectorgit.transformers.ProjectTransformer
 import org.dxworks.inspectorgit.utils.FileSystemUtils
 import org.dxworks.inspectorgit.utils.JsonUtils

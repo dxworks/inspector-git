@@ -1,6 +1,6 @@
 package org.dxworks.inspectorgit.model
 
-import org.dxworks.inspectorgit.enums.ChangeType
+import org.dxworks.inspectorgit.client.enums.ChangeType
 import org.dxworks.inspectorgit.utils.devNull
 import java.nio.file.Path
 import java.nio.file.Paths

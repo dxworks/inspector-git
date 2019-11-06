@@ -17,11 +17,13 @@
     <version>1.0-SNAPSHOT</version>
     <modules>
         <module>api</module>
-        <module>client</module>
+        <module>gitclient</module>
         <module>core</module>
         <module>pullrequests</module>
         <module>jiraminer</module>
         <module>analyzers</module>
+        <module>utils</module>
+        <module>persistence</module>
     </modules>
 
     <properties>
@@ -87,12 +89,6 @@
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib-jdk8</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

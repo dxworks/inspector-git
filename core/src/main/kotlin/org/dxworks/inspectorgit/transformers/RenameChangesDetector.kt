@@ -1,7 +1,7 @@
 package org.dxworks.inspectorgit.transformers
 
-import org.dxworks.inspectorgit.dto.ChangeDTO
-import org.dxworks.inspectorgit.enums.ChangeType
+import org.dxworks.inspectorgit.client.dto.ChangeDTO
+import org.dxworks.inspectorgit.client.enums.ChangeType
 import org.dxworks.inspectorgit.model.Project
 import org.slf4j.LoggerFactory
 

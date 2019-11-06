@@ -1,6 +1,6 @@
 package org.dxworks.inspectorgit.analyzers.work
 
-import org.dxworks.inspectorgit.configuration.Configuration
+import org.dxworks.inspectorgit.api.configuration.Configuration
 import java.time.Period
 
 class WorkAnalyzerConfiguration(configuration: Map<String, String>) : Configuration() {

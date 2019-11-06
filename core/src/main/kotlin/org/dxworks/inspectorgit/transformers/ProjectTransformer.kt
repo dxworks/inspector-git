@@ -1,6 +1,6 @@
 package org.dxworks.inspectorgit.transformers
 
-import org.dxworks.inspectorgit.dto.ProjectDTO
+import org.dxworks.inspectorgit.client.dto.ProjectDTO
 import org.dxworks.inspectorgit.model.Project
 import org.slf4j.LoggerFactory
 
