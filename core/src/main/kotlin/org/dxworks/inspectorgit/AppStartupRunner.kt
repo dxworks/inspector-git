@@ -1,26 +1,36 @@
 package org.dxworks.inspectorgit
 
-import org.dxworks.inspectorgit.client.dto.GitLogDTO
-import org.dxworks.inspectorgit.persistence.dto.ProjectDTO
+import org.dxworks.inspectorgit.analyzers.work.WorkAnalyzer
 import org.dxworks.inspectorgit.persistence.services.ProjectService
-import org.dxworks.inspectorgit.utils.FileSystemUtils
-import org.dxworks.inspectorgit.utils.JsonUtils
+import org.dxworks.inspectorgit.transformers.ProjectTransformer
 import org.slf4j.LoggerFactory
 import org.springframework.boot.CommandLineRunner
 import org.springframework.stereotype.Component
+import java.util.*
 
 @Component
-class AppStartupRunner(private val projectService: ProjectService) : CommandLineRunner {
+class AppStartupRunner(private val projectService: ProjectService, private val workAnalyzer: WorkAnalyzer) : CommandLineRunner {
     companion object {
         private val LOG = LoggerFactory.getLogger(AppStartupRunner::class.java)
     }
 
-    private val projectName = "kafka"
+    private val projectName = "logTest"
 
     override fun run(vararg args: String) {
-        val gitLogDTO = JsonUtils.jsonFromFile(FileSystemUtils.getDtoFilePathFor(projectName, "trunk"), GitLogDTO::class.java)
-        projectService.saveProject(ProjectDTO(projectName, gitLogDTO))
-//        val project = ProjectTransformer(gitLogDTO, projectName).transform()
-//        println(project.hashCode())
+        val projectDTO = projectService.findProjectByName(projectName)
+        val properties = Properties()
+        properties.setProperty("recentWorkPeriod", "2m")
+        properties.setProperty("legacyCodeAge", "3m")
+        workAnalyzer.configure(properties)
+        val project = ProjectTransformer(projectDTO).transform()
+        val results = workAnalyzer.analyze(project)
+        print("New work: ")
+        println(results.map { it.newWork.size }.toIntArray().sum())
+        print("Legacy refactor: ")
+        println(results.map { it.legacyRefactor.size }.toIntArray().sum())
+        print("Help Others: ")
+        println(results.map { it.helpOthers.size }.toIntArray().sum())
+        print("Churn: ")
+        println(results.map { it.churn.size }.toIntArray().sum())
     }
 }

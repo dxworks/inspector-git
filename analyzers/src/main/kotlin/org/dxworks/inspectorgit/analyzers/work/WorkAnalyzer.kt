@@ -2,15 +2,11 @@ package org.dxworks.inspectorgit.analyzers.work
 
 import org.dxworks.inspectorgit.api.configuration.AbstractConfigurable
 import org.dxworks.inspectorgit.api.configuration.exceptions.NotConfiguredException
-import org.dxworks.inspectorgit.client.dto.GitLogDTO
 import org.dxworks.inspectorgit.client.enums.LineOperation
 import org.dxworks.inspectorgit.model.AnnotatedLine
 import org.dxworks.inspectorgit.model.Change
 import org.dxworks.inspectorgit.model.Commit
 import org.dxworks.inspectorgit.model.Project
-import org.dxworks.inspectorgit.transformers.ProjectTransformer
-import org.dxworks.inspectorgit.utils.FileSystemUtils
-import org.dxworks.inspectorgit.utils.JsonUtils
 import org.springframework.stereotype.Component
 import java.util.*
 import kotlin.collections.HashMap
@@ -64,22 +60,4 @@ class WorkAnalyzer : AbstractConfigurable<WorkAnalyzerConfiguration>() {
 
     private fun getChangesOfType(change: Change, operation: LineOperation) =
             change.lineChanges.filter { it.operation == operation }.map { it.annotatedLine }
-}
-
-fun main() {
-    val workAnalyzer = WorkAnalyzer()
-    val properties = Properties()
-    properties.setProperty("recentWorkPeriod", "2m")
-    properties.setProperty("legacyCodeAge", "3m")
-    workAnalyzer.configure(properties)
-    val project = ProjectTransformer(JsonUtils.jsonFromFile(FileSystemUtils.getDtoFilePathFor("kafka", "trunk"), GitLogDTO::class.java), "kafka").transform()
-    val results = workAnalyzer.analyze(project)
-    print("New work: ")
-    println(results.map { it.newWork.size }.toIntArray().sum())
-    print("Legacy refactor: ")
-    println(results.map { it.legacyRefactor.size }.toIntArray().sum())
-    print("Help Others: ")
-    println(results.map { it.helpOthers.size }.toIntArray().sum())
-    print("Churn: ")
-    println(results.map { it.churn.size }.toIntArray().sum())
 }
