@@ -1,5 +1,7 @@
 package org.dxworks.inspectorgit.analyzers.work
 
+import org.dxworks.inspectorgit.api.configuration.AbstractConfigurable
+import org.dxworks.inspectorgit.api.configuration.exceptions.NotConfiguredException
 import org.dxworks.inspectorgit.client.dto.ProjectDTO
 import org.dxworks.inspectorgit.client.enums.LineOperation
 import org.dxworks.inspectorgit.model.AnnotatedLine
@@ -9,12 +11,21 @@ import org.dxworks.inspectorgit.model.Project
 import org.dxworks.inspectorgit.transformers.ProjectTransformer
 import org.dxworks.inspectorgit.utils.FileSystemUtils
 import org.dxworks.inspectorgit.utils.JsonUtils
+import org.springframework.stereotype.Component
+import java.util.*
+import kotlin.collections.HashMap
 
-class WorkAnalyzer(private val configuration: WorkAnalyzerConfiguration) {
+@Component
+class WorkAnalyzer : AbstractConfigurable<WorkAnalyzerConfiguration>() {
+    override fun setConfiguration(properties: Properties): WorkAnalyzerConfiguration {
+        return WorkAnalyzerConfiguration(properties)
+    }
 
     private var results: MutableMap<Commit, WorkAnalyzerResult> = HashMap()
 
     fun analyze(project: Project): Collection<WorkAnalyzerResult> {
+        if (!configured) throw NotConfiguredException(this.javaClass.simpleName)
+
         results = HashMap()
         project.commitRegistry.all.sortedBy { it.committerDate }.map { analyze(it) }
         return results.values
@@ -56,7 +67,11 @@ class WorkAnalyzer(private val configuration: WorkAnalyzerConfiguration) {
 }
 
 fun main() {
-    val workAnalyzer = WorkAnalyzer(WorkAnalyzerConfiguration(mapOf(Pair("recentWorkPeriod", "2m"), Pair("legacyCodeAge", "4m"))))
+    val workAnalyzer = WorkAnalyzer()
+    val properties = Properties()
+    properties.setProperty("recentWorkPeriod", "2m")
+    properties.setProperty("legacyCodeAge", "3m")
+    workAnalyzer.configure(properties)
     val project = ProjectTransformer(JsonUtils.jsonFromFile(FileSystemUtils.getDtoFilePathFor("kafka", "trunk"), ProjectDTO::class.java), "kafka").transform()
     val results = workAnalyzer.analyze(project)
     print("New work: ")

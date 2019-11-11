@@ -1,24 +1,23 @@
 package org.dxworks.inspectorgit.analyzers.work
 
 import org.dxworks.inspectorgit.api.configuration.Configuration
+import org.dxworks.inspectorgit.api.configuration.validators.RegexValidator
 import java.time.Period
+import java.util.*
 
-class WorkAnalyzerConfiguration(configuration: Map<String, String>) : Configuration() {
+class WorkAnalyzerConfiguration(configuration: Properties) : Configuration {
     private val recentWorkPeriodField = "recentWorkPeriod"
     private val legacyCodeAgeField = "legacyCodeAge"
     private val periodRegex = Regex("^[1-9]+[0-9]*([dwmy])\$")
 
-    override val validation = mapOf(Pair(recentWorkPeriodField, periodRegex), Pair(legacyCodeAgeField, periodRegex))
-
-
     init {
-        validate(configuration)
+        validate(configuration, listOf(RegexValidator(listOf(recentWorkPeriodField, legacyCodeAgeField), periodRegex)))
     }
 
 
-    val recentWorkPeriod: Period = parsePeriod(configuration.getOrElse(recentWorkPeriodField) { throw IllegalStateException() })
+    val recentWorkPeriod: Period = parsePeriod(configuration.getProperty(recentWorkPeriodField))
 
-    val legacyCodeAge: Period = parsePeriod(configuration.getOrElse(legacyCodeAgeField) { throw IllegalStateException() })
+    val legacyCodeAge: Period = parsePeriod(configuration.getProperty(legacyCodeAgeField))
 
     private fun parsePeriod(period: String): Period {
         val unit = period.last()

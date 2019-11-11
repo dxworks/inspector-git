@@ -24,6 +24,7 @@
         <module>analyzers</module>
         <module>utils</module>
         <module>persistence</module>
+        <module>app</module>
     </modules>
 
     <properties>
