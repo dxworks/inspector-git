@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface ProjectRepository : CrudRepository<ProjectEntity, UUID>
+interface ProjectRepository : CrudRepository<ProjectEntity, UUID> {
+    fun findByName(name: String): ProjectEntity
+}

@@ -1,10 +1,10 @@
 package org.dxworks.inspectorgit.transformers
 
-import org.dxworks.inspectorgit.client.dto.ProjectDTO
+import org.dxworks.inspectorgit.client.dto.GitLogDTO
 import org.dxworks.inspectorgit.model.Project
 import org.slf4j.LoggerFactory
 
-class ProjectTransformer(private val projectDTO: ProjectDTO, private val projectId: String) {
+class ProjectTransformer(private val gitLogDTO: GitLogDTO, private val projectId: String) {
     companion object {
         private val LOG = LoggerFactory.getLogger(ProjectTransformer::class.java)
     }
@@ -12,7 +12,7 @@ class ProjectTransformer(private val projectDTO: ProjectDTO, private val project
     fun transform(): Project {
         val project = Project(projectId)
         LOG.info("Creating project $projectId")
-        projectDTO.commits.forEach {
+        gitLogDTO.commits.forEach {
             CommitTransformer(it, project).addToProject()
         }
         LOG.info("Done creating project $projectId")

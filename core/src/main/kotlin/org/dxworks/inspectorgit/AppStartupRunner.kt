@@ -1,7 +1,8 @@
 package org.dxworks.inspectorgit
 
-import org.dxworks.inspectorgit.client.dto.ProjectDTO
-import org.dxworks.inspectorgit.transformers.ProjectTransformer
+import org.dxworks.inspectorgit.client.dto.GitLogDTO
+import org.dxworks.inspectorgit.persistence.dto.ProjectDTO
+import org.dxworks.inspectorgit.persistence.services.ProjectService
 import org.dxworks.inspectorgit.utils.FileSystemUtils
 import org.dxworks.inspectorgit.utils.JsonUtils
 import org.slf4j.LoggerFactory
@@ -9,14 +10,17 @@ import org.springframework.boot.CommandLineRunner
 import org.springframework.stereotype.Component
 
 @Component
-class AppStartupRunner : CommandLineRunner {
+class AppStartupRunner(private val projectService: ProjectService) : CommandLineRunner {
     companion object {
         private val LOG = LoggerFactory.getLogger(AppStartupRunner::class.java)
     }
 
+    private val projectName = "kafka"
+
     override fun run(vararg args: String) {
-        val projectDTO = JsonUtils.jsonFromFile(FileSystemUtils.getDtoFilePathFor("kafka", "trunk"), ProjectDTO::class.java)
-        val project = ProjectTransformer(projectDTO, "kafka").transform()
-        println(project.hashCode())
+        val gitLogDTO = JsonUtils.jsonFromFile(FileSystemUtils.getDtoFilePathFor(projectName, "trunk"), GitLogDTO::class.java)
+        projectService.saveProject(ProjectDTO(projectName, gitLogDTO))
+//        val project = ProjectTransformer(gitLogDTO, projectName).transform()
+//        println(project.hashCode())
     }
 }

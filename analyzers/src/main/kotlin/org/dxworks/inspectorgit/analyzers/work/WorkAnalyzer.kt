@@ -2,7 +2,7 @@ package org.dxworks.inspectorgit.analyzers.work
 
 import org.dxworks.inspectorgit.api.configuration.AbstractConfigurable
 import org.dxworks.inspectorgit.api.configuration.exceptions.NotConfiguredException
-import org.dxworks.inspectorgit.client.dto.ProjectDTO
+import org.dxworks.inspectorgit.client.dto.GitLogDTO
 import org.dxworks.inspectorgit.client.enums.LineOperation
 import org.dxworks.inspectorgit.model.AnnotatedLine
 import org.dxworks.inspectorgit.model.Change
@@ -72,7 +72,7 @@ fun main() {
     properties.setProperty("recentWorkPeriod", "2m")
     properties.setProperty("legacyCodeAge", "3m")
     workAnalyzer.configure(properties)
-    val project = ProjectTransformer(JsonUtils.jsonFromFile(FileSystemUtils.getDtoFilePathFor("kafka", "trunk"), ProjectDTO::class.java), "kafka").transform()
+    val project = ProjectTransformer(JsonUtils.jsonFromFile(FileSystemUtils.getDtoFilePathFor("kafka", "trunk"), GitLogDTO::class.java), "kafka").transform()
     val results = workAnalyzer.analyze(project)
     print("New work: ")
     println(results.map { it.newWork.size }.toIntArray().sum())
