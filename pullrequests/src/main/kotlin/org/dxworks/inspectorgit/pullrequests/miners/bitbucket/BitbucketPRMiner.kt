@@ -3,6 +3,7 @@ package org.dxworks.inspectorgit.pullrequests.miners.bitbucket
 import org.dxworks.inspectorgit.pullrequests.miners.PRMiner
 import org.dxworks.inspectorgit.pullrequests.miners.bitbucket.dto.PullRequestListDTO
 import org.dxworks.inspectorgit.pullrequests.repositories.*
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
@@ -19,7 +20,7 @@ class BitbucketPRMiner(private val prProjectRepository: PRProjectRepository,
                        private val commentRepository: CommentRepository,
                        private val fileRepository: FileRepository) : PRMiner() {
     companion object {
-        val LOG = LoggerFactory.getLogger(BitbucketPRMiner::class.java)
+        val LOG: Logger = LoggerFactory.getLogger(BitbucketPRMiner::class.java)
     }
 
     private fun getRepoUrl(owner: String, repoName: String) =
