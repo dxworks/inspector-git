@@ -4,9 +4,12 @@ import com.google.gson.reflect.TypeToken
 import org.eclipse.egit.github.core.IRepositoryIdProvider
 import org.eclipse.egit.github.core.PullRequest
 import org.eclipse.egit.github.core.client.GitHubClient
+import org.eclipse.egit.github.core.client.NoSuchPageException
 import org.eclipse.egit.github.core.client.PageIterator
 import org.eclipse.egit.github.core.client.PagedRequest
 import org.eclipse.egit.github.core.service.PullRequestService
+import java.io.IOException
+import java.util.*
 
 class CustomPullRequestService(client: GitHubClient) : PullRequestService(client) {
 

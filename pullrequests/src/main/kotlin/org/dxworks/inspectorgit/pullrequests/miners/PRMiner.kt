@@ -12,5 +12,5 @@ abstract class PRMiner {
     }
 
     @Async
-    abstract fun loadData(username: String, password: String, owner: String, repoName: String)
+    abstract fun saveToDatabase(options: PRMinerOptions)
 }

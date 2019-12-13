@@ -1,6 +1,7 @@
 package org.dxworks.inspectorgit.pullrequests.miners.bitbucket
 
 import org.dxworks.inspectorgit.pullrequests.miners.PRMiner
+import org.dxworks.inspectorgit.pullrequests.miners.PRMinerOptions
 import org.dxworks.inspectorgit.pullrequests.miners.bitbucket.dto.PullRequestListDTO
 import org.dxworks.inspectorgit.pullrequests.repositories.*
 import org.slf4j.Logger
@@ -30,9 +31,9 @@ class BitbucketPRMiner(private val prProjectRepository: PRProjectRepository,
             "${getRepoUrl(owner, repoName)}pullrequests?&page=$page"
 
     @Async
-    override fun loadData(username: String, password: String, owner: String, repoName: String) {
+    override fun saveToDatabase(options: PRMinerOptions) {
         val restTemplate = RestTemplate()
-        getPullRequests(restTemplate, getPagedPullRequestsUrl(owner, repoName, 0), username, password)
+        getPullRequests(restTemplate, getPagedPullRequestsUrl(options.owner, options.repository, 0), options.username, options.password)
     }
 
     private fun getPullRequests(restTemplate: RestTemplate, url: String, username: String, password: String): PullRequestListDTO? {
