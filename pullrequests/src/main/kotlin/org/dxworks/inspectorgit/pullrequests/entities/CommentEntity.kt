@@ -1,37 +1,46 @@
 package org.dxworks.inspectorgit.pullrequests.entities
 
+import BaseEntity
 import org.springframework.data.annotation.CreatedDate
 import java.util.*
 import javax.persistence.*
 
 @Entity
-class CommentEntity(
-        @Id
-        val id: Long,
+class CommentEntity() : BaseEntity<UUID>(UUID.randomUUID()) {
 
-        @ManyToOne
-        @JoinColumn(name = "developerId")
+    @ManyToOne
+//    @JoinColumn(name = "developerId")
+    lateinit var author: DeveloperEntity
 
-        val author: DeveloperEntity,
-        @ManyToOne
+    @ManyToOne
+//    @JoinColumn(name = "pullRequestId")
+    lateinit var pullRequest: PullRequestEntity
 
-        @JoinColumn(name = "pullRequestId")
-        val pullRequest: PullRequestEntity,
+    @CreatedDate
+    @Temporal(TemporalType.TIMESTAMP)
+    lateinit var timestamp: Date
 
-        @CreatedDate
-        @Temporal(TemporalType.TIMESTAMP)
-        val timestamp: Date,
+    @Column
+    var commentId: Long = 0
 
-        @Column
-        val parentId: Long,
+    @Column
+    var parentId: Long = 0
 
-        @Column
-        val file: String,
+    @Column
+    lateinit var file: String
 
-        @Column
-        val lineOfCode: Int = 0,
+    @Column
+    var lineOfCode: Int = 0
 
-        @Column(columnDefinition = "TEXT")
-        val content: String
-)
+    @Column(columnDefinition = "TEXT")
+    lateinit var content: String
 
+    constructor(author: DeveloperEntity, pullRequest: PullRequestEntity, timestamp: Date, parentId: Long, file: String, content: String) : this() {
+        this.author = author
+        this.pullRequest = pullRequest
+        this.timestamp = timestamp
+        this.parentId = parentId
+        this.file = file
+        this.content = content
+    }
+}

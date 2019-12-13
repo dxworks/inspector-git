@@ -1,5 +1,6 @@
 package org.dxworks.inspectorgit.pullrequests.miners.github
 
+import org.dxworks.inspectorgit.pullrequests.entities.PullRequestEntity
 import org.dxworks.inspectorgit.pullrequests.miners.PRMiner
 import org.dxworks.inspectorgit.pullrequests.miners.PRMinerOptions
 import org.dxworks.inspectorgit.pullrequests.repositories.*
@@ -54,7 +55,6 @@ class GithubPRMiner(private val prProjectRepository: PRProjectRepository,
 
     private fun saveToDatabase(repository: Repository, newerThan: Date?) {
         getAndSavePullRequests(pullRequestService, repository, newerThan)
-
     }
 
     private fun getAndSavePullRequests(pullRequestService: CustomPullRequestService, repository: Repository, newerThan: Date?): List<PullRequest?> {
@@ -81,7 +81,7 @@ class GithubPRMiner(private val prProjectRepository: PRProjectRepository,
     }
 
     private fun saveAll(pullRequests: Collection<PullRequest?>) {
-
+//        this.pullRequestRepository.saveAll(pullRequests.map {  })
     }
 
     private fun anyWereFiltered(updatedPullRequests: Collection<PullRequest?>, currentPullRequests: Collection<PullRequest?>) =
