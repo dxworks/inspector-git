@@ -1,14 +1,10 @@
 package org.dxworks.inspectorgit.client
 
-import org.dxworks.inspectorgit.client.parsers.LogParser
-import org.dxworks.inspectorgit.utils.FileSystemUtils
-import org.dxworks.inspectorgit.utils.JsonUtils
 import org.dxworks.inspectorgit.utils.OsUtils
 import org.slf4j.LoggerFactory
 import java.io.BufferedReader
 import java.io.InputStream
 import java.nio.file.Path
-import java.nio.file.Paths
 
 class GitClient(path: Path) {
     companion object {
@@ -64,10 +60,4 @@ class GitClient(path: Path) {
         reader.forEachLine { lines.add(it) }
         return lines
     }
-}
-
-fun main() {
-    val gitClient = GitClient(Paths.get(System.getProperty("user.home"), "Documents", "DX", "kafkaRepo", "kafka"))
-    val projectDTO = LogParser(gitClient).parse(gitClient.getLogs())
-    JsonUtils.toJsonFile(FileSystemUtils.getDtoFilePathFor(gitClient.repoName, gitClient.branch), projectDTO)
 }

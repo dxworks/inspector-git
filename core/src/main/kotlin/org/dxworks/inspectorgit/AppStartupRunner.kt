@@ -19,19 +19,19 @@ class AppStartupRunner(private val projectService: ProjectService,
     private val projectName = "logTest"
 
     override fun run(vararg args: String) {
-        val projectDTO = projectService.findProjectByName(projectName)
-        configurationService.configureAll()
-        if (workAnalyzer.configured) {
-            val project = ProjectTransformer(projectDTO).transform()
-            val results = workAnalyzer.analyze(project)
-            print("New work: ")
-            println(results.map { it.newWork.size }.toIntArray().sum())
-            print("Legacy refactor: ")
-            println(results.map { it.legacyRefactor.size }.toIntArray().sum())
-            print("Help Others: ")
-            println(results.map { it.helpOthers.size }.toIntArray().sum())
-            print("Churn: ")
-            println(results.map { it.churn.size }.toIntArray().sum())
-        }
+//        val projectDTO = projectService.findProjectByName(projectName)
+//        configurationService.configureAll()
+//        if (workAnalyzer.configured) {
+//            val project = ProjectTransformer(projectDTO).transform()
+//            val results = workAnalyzer.analyze(project)
+//            print("New work: ")
+//            println(results.map { it.newWork.size }.toIntArray().sum())
+//            print("Legacy refactor: ")
+//            println(results.map { it.legacyRefactor.size }.toIntArray().sum())
+//            print("Help Others: ")
+//            println(results.map { it.helpOthers.size }.toIntArray().sum())
+//            print("Churn: ")
+//            println(results.map { it.churn.size }.toIntArray().sum())
+//        }
     }
 }

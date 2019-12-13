@@ -25,6 +25,7 @@
         <module>utils</module>
         <module>persistence</module>
         <module>app</module>
+        <module>web</module>
     </modules>
 
     <properties>
