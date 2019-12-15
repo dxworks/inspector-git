@@ -7,5 +7,6 @@ import java.util.*
 
 @Repository
 interface ProjectRepository : CrudRepository<ProjectEntity, UUID> {
-    fun findByName(name: String): ProjectEntity
+    fun findByPath(path: String): ProjectEntity
+    fun deleteByPath(path: String)
 }

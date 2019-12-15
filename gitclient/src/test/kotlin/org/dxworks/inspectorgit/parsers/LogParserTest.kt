@@ -1,8 +1,8 @@
 package org.dxworks.inspectorgit.parsers
 
 import net.lingala.zip4j.core.ZipFile
-import org.dxworks.inspectorgit.client.GitClient
-import org.dxworks.inspectorgit.client.parsers.LogParser
+import org.dxworks.inspectorgit.gitClient.GitClient
+import org.dxworks.inspectorgit.gitClient.parsers.LogParser
 import org.dxworks.inspectorgit.resourcesPath
 import org.dxworks.inspectorgit.utils.JsonUtils
 import org.junit.jupiter.api.Assertions.assertEquals

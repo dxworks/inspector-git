@@ -1,29 +1,40 @@
 package org.dxworks.inspectorgit.web.controllers
 
-import org.dxworks.inspectorgit.services.RepositoryService
+import org.dxworks.inspectorgit.persistence.dto.ProjectDTO
+import org.dxworks.inspectorgit.services.ProjectService
 import org.dxworks.inspectorgit.web.apiPath
 import org.dxworks.inspectorgit.web.dto.GitlabCloneRepositoriesDTO
 import org.dxworks.inspectorgit.web.dto.GitlabCredentialsDTO
-import org.dxworks.inspectorgit.web.dto.GitlabSimpleRepositoryResponseDTO
+import org.dxworks.inspectorgit.web.dto.GitlabSimpleProjectResponseDTO
 import org.dxworks.inspectorgit.web.services.GitlabIntegrationService
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
+@CrossOrigin(origins = ["http://localhost:4200"], maxAge = 3600)
 @RestController
 @RequestMapping("$apiPath/gitlab")
-class GitLabIntegrationController(private val repositoryService: RepositoryService,
-                                  private val gitlabIntegrationService: GitlabIntegrationService) {
-    @GetMapping("cloneRepositories")
-    fun cloneRepositories(@RequestBody cloneRepositoriesDTO: GitlabCloneRepositoriesDTO) {
-        cloneRepositoriesDTO.repositories.forEach {
-            repositoryService.cloneRepository(it.url, it.repoName, it.branch, cloneRepositoriesDTO.credentials.username, cloneRepositoriesDTO.credentials.token)
+class GitLabIntegrationController(private val gitlabIntegrationService: GitlabIntegrationService,
+                                  private val projectService: ProjectService) {
+    private val integrationName = "gitlab"
+
+    @PutMapping("importProjects")
+    fun importProjects(@RequestBody cloneRepositoriesDTO: GitlabCloneRepositoriesDTO) {
+        cloneRepositoriesDTO.projects.parallelStream().forEach {
+            projectService.create(it, cloneRepositoriesDTO.credentials.username, cloneRepositoriesDTO.credentials.token)
         }
     }
 
-    @GetMapping("listRepositories")
-    fun listRepositories(@RequestBody gitlabCredentialsDTO: GitlabCredentialsDTO): List<GitlabSimpleRepositoryResponseDTO>? {
+    @PutMapping("listProjects")
+    fun listProjects(@RequestBody gitlabCredentialsDTO: GitlabCredentialsDTO): List<GitlabSimpleProjectResponseDTO>? {
         return gitlabIntegrationService.listRepositories(gitlabCredentialsDTO)
+    }
+
+    @DeleteMapping("deleteProject")
+    fun deleteProject(@RequestParam(required = true) path: String) {
+        projectService.delete("$integrationName/$path")
+    }
+
+    @GetMapping("projects")
+    fun getProjects(): List<ProjectDTO> {
+        return this.projectService.getProjectsWithoutLog()
     }
 }

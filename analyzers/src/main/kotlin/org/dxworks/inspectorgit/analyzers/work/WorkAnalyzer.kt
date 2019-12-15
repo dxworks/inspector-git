@@ -2,7 +2,7 @@ package org.dxworks.inspectorgit.analyzers.work
 
 import org.dxworks.inspectorgit.api.configuration.AbstractConfigurable
 import org.dxworks.inspectorgit.api.configuration.exceptions.NotConfiguredException
-import org.dxworks.inspectorgit.client.enums.LineOperation
+import org.dxworks.inspectorgit.gitClient.enums.LineOperation
 import org.dxworks.inspectorgit.model.AnnotatedLine
 import org.dxworks.inspectorgit.model.Change
 import org.dxworks.inspectorgit.model.Commit

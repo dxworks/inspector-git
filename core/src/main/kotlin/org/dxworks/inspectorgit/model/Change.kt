@@ -1,7 +1,7 @@
 package org.dxworks.inspectorgit.model
 
-import org.dxworks.inspectorgit.client.enums.ChangeType
-import org.dxworks.inspectorgit.client.enums.LineOperation
+import org.dxworks.inspectorgit.gitClient.enums.ChangeType
+import org.dxworks.inspectorgit.gitClient.enums.LineOperation
 
 data class Change(val commit: Commit,
                   val type: ChangeType,

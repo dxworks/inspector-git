@@ -1,7 +1,7 @@
 package org.dxworks.inspectorgit.web.services
 
 import org.dxworks.inspectorgit.web.dto.GitlabCredentialsDTO
-import org.dxworks.inspectorgit.web.dto.GitlabSimpleRepositoryResponseDTO
+import org.dxworks.inspectorgit.web.dto.GitlabSimpleProjectResponseDTO
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -16,11 +16,9 @@ class GitlabIntegrationService {
     private val apiUrl = "/api/v4/"
 
 
-    fun listRepositories(gitlabCredentialsDTO: GitlabCredentialsDTO): List<GitlabSimpleRepositoryResponseDTO>? {
+    fun listRepositories(gitlabCredentialsDTO: GitlabCredentialsDTO): List<GitlabSimpleProjectResponseDTO>? {
         val url = (gitlabCredentialsDTO.url ?: defaultGitlabUrl) + apiUrl + "projects?simple=true"
-
-        val body = restTemplate.exchange<List<GitlabSimpleRepositoryResponseDTO>>(url, HttpMethod.GET, HttpEntity(null, getHeaders(gitlabCredentialsDTO.token))).body
-        return body
+        return restTemplate.exchange<List<GitlabSimpleProjectResponseDTO>>(url, HttpMethod.GET, HttpEntity(null, getHeaders(gitlabCredentialsDTO.token))).body
     }
 
     private fun getHeaders(token: String): HttpHeaders {

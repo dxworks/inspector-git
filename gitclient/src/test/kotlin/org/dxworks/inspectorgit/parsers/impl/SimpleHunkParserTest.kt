@@ -1,8 +1,8 @@
 package org.dxworks.inspectorgit.parsers.impl
 
-import org.dxworks.inspectorgit.client.dto.LineChangeDTO
-import org.dxworks.inspectorgit.client.enums.LineOperation
-import org.dxworks.inspectorgit.client.parsers.impl.SimpleHunkParser
+import org.dxworks.inspectorgit.gitClient.dto.LineChangeDTO
+import org.dxworks.inspectorgit.gitClient.enums.LineOperation
+import org.dxworks.inspectorgit.gitClient.parsers.impl.SimpleHunkParser
 import org.dxworks.inspectorgit.resourcesPath
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

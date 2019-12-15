@@ -1,7 +1,7 @@
 package org.dxworks.inspectorgit.transformers
 
-import org.dxworks.inspectorgit.client.dto.ChangeDTO
-import org.dxworks.inspectorgit.client.dto.CommitDTO
+import org.dxworks.inspectorgit.gitClient.dto.ChangeDTO
+import org.dxworks.inspectorgit.gitClient.dto.CommitDTO
 import org.dxworks.inspectorgit.model.Author
 import org.dxworks.inspectorgit.model.AuthorID
 import org.dxworks.inspectorgit.model.Commit

@@ -1,9 +1,8 @@
 package org.dxworks.inspectorgit
 
 import org.dxworks.inspectorgit.analyzers.work.WorkAnalyzer
-import org.dxworks.inspectorgit.configuration.services.ConfigurationService
-import org.dxworks.inspectorgit.persistence.services.ProjectService
-import org.dxworks.inspectorgit.transformers.ProjectTransformer
+import org.dxworks.inspectorgit.services.ConfigurationService
+import org.dxworks.inspectorgit.services.ProjectService
 import org.slf4j.LoggerFactory
 import org.springframework.boot.CommandLineRunner
 import org.springframework.stereotype.Component

@@ -1,7 +1,7 @@
 package org.dxworks.inspectorgit.parsers.impl
 
 
-import org.dxworks.inspectorgit.client.parsers.impl.MergeHunkParser
+import org.dxworks.inspectorgit.gitClient.parsers.impl.MergeHunkParser
 import org.junit.jupiter.api.Test
 
 class MergeHunkParserTest {

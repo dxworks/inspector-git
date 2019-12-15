@@ -26,6 +26,7 @@
         <module>persistence</module>
         <module>app</module>
         <module>web</module>
+        <module>services</module>
     </modules>
 
     <properties>
