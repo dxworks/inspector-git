@@ -12,6 +12,14 @@ class IntegrationServiceImpl(private val integrationRepository: IntegrationRepos
         return integrationRepository.getAllByPlatform(platform).map { IntegrationDTO.fromEntity(it) }
     }
 
+    override fun findByNameAndPlatform(integrationName: String, platform: String): IntegrationDTO {
+        return IntegrationDTO.fromEntity(integrationRepository.getByNameAndPlatform(integrationName, platform))
+    }
+
+    override fun getAll(): List<IntegrationDTO> {
+        return integrationRepository.findAll().map { IntegrationDTO.fromEntity(it) }
+    }
+
     override fun create(integrationDTO: IntegrationDTO) {
         integrationRepository.save(integrationDTO.toEntity())
     }

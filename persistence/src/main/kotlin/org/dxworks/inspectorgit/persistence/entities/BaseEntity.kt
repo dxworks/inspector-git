@@ -1,12 +1,13 @@
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
+import java.io.Serializable
 import java.time.Instant
 import javax.persistence.Id
 import javax.persistence.MappedSuperclass
 import javax.persistence.Version
 
 @MappedSuperclass
-abstract class BaseEntity<T>(
+abstract class BaseEntity<T : Serializable>(
         @Id val id: T
 ) {
 
@@ -32,6 +33,6 @@ abstract class BaseEntity<T>(
     }
 
     override fun hashCode(): Int {
-        return id?.hashCode() ?: 0
+        return id.hashCode() ?: 0
     }
 }

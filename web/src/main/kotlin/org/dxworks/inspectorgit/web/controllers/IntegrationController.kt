@@ -8,8 +8,12 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("$apiPath/integration")
 class IntegrationController(private val integrationService: IntegrationService) {
+    @GetMapping
+    fun getIntegrations() = integrationService.getAll()
+
     @GetMapping("{platform}")
     fun getByPlatform(@PathVariable platform: String) = integrationService.getByPlatform(platform)
+
 
     @PostMapping("create")
     fun createIntegration(@RequestBody integrationDTO: IntegrationDTO) {

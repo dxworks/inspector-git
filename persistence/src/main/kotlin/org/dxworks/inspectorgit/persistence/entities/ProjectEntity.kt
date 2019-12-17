@@ -2,31 +2,20 @@ package org.dxworks.inspectorgit.persistence.entities
 
 import BaseEntity
 import java.util.*
-import javax.persistence.*
+import javax.persistence.Column
+import javax.persistence.MappedSuperclass
 
-@Entity
-@Table(uniqueConstraints = [UniqueConstraint(columnNames = ["name", "integrationPath"])])
-data class ProjectEntity(
-        @Column
-        val name: String,
-        @Column(unique = true)
-        val path: String?,
+@MappedSuperclass
+open class ProjectEntity : BaseEntity<UUID>(UUID.randomUUID()) {
+    @Column
+    var name: String? = null
 
-        @Column
-        var branch: String,
+    @Column
+    var integrationName: String? = null
 
-        @Column
-        val integrationPath: String,
+    @Column
+    var platform: String? = null
 
-        @Column
-        val repositoryHttpUrl: String?,
-
-        @Column
-        val webUrl: String?,
-
-        @Column
-        var pullRequestsEnabled: Boolean,
-
-        @Lob
-        var gitLogDtoString: String?
-) : BaseEntity<UUID>(UUID.randomUUID())
+    @Column
+    var webUrl: String? = null
+}

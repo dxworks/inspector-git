@@ -1,6 +1,4 @@
 package org.dxworks.inspectorgit.dto
 
-import org.dxworks.inspectorgit.dto.ProjectDTO
-
-data class ImportGitlabProjectsDTO(val projects: List<ProjectDTO>,
+data class ImportGitlabProjectsDTO(val swProjects: List<SwProjectDTO>,
                                    val credentials: GitlabCredentialsDTO)

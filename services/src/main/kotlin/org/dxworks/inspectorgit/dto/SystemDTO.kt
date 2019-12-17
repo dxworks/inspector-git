@@ -1,6 +1,7 @@
 package org.dxworks.inspectorgit.dto
 
-data class SystemDTO(
-        val name: String,
-        val projects: List<ProjectDTO>
-)
+class SystemDTO {
+    var name: String? = null
+    var systemId: String? = null
+    var projects: List<SwProjectDTO>? = emptyList()
+}

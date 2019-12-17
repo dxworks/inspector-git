@@ -1,8 +1,7 @@
 package org.dxworks.inspectorgit.services.impl
 
-import org.dxworks.inspectorgit.dto.ImportGitlabProjectsDTO
-import org.dxworks.inspectorgit.dto.ProjectDTO
-import org.dxworks.inspectorgit.persistence.repositories.ProjectRepository
+import org.dxworks.inspectorgit.dto.SwProjectDTO
+import org.dxworks.inspectorgit.persistence.repositories.SwProjectRepository
 import org.dxworks.inspectorgit.services.GitRepositoryService
 import org.dxworks.inspectorgit.services.ProjectService
 import org.slf4j.LoggerFactory
@@ -10,31 +9,33 @@ import org.springframework.stereotype.Service
 import javax.transaction.Transactional
 
 @Service
-class ProjectServiceImpl(private val projectRepository: ProjectRepository,
+class ProjectServiceImpl(private val swProjectRepository: SwProjectRepository,
                          private val gitRepositoryService: GitRepositoryService) : ProjectService {
     companion object {
         private val LOG = LoggerFactory.getLogger(ProjectService::class.java)
     }
 
-    override fun import(projectDTO: ProjectDTO, username: String, password: String) {
-        LOG.info("Importing ${projectDTO.name}")
-        gitRepositoryService.clone(projectDTO.repositoryHttpUrl!!, projectDTO.path!!, projectDTO.branch, username, password)
-        projectDTO.gitLogDTO = gitRepositoryService.getGitLog(projectDTO.path!!)
-        projectRepository.save(projectDTO.toEntity())
-        LOG.info("Imported ${projectDTO.name}")
+    override fun import(swProjectDTO: SwProjectDTO, username: String, password: String) {
+        LOG.info("Importing ${swProjectDTO.name}")
+        gitRepositoryService.clone(swProjectDTO.repositoryHttpUrl!!,
+                swProjectDTO.path!!,
+                swProjectDTO.branch ?: "master",
+                username, password)
+
+        swProjectDTO.gitLogDTO = gitRepositoryService.getGitLog(swProjectDTO.path!!)
+        swProjectRepository.save(swProjectDTO.toEntity())
+        LOG.info("Imported ${swProjectDTO.name}")
     }
 
     @Transactional
     override fun delete(path: String) {
         gitRepositoryService.delete(path)
-        projectRepository.deleteByPath(path)
+        swProjectRepository.deleteByPath(path)
     }
 
-    override fun getProjectsWithoutLog(): List<ProjectDTO> {
-        return projectRepository.findAll().map {
-            ProjectDTO(it.name, it.path, it.branch, it.integrationPath, it.repositoryHttpUrl, it.webUrl, it.pullRequestsEnabled)
-        }
+    override fun findAllSwProjectsWithoutLog(): List<SwProjectDTO> {
+        return swProjectRepository.findAll().map { SwProjectDTO.fromEntity(it, includeLogs = false) }
     }
 
-    override fun findAllProjects() = projectRepository.findAll().map { ProjectDTO.fromEntity(it) }
+    override fun findAllSwProjects() = swProjectRepository.findAll().map { SwProjectDTO.fromEntity(it) }
 }

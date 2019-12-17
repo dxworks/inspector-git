@@ -1,10 +1,10 @@
 package org.dxworks.inspectorgit.services
 
-import org.dxworks.inspectorgit.dto.ProjectDTO
+import org.dxworks.inspectorgit.dto.SwProjectDTO
 
 interface ProjectService {
-    fun findAllProjects(): Collection<ProjectDTO>
-    fun import(projectDTO: ProjectDTO, username: String, password: String)
+    fun findAllSwProjects(): Collection<SwProjectDTO>
+    fun import(swProjectDTO: SwProjectDTO, username: String, password: String)
     fun delete(path: String)
-    fun getProjectsWithoutLog(): List<ProjectDTO>
+    fun findAllSwProjectsWithoutLog(): List<SwProjectDTO>
 }

@@ -1,8 +1,8 @@
 package org.dxworks.inspectorgit.web.dto
 
-import org.dxworks.inspectorgit.dto.ImportGitlabProjectsDTO
+import org.dxworks.inspectorgit.dto.SwProjectDTO
 
 data class CreateSystemDTO(
         val name: String,
-        val gitlabIntegrationProjectsDTO: ImportGitlabProjectsDTO
+        val projects: List<SwProjectDTO>
 )

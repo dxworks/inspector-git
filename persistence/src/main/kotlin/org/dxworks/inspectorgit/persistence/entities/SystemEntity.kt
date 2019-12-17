@@ -7,13 +7,13 @@ import javax.persistence.Entity
 import javax.persistence.OneToMany
 
 @Entity
-data class SystemEntity(
-        @Column(unique = true)
-        val name: String,
+class SystemEntity : BaseEntity<UUID>(UUID.randomUUID()) {
+    @Column(unique = true)
+    var name: String? = null
 
-        @Column
-        val systemId: String,
+    @Column(unique = true)
+    var systemId: String? = null
 
-        @OneToMany
-        val projects: List<ProjectEntity>
-) : BaseEntity<UUID>(UUID.randomUUID())
+    @OneToMany
+    var swProjects: List<SwProjectEntity>? = emptyList()
+}

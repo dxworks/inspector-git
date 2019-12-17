@@ -1,7 +1,7 @@
 package org.dxworks.inspectorgit.web.services
 
-import org.dxworks.inspectorgit.dto.GitlabCredentialsDTO
-import org.dxworks.inspectorgit.dto.ImportGitlabProjectsDTO
+import org.dxworks.inspectorgit.dto.SwProjectDTO
+import org.dxworks.inspectorgit.services.IntegrationService
 import org.dxworks.inspectorgit.services.ProjectService
 import org.dxworks.inspectorgit.web.dto.GitlabSimpleProjectResponseDTO
 import org.springframework.http.HttpEntity
@@ -12,17 +12,31 @@ import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.exchange
 
 @Service
-class GitlabIntegrationService(private val projectService: ProjectService) {
+class GitlabIntegrationService(private val integrationService: IntegrationService,
+                               private val projectService: ProjectService) {
     private val restTemplate = RestTemplate()
     private val defaultGitlabUrl = "https://gitlab.com"
     private val apiUrl = "/api/v4/"
 
-    private val integrationName = "gitlab"
+    private val platform = "gitlab"
 
 
-    fun listRepositories(gitlabCredentialsDTO: GitlabCredentialsDTO): List<GitlabSimpleProjectResponseDTO>? {
-        val url = (gitlabCredentialsDTO.url ?: defaultGitlabUrl) + apiUrl + "projects?simple=true"
-        return restTemplate.exchange<List<GitlabSimpleProjectResponseDTO>>(url, HttpMethod.GET, HttpEntity(null, getHeaders(gitlabCredentialsDTO.token))).body
+    fun listProjects(integrationName: String): List<SwProjectDTO>? {
+        val integrationDTO = integrationService.findByNameAndPlatform(integrationName, platform)
+        val url = "${integrationDTO.url}${apiUrl}projects?simple=true"
+        val gitlabProjectResponseDTOs = restTemplate.exchange<List<GitlabSimpleProjectResponseDTO>>(url, HttpMethod.GET, HttpEntity(null, getHeaders(integrationDTO.password!!))).body
+        return gitlabProjectResponseDTOs?.map {
+            val swProjectDTO = SwProjectDTO()
+            swProjectDTO.name = it.name
+            swProjectDTO.platform = platform
+            swProjectDTO.integrationName = integrationDTO.name
+            swProjectDTO.webUrl = it.webUrl
+            swProjectDTO.description = it.description
+            swProjectDTO.path = it.path
+            swProjectDTO.branch = it.defaultBranch
+            swProjectDTO.repositoryHttpUrl = it.httpUrlToRepo
+            swProjectDTO
+        }
     }
 
     private fun getHeaders(token: String): HttpHeaders {
@@ -31,10 +45,11 @@ class GitlabIntegrationService(private val projectService: ProjectService) {
         return httpHeaders
     }
 
-    fun import(importProjectsDTO: ImportGitlabProjectsDTO) {
-        importProjectsDTO.projects.parallelStream().forEach {
-            it.path = "$integrationName/${it.path}"
-            projectService.import(it, importProjectsDTO.credentials.username, importProjectsDTO.credentials.token)
+    fun import(projectsDTO: List<SwProjectDTO>) {
+        projectsDTO.parallelStream().forEach {
+            it.path = "$platform/${it.path}"
+            val integrationDTO = integrationService.findByNameAndPlatform(it.integrationName!!, it.platform!!)
+            projectService.import(it, integrationDTO.username, integrationDTO.password!!)
         }
     }
 

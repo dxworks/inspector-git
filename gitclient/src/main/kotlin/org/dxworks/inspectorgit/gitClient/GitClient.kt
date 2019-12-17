@@ -26,7 +26,7 @@ class GitClient(path: Path) {
         processBuilder.directory(path.toFile())
     }
 
-    val branch: String = runCommand(gitBranchCommand).find { it.startsWith("* ") }!!.removePrefix("* ")
+    val branch: String? = runCommand(gitBranchCommand).find { it.startsWith("* ") }?.removePrefix("* ")
 
     fun getLogs(): List<String> = runCommand(gitLogCommand)
 
