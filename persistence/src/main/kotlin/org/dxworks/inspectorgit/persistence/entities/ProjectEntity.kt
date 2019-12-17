@@ -18,4 +18,7 @@ open class ProjectEntity : BaseEntity<UUID>(UUID.randomUUID()) {
 
     @Column
     var webUrl: String? = null
+
+    @Column
+    var imported: Boolean? = null
 }

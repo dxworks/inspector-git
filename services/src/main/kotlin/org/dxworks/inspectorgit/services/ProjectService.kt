@@ -7,4 +7,5 @@ interface ProjectService {
     fun import(swProjectDTO: SwProjectDTO, username: String, password: String)
     fun delete(path: String)
     fun findAllSwProjectsWithoutLog(): List<SwProjectDTO>
+    fun existsByPath(path: String): Boolean
 }

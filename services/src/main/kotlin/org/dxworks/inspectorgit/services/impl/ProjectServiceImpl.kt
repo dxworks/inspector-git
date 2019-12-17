@@ -23,7 +23,9 @@ class ProjectServiceImpl(private val swProjectRepository: SwProjectRepository,
                 username, password)
 
         swProjectDTO.gitLogDTO = gitRepositoryService.getGitLog(swProjectDTO.path!!)
-        swProjectRepository.save(swProjectDTO.toEntity())
+        val entity = swProjectDTO.toEntity()
+        entity.imported = true
+        swProjectRepository.save(entity)
         LOG.info("Imported ${swProjectDTO.name}")
     }
 
@@ -38,4 +40,8 @@ class ProjectServiceImpl(private val swProjectRepository: SwProjectRepository,
     }
 
     override fun findAllSwProjects() = swProjectRepository.findAll().map { SwProjectDTO.fromEntity(it) }
+
+    override fun existsByPath(path: String): Boolean {
+        return swProjectRepository.existsByPath(path)
+    }
 }

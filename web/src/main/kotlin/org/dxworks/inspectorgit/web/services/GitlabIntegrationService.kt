@@ -35,6 +35,7 @@ class GitlabIntegrationService(private val integrationService: IntegrationServic
             swProjectDTO.path = it.path
             swProjectDTO.branch = it.defaultBranch
             swProjectDTO.repositoryHttpUrl = it.httpUrlToRepo
+            swProjectDTO.imported = projectService.existsByPath("$platform/${it.path}")
             swProjectDTO
         }
     }
@@ -46,11 +47,13 @@ class GitlabIntegrationService(private val integrationService: IntegrationServic
     }
 
     fun import(projectsDTO: List<SwProjectDTO>) {
-        projectsDTO.parallelStream().forEach {
-            it.path = "$platform/${it.path}"
-            val integrationDTO = integrationService.findByNameAndPlatform(it.integrationName!!, it.platform!!)
-            projectService.import(it, integrationDTO.username, integrationDTO.password!!)
-        }
+        projectsDTO.parallelStream()
+                .filter { !projectService.existsByPath("$platform/${it.path}") }
+                .forEach {
+                    it.path = "$platform/${it.path}"
+                    val integrationDTO = integrationService.findByNameAndPlatform(it.integrationName!!, it.platform!!)
+                    projectService.import(it, integrationDTO.username, integrationDTO.password!!)
+                }
     }
 
 

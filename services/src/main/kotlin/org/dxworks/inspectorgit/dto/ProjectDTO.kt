@@ -5,4 +5,5 @@ open class ProjectDTO {
     var platform: String? = null
     var integrationName: String? = null
     var webUrl: String? = null
+    var imported: Boolean? = false
 }

@@ -9,4 +9,5 @@ import java.util.*
 interface SwProjectRepository : CrudRepository<SwProjectEntity, UUID> {
     fun findByPath(path: String): SwProjectEntity
     fun deleteByPath(path: String)
+    fun existsByPath(path: String): Boolean
 }
