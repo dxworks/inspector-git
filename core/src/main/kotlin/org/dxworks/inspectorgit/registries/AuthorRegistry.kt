@@ -1,10 +1,10 @@
 package org.dxworks.inspectorgit.registries
 
 import org.dxworks.inspectorgit.model.Author
-import org.dxworks.inspectorgit.model.AuthorID
+import org.dxworks.inspectorgit.model.AuthorId
 
-class AuthorRegistry : AbstractRegistry<Author, AuthorID>() {
-    override fun getID(entity: Author): AuthorID {
+class AuthorRegistry : AbstractRegistry<Author, AuthorId>() {
+    override fun getID(entity: Author): AuthorId {
         return entity.id
     }
 }

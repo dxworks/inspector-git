@@ -37,12 +37,12 @@ class WorkAnalyzer : AbstractConfigurable<WorkAnalyzerConfiguration>() {
             val brandNewWork = addedLines.filter { removedLines.none { removedLine -> removedLine.number == it.number } }
 
             val codeChangingWork = addedLines.subtract(brandNewWork).map { CodeChange(it, getReplacedLine(removedLines, it)) }
-            val legacyRefactor = codeChangingWork.filter { it.removedLine.commit.olderThan(configuration.legacyCodeAge) }
+            val legacyRefactor = codeChangingWork.filter { it.removedLine.commit.olderThan(configuration.legacyCodeAge, it.addedLine.commit) }
 
-            val recentChanges = codeChangingWork.filter { !it.removedLine.commit.olderThan(configuration.recentWorkPeriod) }
+            val recentChanges = codeChangingWork.filter { !it.removedLine.commit.olderThan(configuration.recentWorkPeriod, it.addedLine.commit) }
             val helpOthers = recentChanges.filter { it.removedLine.commit.author != commit.author }
 
-            val recentRemovedLines = removedLines.filter { !it.commit.olderThan(configuration.recentWorkPeriod) }
+            val recentRemovedLines = recentChanges.map { it.removedLine }
             recentRemovedLines.forEach {
                 val result = results[it.commit]!!
                 result.newWork.remove(it)

@@ -1,4 +1,4 @@
-package org.dxworks.inspectorgit.web.dto
+package org.dxworks.inspectorgit.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 

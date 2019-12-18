@@ -1,5 +1,6 @@
 package org.dxworks.inspectorgit.utils
 
+import com.google.gson.Gson
 import java.nio.file.Path
 
 class FileSystemUtils {
@@ -13,6 +14,11 @@ class FileSystemUtils {
 
         fun deleteRepository(path: String): Boolean {
             return PROJECTS_FOLDER_PATH.resolve(path).toFile().deleteRecursively()
+        }
+
+        fun writeResults(systemId: String, results: Map<String, Collection<Any>>?) {
+            val file = userHomePath.resolve("Documents").resolve("$systemId.json").toFile()
+            file.writeText(Gson().toJson(results))
         }
     }
 }

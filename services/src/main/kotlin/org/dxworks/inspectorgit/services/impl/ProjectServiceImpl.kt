@@ -1,6 +1,7 @@
 package org.dxworks.inspectorgit.services.impl
 
 import org.dxworks.inspectorgit.dto.SwProjectDTO
+import org.dxworks.inspectorgit.persistence.entities.SwProjectEntity
 import org.dxworks.inspectorgit.persistence.repositories.SwProjectRepository
 import org.dxworks.inspectorgit.services.GitRepositoryService
 import org.dxworks.inspectorgit.services.ProjectService
@@ -15,7 +16,7 @@ class ProjectServiceImpl(private val swProjectRepository: SwProjectRepository,
         private val LOG = LoggerFactory.getLogger(ProjectService::class.java)
     }
 
-    override fun import(swProjectDTO: SwProjectDTO, username: String, password: String) {
+    override fun import(swProjectDTO: SwProjectDTO, username: String, password: String): SwProjectEntity {
         LOG.info("Importing ${swProjectDTO.name}")
         gitRepositoryService.clone(swProjectDTO.repositoryHttpUrl!!,
                 swProjectDTO.path!!,
@@ -25,8 +26,8 @@ class ProjectServiceImpl(private val swProjectRepository: SwProjectRepository,
         swProjectDTO.gitLogDTO = gitRepositoryService.getGitLog(swProjectDTO.path!!)
         val entity = swProjectDTO.toEntity()
         entity.imported = true
-        swProjectRepository.save(entity)
         LOG.info("Imported ${swProjectDTO.name}")
+        return swProjectRepository.save(entity)
     }
 
     @Transactional

@@ -3,7 +3,7 @@ package org.dxworks.inspectorgit.transformers
 import org.dxworks.inspectorgit.gitClient.dto.ChangeDTO
 import org.dxworks.inspectorgit.gitClient.dto.CommitDTO
 import org.dxworks.inspectorgit.model.Author
-import org.dxworks.inspectorgit.model.AuthorID
+import org.dxworks.inspectorgit.model.AuthorId
 import org.dxworks.inspectorgit.model.Commit
 import org.dxworks.inspectorgit.model.Project
 import org.slf4j.LoggerFactory
@@ -57,15 +57,15 @@ class CommitTransformer(private val commitDTO: CommitDTO, private val project: P
     }
 
     private fun getAuthor(commitDTO: CommitDTO, project: Project): Author =
-            getAuthor(project, AuthorID(commitDTO.authorEmail, commitDTO.authorName))
+            getAuthor(project, AuthorId(commitDTO.authorEmail, commitDTO.authorName))
 
     private fun getCommitter(commitDTO: CommitDTO, project: Project): Author =
-            getAuthor(project, AuthorID(commitDTO.committerEmail, commitDTO.committerName))
+            getAuthor(project, AuthorId(commitDTO.committerEmail, commitDTO.committerName))
 
-    private fun getAuthor(project: Project, authorID: AuthorID): Author {
-        var author = project.authorRegistry.getByID(authorID)
+    private fun getAuthor(project: Project, authorId: AuthorId): Author {
+        var author = project.authorRegistry.getByID(authorId)
         if (author == null) {
-            author = Author(authorID)
+            author = Author(authorId)
             project.authorRegistry.add(author)
         }
         return author

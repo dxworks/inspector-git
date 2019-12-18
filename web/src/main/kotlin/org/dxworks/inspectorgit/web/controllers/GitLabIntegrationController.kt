@@ -3,7 +3,7 @@ package org.dxworks.inspectorgit.web.controllers
 import org.dxworks.inspectorgit.dto.SwProjectDTO
 import org.dxworks.inspectorgit.services.ProjectService
 import org.dxworks.inspectorgit.web.apiPath
-import org.dxworks.inspectorgit.web.services.GitlabIntegrationService
+import org.dxworks.inspectorgit.services.impl.GitlabIntegrationService
 import org.springframework.web.bind.annotation.*
 
 @RestController

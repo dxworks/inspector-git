@@ -8,7 +8,7 @@ class MergeChangeParser(private val parentIndex: Int, private val numberOfParent
 
     override fun addHunks(lines: List<String>, changeDTO: ChangeDTO) {
         changeDTO.hunks = if (lines.isNotEmpty())
-            extractHunks(lines).map { MergeHunkParser(parentIndex, numberOfParents).parse(it) }
+            extractHunks(lines).mapNotNull { MergeHunkParser(parentIndex, numberOfParents).parse(it) }
         else emptyList()
     }
 

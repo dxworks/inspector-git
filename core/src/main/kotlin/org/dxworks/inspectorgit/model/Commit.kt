@@ -11,7 +11,7 @@ data class Commit(var id: String,
                   val committer: Author,
                   var parents: List<Commit>,
                   var changes: List<Change>) {
-    fun olderThan(age: Period) = committerDate.isBefore(LocalDateTime.now().minus(age))
+    fun olderThan(age: Period, other: Commit) = committerDate.isBefore(other.committerDate.minus(age))
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

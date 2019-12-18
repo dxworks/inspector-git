@@ -5,6 +5,6 @@ import org.springframework.data.repository.CrudRepository
 import java.util.*
 
 interface SystemRepository : CrudRepository<SystemEntity, UUID> {
-    fun findByName(name: String): SystemEntity
-    fun deleteByName(name: String)
+    fun findBySystemId(systemId: String): SystemEntity
+    fun deleteBySystemId(systemId: String)
 }

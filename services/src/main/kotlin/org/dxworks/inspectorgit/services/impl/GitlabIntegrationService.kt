@@ -1,15 +1,17 @@
-package org.dxworks.inspectorgit.web.services
+package org.dxworks.inspectorgit.services.impl
 
+import org.dxworks.inspectorgit.dto.GitlabSimpleProjectResponseDTO
 import org.dxworks.inspectorgit.dto.SwProjectDTO
+import org.dxworks.inspectorgit.persistence.entities.SwProjectEntity
 import org.dxworks.inspectorgit.services.IntegrationService
 import org.dxworks.inspectorgit.services.ProjectService
-import org.dxworks.inspectorgit.web.dto.GitlabSimpleProjectResponseDTO
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.exchange
+import kotlin.streams.toList
 
 @Service
 class GitlabIntegrationService(private val integrationService: IntegrationService,
@@ -46,14 +48,14 @@ class GitlabIntegrationService(private val integrationService: IntegrationServic
         return httpHeaders
     }
 
-    fun import(projectsDTO: List<SwProjectDTO>) {
-        projectsDTO.parallelStream()
+    fun import(projectsDTO: List<SwProjectDTO>): List<SwProjectEntity> {
+        return projectsDTO.parallelStream()
                 .filter { !projectService.existsByPath("$platform/${it.path}") }
-                .forEach {
+                .map {
                     it.path = "$platform/${it.path}"
                     val integrationDTO = integrationService.findByNameAndPlatform(it.integrationName!!, it.platform!!)
                     projectService.import(it, integrationDTO.username, integrationDTO.password!!)
-                }
+                }.toList()
     }
 
 
