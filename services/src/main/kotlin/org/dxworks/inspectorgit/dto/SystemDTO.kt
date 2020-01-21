@@ -12,7 +12,7 @@ class SystemDTO {
             val dto = SystemDTO()
             dto.name = entity.name
             dto.systemId = entity.systemId
-            dto.projects = entity.swProjects?.map { SwProjectDTO.fromEntity(it) }
+            dto.projects = if (includeProjects) entity.swProjects?.map { SwProjectDTO.fromEntity(it) } else null
             return dto
         }
     }
