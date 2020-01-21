@@ -16,7 +16,7 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
     fun transform(): Change {
         LOG.info("Creating ${changeDTO.type} change for file: ${changeDTO.oldFileName} -> ${changeDTO.newFileName}")
         val annotatedLines = getAnnotatedLines(changeDTO, project)
-        val file = getFileForChange(changeDTO, project)
+        val file = getFileForChange(changeDTO, project, commit.isMergeCommit)
         val parentCommit = if (changeDTO.parentCommitId.isEmpty()) null else commit.parents.find { it.id == changeDTO.parentCommitId }!!
         val change = Change(
                 commit = commit,
@@ -43,7 +43,7 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
                 AnnotatedLine(commit, lineChangeDTO.number, lineChangeDTO.content)
             }
         else {
-            val latChange = file.getLastChange(parentCommit) ?: file.getLastChange()!!
+            val latChange = file.getLastChange(parentCommit) ?: file.lastChange!!
             latChange.annotatedLines[lineChangeDTO.number - 1]
         }
     }
@@ -53,21 +53,33 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
         return changeDTO.annotatedLines.map { AnnotatedLine(project.commitRegistry.getByID(it.commitId)!!, it.number, it.content) }.toMutableList()
     }
 
-    private fun getFileForChange(change: ChangeDTO, project: Project): File {
+    private fun getFileForChange(change: ChangeDTO, project: Project, mergeCommit: Boolean): File {
         LOG.info("Getting file")
         return when (change.type) {
             ChangeType.ADD -> {
-                val file = File(change.isBinary)
-                project.fileRegistry.add(file, change.newFileName)
-                file
+                val file = project.fileRegistry.getByID(change.newFileName)
+                if (mergeCommit && file != null) {
+                    file
+                } else {
+                    val newFile = File(change.isBinary)
+                    project.fileRegistry.add(newFile, change.newFileName)
+                    newFile
+                }
             }
             ChangeType.RENAME -> {
-                val file = getFileForChange(change.oldFileName, project.commitRegistry.getByID(change.parentCommitId)!!, project.fileRegistry)
-                project.fileRegistry.add(file, change.newFileName)
-                file
+                if (mergeCommit) {
+                    project.fileRegistry.getByID(change.newFileName)!!
+                } else {
+                    val file = getFileForChange(change.oldFileName, project.commitRegistry.getByID(change.parentCommitId)!!, project.fileRegistry)
+                    project.fileRegistry.add(file, change.newFileName)
+                    file
+                }
             }
             else -> {
-                getFileForChange(change.oldFileName, project.commitRegistry.getByID(change.parentCommitId)!!, project.fileRegistry)
+                if (mergeCommit)
+                    project.fileRegistry.getByID(change.oldFileName)!!
+                else
+                    getFileForChange(change.oldFileName, project.commitRegistry.getByID(change.parentCommitId)!!, project.fileRegistry)
             }
         }
     }

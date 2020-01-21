@@ -1,32 +1,38 @@
 package org.dxworks.inspectorgit.model
 
 import org.dxworks.inspectorgit.gitClient.enums.ChangeType
-import org.dxworks.inspectorgit.utils.devNull
 import java.nio.file.Path
 import java.nio.file.Paths
 
 data class File(val isBinary: Boolean, val changes: MutableList<Change> = ArrayList()) {
+
+    val name get() = name(null)
+
+    val path get() = path(null)
+
+    val fullyQualifiedName get() = fullyQualifiedName(null)
+
+    val lastChange get() = getLastChange(null)
+
+    val isAlive get() = isAlive(null)
+
+    val annotatedLines get() = annotatedLines(null)
+
     fun fullyQualifiedName(commit: Commit?): String? = getLastChange(commit)?.newFileName
 
     fun name(commit: Commit?): String? = fullyQualifiedName(commit)?.split("/")?.last()
 
     fun path(commit: Commit?): Path? = fullyQualifiedName(commit)?.let { Paths.get(it) }
 
-
-    fun alias(commit: Commit): String {
-        return getLastChange(commit)?.newFileName ?: devNull
-    }
-
-    fun isAlive(commit: Commit): Boolean {
+    fun isAlive(commit: Commit?): Boolean {
         val type = getLastChange(commit)?.type
         return type != null && type != ChangeType.DELETE
     }
 
-    fun annotatedLines(commit: Commit): List<AnnotatedLine> {
+    fun annotatedLines(commit: Commit?): List<AnnotatedLine> {
         return getLastChange(commit)?.annotatedLines ?: emptyList()
     }
 
-    fun getLastChange() = getLastChange(null)
 
     tailrec fun getLastChange(commit: Commit?): Change? {
         return when {
