@@ -15,28 +15,29 @@ class GitClient(path: Path) {
     private val renameDetectionThreshold = "-M25%"
     private val contextThreshold = "-U0"
 
-    private val gitLogCommand = "$git log $renameDetectionThreshold -c $contextThreshold --encoding=UTF-8 --format=\"commit: %H%nparents: %P%nauthor name: %an%nauthor email: %ae%nauthor date: %ad%ncommitter name: %cn%ncommitter email: %ce%ncommitter date: %cd %nmessage:%n%s%n%b\""
-    private val gitAffectedFilesCommand = "$git log $renameDetectionThreshold -m -1 --name-only --pretty=\"format:\""
-    private val gitDiffCommand = "$git diff $renameDetectionThreshold $contextThreshold"
-    private val gitBlameCommand = "$git blame -l"
-    private val gitBranchCommand = "$git branch"
+    private val gitLogCommand = "log $renameDetectionThreshold -c $contextThreshold --encoding=UTF-8 --format=\"commit: %H%nparents: %P%nauthor name: %an%nauthor email: %ae%nauthor date: %ad%ncommitter name: %cn%ncommitter email: %ce%ncommitter date: %cd %nmessage:%n%s%n%b\""
+    private val gitAffectedFilesCommand = "log $renameDetectionThreshold -m -1 --name-only --pretty=\"format:\""
+    private val gitDiffCommand = "diff $renameDetectionThreshold $contextThreshold"
+    private val gitBlameCommand = "blame -l"
+    private val gitBranchCommand = "branch"
     private val processBuilder = ProcessBuilder()
 
     init {
         processBuilder.directory(path.toFile())
     }
 
-    val branch: String? = runCommand(gitBranchCommand).find { it.startsWith("* ") }?.removePrefix("* ")
+    val branch: String? = runGitCommand(gitBranchCommand).find { it.startsWith("* ") }?.removePrefix("* ")
 
-    fun getLogs(): List<String> = runCommand(gitLogCommand)
+    fun getLogs(): List<String> = runGitCommand(gitLogCommand)
 
-    fun diff(parent: String, revision: String, file: String): List<String> = runCommand("$gitDiffCommand $parent $revision -- $file")
+    fun diff(parent: String, revision: String, file: String): List<String> = runGitCommand("$gitDiffCommand $parent $revision -- $file")
 
-    fun blame(revision: String, file: String): List<String> = runCommand("$gitBlameCommand $file $revision")
+    fun blame(revision: String, file: String): List<String> = runGitCommand("$gitBlameCommand $file $revision")
 
-    fun affectedFiles(revision: String): List<String> = runCommand("$gitAffectedFilesCommand $revision")
+    fun affectedFiles(revision: String): List<String> = runGitCommand("$gitAffectedFilesCommand $revision")
 
-    private fun runCommand(command: String): List<String> {
+    fun runGitCommand(args: String): List<String> {
+        val command = "$git $args"
         LOG.info("Running command: $command")
 
         processBuilder.command(OsUtils.commandInterpreterPrefix, OsUtils.interpreterArg, command)

@@ -15,6 +15,10 @@ abstract class AbstractRegistry<TYPE, ID> {
         return map[id]
     }
 
+    open fun contains(id: ID): Boolean {
+        return map.contains(id)
+    }
+
     fun add(entity: TYPE, id: ID): TYPE? {
         return map.put(id, entity)
     }

@@ -43,8 +43,8 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
                 AnnotatedLine(commit, lineChangeDTO.number, lineChangeDTO.content)
             }
         else {
-            val latChange = file.getLastChange(parentCommit) ?: file.lastChange!!
-            latChange.annotatedLines[lineChangeDTO.number - 1]
+            val lastChange = file.getLastChange(parentCommit) ?: file.lastChange!!
+            lastChange.annotatedLines[lineChangeDTO.number - 1]
         }
     }
 
