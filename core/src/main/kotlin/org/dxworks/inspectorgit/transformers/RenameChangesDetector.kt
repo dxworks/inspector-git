@@ -39,9 +39,7 @@ class RenameChangesDetector(private val changes: List<ChangeDTO>, private val pr
                     type = ChangeType.RENAME,
                     parentCommitId = it.parentCommitId,
                     isBinary = it.isBinary,
-                    hunks = emptyList(),
-                    annotatedLines = it.annotatedLines,
-                    isBlame = it.isBlame)
+                    hunks = emptyList())
         }
     }
 

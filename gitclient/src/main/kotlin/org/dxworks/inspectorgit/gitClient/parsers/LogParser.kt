@@ -1,10 +1,9 @@
 package org.dxworks.inspectorgit.gitClient.parsers
 
-import org.dxworks.inspectorgit.gitClient.GitClient
 import org.dxworks.inspectorgit.gitClient.dto.GitLogDTO
 import org.slf4j.LoggerFactory
 
-class LogParser(private val gitClient: GitClient) : GitParser<GitLogDTO> {
+class LogParser : GitParser<GitLogDTO> {
     companion object {
         private val LOG = LoggerFactory.getLogger(LogParser::class.java)
     }
@@ -14,7 +13,7 @@ class LogParser(private val gitClient: GitClient) : GitParser<GitLogDTO> {
     override fun parse(lines: List<String>): GitLogDTO {
         val commits = extractCommits(lines)
         LOG.info("Found ${commits.size} commits")
-        return GitLogDTO(commits.map { CommitParserFactory.create(it, gitClient).parse(it) }.reversed())
+        return GitLogDTO(commits.map { CommitParserFactory.create(it).parse(it) }.reversed())
     }
 
     private fun extractCommits(lines: List<String>): List<List<String>> {

@@ -9,17 +9,15 @@ data class Change(val commit: Commit,
                   val parentCommit: Commit?,
                   val oldFileName: String,
                   val newFileName: String,
-                  val lineChanges: List<LineChange>,
-                  var annotatedLines: List<AnnotatedLine>) {
-    val parent: Change? = file.getLastChange(commit)
+                  var lineChanges: List<LineChange>,
+                  var annotatedLines: List<AnnotatedLine> = emptyList()) {
+    val parent: Change? = file.getLastChange(parentCommit)
 
     val isRenameChange: Boolean
         get() = type == ChangeType.RENAME
 
     init {
-        if (!commit.isMergeCommit) {
-            apply()
-        }
+        apply()
     }
 
     private fun apply() {

@@ -11,8 +11,6 @@ abstract class ChangeParser(private val parentCommitId: String) : GitParser<Chan
         private val LOG = LoggerFactory.getLogger(ChangeParser::class.java)
     }
 
-    open val isBlameParser = false
-
     override fun parse(lines: List<String>): ChangeDTO {
         val type = extractChangeType(lines)
         val (oldFileName, newFileName) = extractFileNames(lines, type)
@@ -22,8 +20,7 @@ abstract class ChangeParser(private val parentCommitId: String) : GitParser<Chan
                 oldFileName = oldFileName,
                 newFileName = newFileName,
                 parentCommitId = parentCommitId,
-                isBinary = lines.any { it.startsWith("Binary files") },
-                isBlame = isBlameParser)
+                isBinary = lines.any { it.startsWith("Binary files") })
         addAnnotatedLines(changeDTO)
         addHunks(lines, changeDTO)
         return changeDTO

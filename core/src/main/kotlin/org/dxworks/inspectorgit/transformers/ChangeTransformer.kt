@@ -15,7 +15,6 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
 
     fun transform(): Change {
         LOG.info("Creating ${changeDTO.type} change for file: ${changeDTO.oldFileName} -> ${changeDTO.newFileName}")
-        val annotatedLines = getAnnotatedLines(changeDTO, project)
         val file = getFileForChange(changeDTO, project, commit.isMergeCommit)
         val parentCommit = if (changeDTO.parentCommitId.isEmpty()) null else commit.parents.find { it.id == changeDTO.parentCommitId }!!
         val change = Change(
@@ -25,32 +24,24 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
                 parentCommit = parentCommit,
                 oldFileName = changeDTO.oldFileName,
                 newFileName = changeDTO.newFileName,
-                lineChanges = getLineChanges(changeDTO, annotatedLines, commit, file, parentCommit),
-                annotatedLines = annotatedLines)
+                lineChanges = getLineChanges(changeDTO, commit, file, parentCommit))
         change.file.changes.add(change)
         LOG.info("Change created")
         return change
     }
 
-    private fun getLineChanges(changeDTO: ChangeDTO, annotatedLines: MutableList<AnnotatedLine>, commit: Commit, file: File, parentCommit: Commit?): MutableList<LineChange> {
+    private fun getLineChanges(changeDTO: ChangeDTO, commit: Commit, file: File, parentCommit: Commit?): MutableList<LineChange> {
         LOG.info("Calculating line changes")
-        return changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, getAnnotatedLine(it, annotatedLines, commit, file, parentCommit)) }.toMutableList()
+        return changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, getAnnotatedLine(it, commit, file, parentCommit), commit) }.toMutableList()
     }
 
-    private fun getAnnotatedLine(lineChangeDTO: LineChangeDTO, annotatedLines: MutableList<AnnotatedLine>, commit: Commit, file: File, parentCommit: Commit?): AnnotatedLine {
+    private fun getAnnotatedLine(lineChangeDTO: LineChangeDTO, commit: Commit, file: File, parentCommit: Commit?): AnnotatedLine {
         return if (lineChangeDTO.operation == LineOperation.ADD)
-            annotatedLines.getOrElse(lineChangeDTO.number) {
-                AnnotatedLine(commit, lineChangeDTO.number, lineChangeDTO.content)
-            }
+            AnnotatedLine(commit, lineChangeDTO.number, lineChangeDTO.content)
         else {
             val lastChange = file.getLastChange(parentCommit) ?: file.lastChange!!
             lastChange.annotatedLines[lineChangeDTO.number - 1]
         }
-    }
-
-    private fun getAnnotatedLines(changeDTO: ChangeDTO, project: Project): MutableList<AnnotatedLine> {
-        LOG.info("Calculating annotated lines")
-        return changeDTO.annotatedLines.map { AnnotatedLine(project.commitRegistry.getByID(it.commitId)!!, it.number, it.content) }.toMutableList()
     }
 
     private fun getFileForChange(change: ChangeDTO, project: Project, mergeCommit: Boolean): File {

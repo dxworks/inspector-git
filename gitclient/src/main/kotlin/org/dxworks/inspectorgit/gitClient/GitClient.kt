@@ -48,7 +48,7 @@ class GitClient(path: Path) {
             LOG.info("Command completed")
             lines
         } else {
-            LOG.error("Command completed with errors")
+            LOG.error("Command completed with errors:\n ${getLines(process.errorStream).joinToString("\n")}")
             emptyList()
         }
     }
