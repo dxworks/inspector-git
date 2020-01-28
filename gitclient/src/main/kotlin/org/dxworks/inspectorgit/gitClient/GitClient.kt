@@ -26,17 +26,17 @@ class GitClient(path: Path) {
         processBuilder.directory(path.toFile())
     }
 
-    val branch: String? = runGitCommand(gitBranchCommand).find { it.startsWith("* ") }?.removePrefix("* ")
+    val branch: String? = runGitCommand(gitBranchCommand)!!.find { it.startsWith("* ") }?.removePrefix("* ")
 
-    fun getLogs(): List<String> = runGitCommand(gitLogCommand)
+    fun getLogs(): List<String> = runGitCommand(gitLogCommand)!!
 
-    fun diff(parent: String, revision: String, file: String): List<String> = runGitCommand("$gitDiffCommand $parent $revision -- $file")
+    fun diff(parent: String, revision: String, file: String): List<String> = runGitCommand("$gitDiffCommand $parent $revision -- $file")!!
 
-    fun blame(revision: String, file: String): List<String> = runGitCommand("$gitBlameCommand $file $revision")
+    fun blame(revision: String, file: String): List<String>? = runGitCommand("$gitBlameCommand $file $revision")
 
-    fun affectedFiles(revision: String): List<String> = runGitCommand("$gitAffectedFilesCommand $revision")
+    fun affectedFiles(revision: String): List<String> = runGitCommand("$gitAffectedFilesCommand $revision")!!
 
-    fun runGitCommand(args: String): List<String> {
+    fun runGitCommand(args: String): List<String>? {
         val command = "$git $args"
         LOG.info("Running command: $command")
 
@@ -49,7 +49,7 @@ class GitClient(path: Path) {
             lines
         } else {
             LOG.error("Command completed with errors:\n ${getLines(process.errorStream).joinToString("\n")}")
-            emptyList()
+            null
         }
     }
 

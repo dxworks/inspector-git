@@ -43,7 +43,8 @@ abstract class ChangeParser(private val parentCommitId: String) : GitParser<Chan
                     currentHunkLines = ArrayList()
                     hunks.add(currentHunkLines)
                 }
-                currentHunkLines.add(it)
+                if (!it.startsWith("\\"))
+                    currentHunkLines.add(it)
             }
             LOG.info("Found ${hunks.size} hunks")
             hunks

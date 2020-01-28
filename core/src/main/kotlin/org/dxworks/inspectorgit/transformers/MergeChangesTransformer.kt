@@ -8,13 +8,12 @@ import org.dxworks.inspectorgit.model.Project
 
 class MergeChangesTransformer(private val changeDTOs: List<ChangeDTO>, val commit: Commit, val project: Project) {
 
-    fun transform(): List<Change> {
+    fun transform(): Change {
         val changes = changeDTOs.map { ChangeTransformer(it, commit, project).transform() }
-        fixAnnotatedLinesForChanges(changes)
-        return changes
+        return mergeChanges(changes)
     }
 
-    private fun fixAnnotatedLinesForChanges(changes: List<Change>): Change {
+    private fun mergeChanges(changes: List<Change>): Change {
         val annotatedFiles = changes.map { it.annotatedLines }
         val size = annotatedFiles.first().size
         for (i in 0 until size) {
@@ -28,6 +27,7 @@ class MergeChangesTransformer(private val changeDTOs: List<ChangeDTO>, val commi
         // This is done temporarily until we figure out how to manage line changes in a merge commit
         firstChange.lineChanges = firstChange.lineChanges + changes.subList(1, changes.size).flatMap { it.lineChanges }
         firstChange.lineChanges.filter { it.operation == LineOperation.ADD }.forEach { it.commit = it.annotatedLine.commit }
+        firstChange.parentCommits = changes.flatMap { it.parentCommits }
         // till here
         return firstChange
     }

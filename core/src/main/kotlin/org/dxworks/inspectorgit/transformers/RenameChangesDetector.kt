@@ -14,7 +14,7 @@ class RenameChangesDetector(private val changes: List<ChangeDTO>, private val pr
 
         LOG.info("Getting potentially renamed files")
 
-        val potentiallyRenamedFiles = changes.filter { it.type == ChangeType.ADD }.mapNotNull { project.fileRegistry.getByID(it.newFileName) }
+        val potentiallyRenamedFiles = changes.filter { it.type == ChangeType.ADD }.mapNotNull { project.fileRegistry.getById(it.newFileName) }
 
         LOG.info("Found: ${potentiallyRenamedFiles.size}")
         LOG.info("Getting rename changes")

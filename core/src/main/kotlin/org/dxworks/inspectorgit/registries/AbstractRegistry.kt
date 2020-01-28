@@ -11,7 +11,7 @@ abstract class AbstractRegistry<TYPE, ID> {
     val allIDs: Set<ID>
         get() = map.keys
 
-    open fun getByID(id: ID): TYPE? {
+    open fun getById(id: ID): TYPE? {
         return map[id]
     }
 

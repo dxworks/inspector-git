@@ -54,7 +54,7 @@ class CommitTransformer(private val commitDTO: CommitDTO, private val project: P
         if (commit.isMergeCommit) {
             val fixedChanges = RenameChangesDetector(changes, project).detectAndReplace()
             val changesByFile = fixedChanges.groupBy { it.newFileName }
-            commit.changes = changesByFile.flatMap { MergeChangesTransformer(it.value, commit, project).transform() }
+            commit.changes = changesByFile.map { MergeChangesTransformer(it.value, commit, project).transform() }
         } else {
             commit.changes = changes.map { ChangeTransformer(it, commit, project).transform() }
         }
@@ -68,7 +68,7 @@ class CommitTransformer(private val commitDTO: CommitDTO, private val project: P
             getAuthor(project, AuthorId(commitDTO.committerEmail, commitDTO.committerName))
 
     private fun getAuthor(project: Project, authorId: AuthorId): Author {
-        var author = project.authorRegistry.getByID(authorId)
+        var author = project.authorRegistry.getById(authorId)
         if (author == null) {
             author = Author(authorId)
             project.authorRegistry.add(author)
@@ -77,5 +77,5 @@ class CommitTransformer(private val commitDTO: CommitDTO, private val project: P
     }
 
     private fun getParentFromIds(parentIds: List<String>, project: Project): List<Commit> =
-            parentIds.mapNotNull { project.commitRegistry.getByID(it) }
+            parentIds.mapNotNull { project.commitRegistry.getById(it) }
 }

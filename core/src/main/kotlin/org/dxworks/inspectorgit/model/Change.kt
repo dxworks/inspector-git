@@ -3,25 +3,28 @@ package org.dxworks.inspectorgit.model
 import org.dxworks.inspectorgit.gitClient.enums.ChangeType
 import org.dxworks.inspectorgit.gitClient.enums.LineOperation
 
-data class Change(val commit: Commit,
-                  val type: ChangeType,
-                  val file: File,
-                  val parentCommit: Commit?,
-                  val oldFileName: String,
-                  val newFileName: String,
-                  var lineChanges: List<LineChange>,
-                  var annotatedLines: List<AnnotatedLine> = emptyList()) {
-    val parent: Change? = file.getLastChange(parentCommit)
+class Change(val commit: Commit,
+             val type: ChangeType,
+             val file: File,
+             var parentCommits: List<Commit>,
+             val oldFileName: String,
+             val newFileName: String,
+             var lineChanges: List<LineChange>,
+             var annotatedLines: List<AnnotatedLine> = emptyList(),
+             parentCommit: Commit?) {
+    val parents: List<Change> get() = parentCommits.map { file.getLastChange(it)!! }
 
     val isRenameChange: Boolean
         get() = type == ChangeType.RENAME
 
     init {
-        apply()
+        val parentChange = file.getLastChange(parentCommit)
+        if (!(commit.isMergeCommit && type != ChangeType.ADD && parentChange == null))
+            apply(parentChange)
     }
 
-    private fun apply() {
-        val newAnnotatedLines = parent?.annotatedLines
+    private fun apply(parentChange: Change?) {
+        val newAnnotatedLines = parentChange?.annotatedLines
                 ?.map { AnnotatedLine(it.commit, it.number, it.content) }?.toMutableList() ?: ArrayList()
         newAnnotatedLines.removeAll(lineChanges.filter { it.operation == LineOperation.REMOVE }.map { it.annotatedLine })
 
