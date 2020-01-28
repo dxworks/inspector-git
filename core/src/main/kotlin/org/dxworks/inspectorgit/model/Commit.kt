@@ -10,6 +10,7 @@ data class Commit(var id: String,
                   val author: Author,
                   val committer: Author,
                   var parents: List<Commit>,
+                  var children: List<Commit>,
                   var changes: List<Change>) {
     fun olderThan(age: Period, other: Commit) = committerDate.isBefore(other.committerDate.minus(age))
 
@@ -42,4 +43,10 @@ data class Commit(var id: String,
     val isMergeCommit: Boolean
         get() = parents.size > 1
 
+    val isSplitCommit: Boolean
+        get() = children.size > 1
+
+    fun addChild(commit: Commit) {
+        children = children + listOf(commit)
+    }
 }

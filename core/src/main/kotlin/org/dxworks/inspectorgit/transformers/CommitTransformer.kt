@@ -32,8 +32,10 @@ class CommitTransformer(private val commitDTO: CommitDTO, private val project: P
                 author = author,
                 committer = committer,
                 parents = getParentFromIds(commitDTO.parentIds, project),
+                children = ArrayList(),
                 changes = ArrayList())
 
+        commit.parents.forEach { it.addChild(commit) }
         LOG.info("Adding commit to repository and to authors")
 
         project.commitRegistry.add(commit)

@@ -1,3 +1,4 @@
+import com.google.gson.Gson
 import org.dxworks.inspectorgit.gitClient.GitClient
 import org.dxworks.inspectorgit.gitClient.dto.AnnotatedLineDTO
 import org.dxworks.inspectorgit.gitClient.dto.GitLogDTO
@@ -18,16 +19,31 @@ internal class ModelTest {
         private lateinit var gitClient: GitClient
         private lateinit var gitLogDTO: GitLogDTO
         private lateinit var project: Project
+
         private val LOG = LoggerFactory.getLogger(ModelTest::class.java)
         private val dxPlatformPath = Paths.get("C:\\Users\\nagyd\\Documents\\DX\\dx\\dx-platform")
         private val IGMergeTestPath = Paths.get("C:\\Users\\nagyd\\Documents\\DX\\testRepo\\IGmergeTest")
         private val kafkaPath = Paths.get("C:\\Users\\nagyd\\Documents\\DX\\kafkaRepo\\kafka")
 
+        private val tmpFolder = Paths.get(System.getProperty("java.io.tmpdir")).resolve("inspectorGitTest")
+
         @BeforeAll
         @JvmStatic
         internal fun beforeAll() {
-            gitClient = GitClient(dxPlatformPath)
-            gitLogDTO = LogParser().parse(gitClient.getLogs())
+            val tmpFolderFile = tmpFolder.toFile()
+            tmpFolderFile.mkdirs()
+
+            val repoPath = kafkaPath
+            val repoName = repoPath.fileName.toString()
+            val repoCache = tmpFolder.resolve("$repoName.json").toFile()
+            if (repoCache.exists())
+                gitLogDTO = Gson().fromJson(repoCache.readText(), GitLogDTO::class.java)
+            else {
+                gitClient = GitClient(kafkaPath)
+                gitLogDTO = LogParser().parse(gitClient.getLogs())
+                repoCache.createNewFile()
+                repoCache.writeText(Gson().toJson(gitLogDTO))
+            }
             project = ProjectTransformer(gitLogDTO, "dx-platform").transform()
         }
     }

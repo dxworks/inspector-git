@@ -1,10 +1,15 @@
 package org.dxworks.inspectorgit.model
 
 import org.dxworks.inspectorgit.gitClient.enums.ChangeType
+import org.slf4j.LoggerFactory
 import java.nio.file.Path
 import java.nio.file.Paths
 
 data class File(val isBinary: Boolean, val changes: MutableList<Change> = ArrayList()) {
+
+    companion object {
+        private val LOG = LoggerFactory.getLogger(File::class.java)
+    }
 
     val name get() = name(null)
 
@@ -12,39 +17,53 @@ data class File(val isBinary: Boolean, val changes: MutableList<Change> = ArrayL
 
     val fullyQualifiedName get() = fullyQualifiedName(null)
 
-    val lastChange get() = getLastChange(null)
+    val lastChange get() = searchLastChange(null)
 
     val isAlive get() = isAlive(null)
 
     val annotatedLines get() = annotatedLines(null)
 
-    fun fullyQualifiedName(commit: Commit?): String? = getLastChange(commit)?.newFileName
+    fun fullyQualifiedName(commit: Commit?): String? = searchLastChange(commit)?.newFileName
 
     fun name(commit: Commit?): String? = fullyQualifiedName(commit)?.split("/")?.last()
 
     fun path(commit: Commit?): Path? = fullyQualifiedName(commit)?.let { Paths.get(it) }
 
     fun isAlive(commit: Commit?): Boolean {
-        val type = getLastChange(commit)?.type
+        val type = searchLastChange(commit)?.type
         return type != null && type != ChangeType.DELETE
     }
 
     fun annotatedLines(commit: Commit?): List<AnnotatedLine> {
-        return getLastChange(commit)?.annotatedLines ?: emptyList()
+        return searchLastChange(commit)?.annotatedLines ?: emptyList()
     }
 
+    fun getLastChange(commit: Commit) = searchLastChange(commit)
 
-    tailrec fun getLastChange(commit: Commit?): Change? {
+    private fun searchLastChange(commit: Commit?): Change? {
         return when {
+            commit == null -> changes.last()
             changes.isEmpty() -> null
-            commit == null -> return changes.last()
             else -> {
-                val change = changes.find { it.commit == commit }
-                if (change != null) change else {
-                    val parent = commit.parents.firstOrNull()
-                    if (parent == null) null else getLastChange(parent)
-                }
+                val splitCommitIds: MutableSet<String> = HashSet()
+                val potentialLastChanges = searchLastChangeRecursively(commit, splitCommitIds)
+                val maxChangeByListIndex = potentialLastChanges.maxBy { changes.indexOf(it) }
+                val maxChangeByCommitterTimestamp = potentialLastChanges.maxBy { it.commit.committerDate }
+                if (maxChangeByListIndex != maxChangeByCommitterTimestamp)
+                    LOG.error("last changes by timestamp and by index are different")
+                maxChangeByListIndex
             }
+        }
+    }
+
+    private fun searchLastChangeRecursively(commit: Commit, splitCommitIds: MutableSet<String>): List<Change> {
+        return if (splitCommitIds.contains(commit.id))
+            emptyList()
+        else {
+            if (commit.isSplitCommit)
+                splitCommitIds.add(commit.id)
+            changes.find { it.commit == commit }?.let { listOf(it) }
+                    ?: commit.parents.flatMap { searchLastChangeRecursively(it, splitCommitIds) }
         }
     }
 }
