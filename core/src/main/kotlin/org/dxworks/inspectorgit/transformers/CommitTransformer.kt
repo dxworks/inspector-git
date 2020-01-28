@@ -58,7 +58,7 @@ class CommitTransformer(private val commitDTO: CommitDTO, private val project: P
             val changesByFile = fixedChanges.groupBy { it.newFileName }
             commit.changes = changesByFile.map { MergeChangesTransformer(it.value, commit, project).transform() }
         } else {
-            commit.changes = changes.map { ChangeTransformer(it, commit, project).transform() }
+            commit.changes = changes.mapNotNull { ChangeTransformer(it, commit, project).transform() }
         }
         LOG.info("Transforming changes")
     }

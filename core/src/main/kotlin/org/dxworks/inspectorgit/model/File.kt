@@ -51,7 +51,7 @@ data class File(val isBinary: Boolean, val changes: MutableList<Change> = ArrayL
                 val maxChangeByCommitterTimestamp = potentialLastChanges.maxBy { it.commit.committerDate }
                 if (maxChangeByListIndex != maxChangeByCommitterTimestamp)
                     LOG.error("last changes by timestamp and by index are different")
-                maxChangeByListIndex
+                maxChangeByCommitterTimestamp
             }
         }
     }

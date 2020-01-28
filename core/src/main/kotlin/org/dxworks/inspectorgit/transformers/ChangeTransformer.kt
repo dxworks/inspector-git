@@ -13,22 +13,27 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
         private val LOG = LoggerFactory.getLogger(ChangeTransformer::class.java)
     }
 
-    fun transform(): Change {
+    fun transform(): Change? {
         LOG.info("Creating ${changeDTO.type} change for file: ${changeDTO.oldFileName} -> ${changeDTO.newFileName}")
         val file = getFileForChange(changeDTO, project, commit.isMergeCommit)
         val parentCommit = if (changeDTO.parentCommitId.isEmpty()) null else commit.parents.find { it.id == changeDTO.parentCommitId }!!
-        val change = Change(
-                commit = commit,
-                type = changeDTO.type,
-                file = file,
-                parentCommits = if (parentCommit == null) emptyList() else listOf(parentCommit),
-                oldFileName = changeDTO.oldFileName,
-                newFileName = changeDTO.newFileName,
-                lineChanges = getLineChanges(changeDTO, commit, file, parentCommit),
-                parentCommit = parentCommit)
-        change.file.changes.add(change)
-        LOG.info("Change created")
-        return change
+        try {
+            val change = Change(
+                    commit = commit,
+                    type = changeDTO.type,
+                    file = file,
+                    parentCommits = if (parentCommit == null) emptyList() else listOf(parentCommit),
+                    oldFileName = changeDTO.oldFileName,
+                    newFileName = changeDTO.newFileName,
+                    lineChanges = getLineChanges(changeDTO, commit, file, parentCommit),
+                    parentCommit = parentCommit)
+            change.file.changes.add(change)
+            LOG.info("Change created")
+            return change
+        } catch (e: IllegalStateException) {
+            LOG.warn(e.message)
+            return null
+        }
     }
 
     private fun getLineChanges(changeDTO: ChangeDTO, commit: Commit, file: File, parentCommit: Commit?): MutableList<LineChange> {
@@ -41,7 +46,10 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
         return if (lineChangeDTO.operation == LineOperation.ADD)
             AnnotatedLine(commit, lineChangeDTO.number, lineChangeDTO.content)
         else {
-            lastChange!!.annotatedLines[lineChangeDTO.number - 1]
+            if (lastChange == null)
+                throw IllegalStateException("Last change is null")
+            else
+                lastChange.annotatedLines[lineChangeDTO.number - 1]
         }
     }
 

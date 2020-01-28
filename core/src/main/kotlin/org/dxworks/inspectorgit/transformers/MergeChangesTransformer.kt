@@ -10,7 +10,7 @@ import java.nio.file.Paths
 class MergeChangesTransformer(private val changeDTOs: List<ChangeDTO>, val commit: Commit, val project: Project) {
 
     fun transform(): Change {
-        val changes = changeDTOs.map { ChangeTransformer(it, commit, project).transform() }
+        val changes = changeDTOs.mapNotNull { ChangeTransformer(it, commit, project).transform() }
         return mergeChanges(changes)
     }
 
