@@ -3,15 +3,15 @@ package org.dxworks.inspectorgit.model
 import org.dxworks.inspectorgit.gitClient.enums.ChangeType
 import org.dxworks.inspectorgit.gitClient.enums.LineOperation
 
-class Change(val commit: Commit,
-             val type: ChangeType,
-             val file: File,
-             var parentCommits: List<Commit>,
-             val oldFileName: String,
-             val newFileName: String,
-             var lineChanges: List<LineChange>,
-             var annotatedLines: List<AnnotatedLine> = emptyList(),
-             parentCommit: Commit?) {
+open class Change(val commit: Commit,
+                  val type: ChangeType,
+                  val file: File,
+                  var parentCommits: List<Commit>,
+                  val oldFileName: String,
+                  val newFileName: String,
+                  var lineChanges: List<LineChange>,
+                  var annotatedLines: List<AnnotatedLine> = emptyList(),
+                  parentCommit: Commit?) {
     val parents: List<Change> = parentCommits.mapNotNull { file.getLastChange(it) }
 
     val isRenameChange: Boolean

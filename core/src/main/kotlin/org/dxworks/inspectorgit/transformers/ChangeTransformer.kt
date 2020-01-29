@@ -1,5 +1,6 @@
 package org.dxworks.inspectorgit.transformers
 
+import org.dxworks.inspectorgit.ChangeFactory
 import org.dxworks.inspectorgit.gitClient.dto.ChangeDTO
 import org.dxworks.inspectorgit.gitClient.dto.LineChangeDTO
 import org.dxworks.inspectorgit.gitClient.enums.ChangeType
@@ -8,7 +9,7 @@ import org.dxworks.inspectorgit.model.*
 import org.dxworks.inspectorgit.registries.FileRegistry
 import org.slf4j.LoggerFactory
 
-class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Commit, private val project: Project) {
+class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Commit, private val project: Project, private val changeFactory: ChangeFactory) {
     companion object {
         private val LOG = LoggerFactory.getLogger(ChangeTransformer::class.java)
     }
@@ -18,7 +19,7 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
         val file = getFileForChange(changeDTO, project, commit.isMergeCommit)
         val parentCommit = if (changeDTO.parentCommitId.isEmpty()) null else commit.parents.find { it.id == changeDTO.parentCommitId }!!
         try {
-            val change = Change(
+            val change = changeFactory.create(
                     commit = commit,
                     type = changeDTO.type,
                     file = file,
@@ -48,8 +49,20 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
         else {
             if (lastChange == null)
                 throw IllegalStateException("Last change is null")
-            else
-                lastChange.annotatedLines[lineChangeDTO.number - 1]
+            else {
+                val annotatedLine = lastChange.annotatedLines[lineChangeDTO.number - 1]
+                return if (annotatedLine.content != lineChangeDTO.content) {
+                    val errorInfo = "in file ${changeDTO.newFileName} at line ${lineChangeDTO.number}.\nExpected: ${lineChangeDTO.content}\nActual: ${annotatedLine.content}"
+                    if (lastChange.annotatedLines.size > lineChangeDTO.number) {
+                        LOG.debug("Line contents don't match but content was fount on next line. Picking that line instead.\n$errorInfo")
+                        lastChange.annotatedLines[lineChangeDTO.number]
+                    } else {
+                        LOG.error("Line contents don't match $errorInfo")
+                        annotatedLine
+                    }
+                } else
+                    annotatedLine
+            }
         }
     }
 

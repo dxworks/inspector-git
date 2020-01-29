@@ -7,12 +7,12 @@ import org.dxworks.inspectorgit.gitClient.parsers.LogParser
 import org.dxworks.inspectorgit.model.AnnotatedLine
 import org.dxworks.inspectorgit.model.Project
 import org.dxworks.inspectorgit.transformers.ProjectTransformer
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import java.nio.file.Paths
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 internal class ModelTest {
 
@@ -25,6 +25,8 @@ internal class ModelTest {
         private val dxPlatformPath = Paths.get("C:\\Users\\nagyd\\Documents\\DX\\dx\\dx-platform")
         private val IGMergeTestPath = Paths.get("C:\\Users\\nagyd\\Documents\\DX\\testRepo\\IGmergeTest")
         private val kafkaPath = Paths.get("C:\\Users\\nagyd\\Documents\\DX\\kafkaRepo\\kafka")
+        private val manCxPath = Paths.get("C:\\Users\\nagyd\\Documents\\DD\\man\\mansp-cx")
+        private val manUiPath = Paths.get("C:\\Users\\nagyd\\Documents\\DD\\man\\mansp-ui")
 
         private val tmpFolder = Paths.get(System.getProperty("java.io.tmpdir")).resolve("inspectorGitTest")
 
@@ -34,7 +36,7 @@ internal class ModelTest {
             val tmpFolderFile = tmpFolder.toFile()
             tmpFolderFile.mkdirs()
 
-            val repoPath = dxPlatformPath
+            val repoPath = manCxPath
 
             val repoName = repoPath.fileName.toString()
             val repoCache = tmpFolder.resolve("$repoName.json").toFile()
@@ -46,7 +48,7 @@ internal class ModelTest {
                 repoCache.createNewFile()
                 repoCache.writeText(Gson().toJson(gitLogDTO))
             }
-            project = ProjectTransformer(gitLogDTO, repoName).transform()
+            project = ProjectTransformer(gitLogDTO, repoName, TestChangeFactory(gitClient)).transform()
         }
     }
 
@@ -80,7 +82,7 @@ internal class ModelTest {
                             LOG.warn("Blame is null for $fileName in ${commit.id}")
                     }
         }
-//        assertTrue { ok }
+        assertTrue { ok }
     }
 
     private fun blameAndFileContentAreTheSame(blame: List<String>, annotatedLines: List<AnnotatedLine>, fileName: String, commitId: String): Boolean {
@@ -131,7 +133,7 @@ internal class ModelTest {
 
     private fun getContentDelimiterIndex(other: String): Int {
         var counter = 1
-        val startIndex = other.indexOf("(") +1
+        val startIndex = other.indexOf("(") + 1
         val tail = other.substring(startIndex)
         for (i in 0 until tail.length) {
             if (tail[i] == '(')

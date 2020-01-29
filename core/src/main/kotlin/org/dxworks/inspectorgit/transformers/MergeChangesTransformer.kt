@@ -1,5 +1,6 @@
 package org.dxworks.inspectorgit.transformers
 
+import org.dxworks.inspectorgit.ChangeFactory
 import org.dxworks.inspectorgit.gitClient.dto.ChangeDTO
 import org.dxworks.inspectorgit.gitClient.enums.LineOperation
 import org.dxworks.inspectorgit.model.Change
@@ -7,10 +8,10 @@ import org.dxworks.inspectorgit.model.Commit
 import org.dxworks.inspectorgit.model.Project
 import java.nio.file.Paths
 
-class MergeChangesTransformer(private val changeDTOs: List<ChangeDTO>, val commit: Commit, val project: Project) {
+class MergeChangesTransformer(private val changeDTOs: List<ChangeDTO>, val commit: Commit, val project: Project, private val changeFactory: ChangeFactory) {
 
     fun transform(): Change {
-        val changes = changeDTOs.mapNotNull { ChangeTransformer(it, commit, project).transform() }
+        val changes = changeDTOs.mapNotNull { ChangeTransformer(it, commit, project, changeFactory).transform() }
         return mergeChanges(changes)
     }
 

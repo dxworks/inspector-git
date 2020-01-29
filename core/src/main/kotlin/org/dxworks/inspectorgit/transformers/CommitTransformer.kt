@@ -1,5 +1,6 @@
 package org.dxworks.inspectorgit.transformers
 
+import org.dxworks.inspectorgit.ChangeFactory
 import org.dxworks.inspectorgit.gitClient.dto.ChangeDTO
 import org.dxworks.inspectorgit.gitClient.dto.CommitDTO
 import org.dxworks.inspectorgit.model.Author
@@ -10,7 +11,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-class CommitTransformer(private val commitDTO: CommitDTO, private val project: Project) {
+class CommitTransformer(private val commitDTO: CommitDTO, private val project: Project, private val changeFactory: ChangeFactory) {
     companion object {
         private const val dateFormat = "EEE MMM d HH:mm:ss yyyy Z"
         private val LOG = LoggerFactory.getLogger(CommitTransformer::class.java)
@@ -18,6 +19,9 @@ class CommitTransformer(private val commitDTO: CommitDTO, private val project: P
 
     fun addToProject() {
         LOG.info("Creating commit with id: ${commitDTO.id}")
+        val parents = getParentsFromIds(commitDTO.parentIds, project)
+        if (parents.size > 1)
+            LOG.info("Is merge commit")
 
         val author = getAuthor(commitDTO, project)
         LOG.info("Parsed author ${author.id}")
@@ -31,7 +35,7 @@ class CommitTransformer(private val commitDTO: CommitDTO, private val project: P
                 committerDate = parseDate(commitDTO.committerDate),
                 author = author,
                 committer = committer,
-                parents = getParentFromIds(commitDTO.parentIds, project),
+                parents = parents,
                 children = ArrayList(),
                 changes = ArrayList())
 
@@ -56,9 +60,9 @@ class CommitTransformer(private val commitDTO: CommitDTO, private val project: P
         if (commit.isMergeCommit) {
             val fixedChanges = RenameChangesDetector(changes, project).detectAndReplace()
             val changesByFile = fixedChanges.groupBy { it.newFileName }
-            commit.changes = changesByFile.map { MergeChangesTransformer(it.value, commit, project).transform() }
+            commit.changes = changesByFile.map { MergeChangesTransformer(it.value, commit, project, changeFactory).transform() }
         } else {
-            commit.changes = changes.mapNotNull { ChangeTransformer(it, commit, project).transform() }
+            commit.changes = changes.mapNotNull { ChangeTransformer(it, commit, project, changeFactory).transform() }
         }
         LOG.info("Transforming changes")
     }
@@ -78,6 +82,6 @@ class CommitTransformer(private val commitDTO: CommitDTO, private val project: P
         return author
     }
 
-    private fun getParentFromIds(parentIds: List<String>, project: Project): List<Commit> =
+    private fun getParentsFromIds(parentIds: List<String>, project: Project): List<Commit> =
             parentIds.mapNotNull { project.commitRegistry.getById(it) }
 }
