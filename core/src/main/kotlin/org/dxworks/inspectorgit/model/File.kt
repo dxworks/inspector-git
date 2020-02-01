@@ -56,7 +56,6 @@ data class File(val isBinary: Boolean, val changes: MutableList<Change> = ArrayL
         }
     }
 
-//    private tailrec fun searchLastChangeRecursively(commit: Commit, splitCommitIds: MutableSet<String>): List<Change> {
     private fun searchLastChangeRecursively(commit: Commit, splitCommitIds: MutableSet<String>): List<Change> {
         return if (splitCommitIds.contains(commit.id))
             emptyList()
@@ -65,7 +64,6 @@ data class File(val isBinary: Boolean, val changes: MutableList<Change> = ArrayL
                 splitCommitIds.add(commit.id)
             changes.find { it.commit == commit }?.let { listOf(it) }
                     ?: commit.parents.flatMap { searchLastChangeRecursively(it, splitCommitIds) }
-//                    ?: searchLastChangeRecursively(commit.parents.first(), splitCommitIds)
         }
     }
 }
