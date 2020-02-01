@@ -7,18 +7,23 @@ import org.dxworks.inspectorgit.gitClient.parsers.abstracts.HunkParser
 class SimpleHunkParser : HunkParser() {
     override fun extractLineChanges(lines: List<String>): List<LineChangeDTO> {
         val (removePair, addPair) = getRemoveAndAddHunkInfo(lines[0])
-        val (removeStart, removeCount) = removePair
-        val (addStart, addCount) = addPair
+        val (removeStart, _) = removePair
+        val (addStart, _) = addPair
 
-        val lineChanges: MutableList<LineChangeDTO> = ArrayList()
-        var diffLineIndex = 1
+        var removedLineIndex = 0
+        var addedLineIndex = 0
 
-        for (i in removeStart until (removeStart + removeCount))
-            lineChanges.add(LineChangeDTO(operation = LineOperation.REMOVE, number = i, content = lines[diffLineIndex++].removePrefix("-")))
-        for (i in addStart until (addStart + addCount))
-            lineChanges.add(LineChangeDTO(operation = LineOperation.ADD, number = i, content = lines[diffLineIndex++].removePrefix("+")))
-
-        return lineChanges
+        return lines.drop(1). mapNotNull {
+            when {
+                it.startsWith("-") -> LineChangeDTO(operation = LineOperation.REMOVE, number = removeStart + removedLineIndex++, content = it.removePrefix("-"))
+                it.startsWith("+") -> LineChangeDTO(operation = LineOperation.ADD, number = addStart + addedLineIndex++, content = it.removePrefix("+"))
+                else -> {
+                    removedLineIndex++
+                    addedLineIndex++
+                    null
+                }
+            }
+        }
     }
 
     private fun getRemoveAndAddHunkInfo(changeInfoLine: String): Pair<Pair<Int, Int>, Pair<Int, Int>> {

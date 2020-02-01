@@ -49,6 +49,7 @@ internal class ModelTest {
                 repoCache.writeText(Gson().toJson(gitLogDTO))
             }
             project = ProjectTransformer(gitLogDTO, repoName, TestChangeFactory(gitClient)).transform()
+//            project = ProjectTransformer(gitLogDTO, repoName).transform()
         }
     }
 

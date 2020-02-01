@@ -12,17 +12,15 @@ open class Change(val commit: Commit,
                   var lineChanges: List<LineChange>,
                   var annotatedLines: List<AnnotatedLine> = emptyList(),
                   parentCommit: Commit?) {
+
+    protected var parentChange: Change? = if (parentCommit == null) null else file.getLastChange(parentCommit)
+
     val parents: List<Change> = parentCommits.mapNotNull { file.getLastChange(it) }
 
     val isRenameChange: Boolean
         get() = type == ChangeType.RENAME
 
     init {
-        val parentChange =
-                if (parentCommit == null)
-                    null
-                else
-                    file.getLastChange(parentCommit)
         applyLineChanges(parentChange)
     }
 

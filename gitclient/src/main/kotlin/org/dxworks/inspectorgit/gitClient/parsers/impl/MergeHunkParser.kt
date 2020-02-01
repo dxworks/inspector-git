@@ -5,6 +5,7 @@ import org.dxworks.inspectorgit.gitClient.enums.LineOperation
 import org.dxworks.inspectorgit.gitClient.parsers.abstracts.HunkParser
 
 class MergeHunkParser(private val parentIndex: Int, private val numberOfParents: Int) : HunkParser() {
+    private val spaces = " ".repeat(numberOfParents)
     private val minus = '-'
     private val plus = "+"
 
@@ -34,14 +35,18 @@ class MergeHunkParser(private val parentIndex: Int, private val numberOfParents:
     private fun getFromLines(lines: List<String>): List<String> {
         val pluses = plus.repeat(numberOfParents)
         return lines.filter {
-            it[parentIndex] == minus ||
+            it.startsWith(spaces) ||
+                    it[parentIndex] == minus ||
                     it.startsWith(pluses.replaceRange(parentIndex, parentIndex + 1, " "))
 
         }
     }
 
     private fun getToLines(lines: List<String>): List<String> {
-        return lines.filter { it.substring(0, numberOfParents).contains(plus) }
+        return lines.filter {
+            it.startsWith(spaces) ||
+                    it.substring(0, numberOfParents).contains(plus)
+        }
     }
 
     private fun getFileRanges(lines: List<String>): Pair<Pair<Int, Int>, Pair<Int, Int>> {

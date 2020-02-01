@@ -29,30 +29,33 @@ class TestChange(
     }
 
     init {
-        val blame = gitClient.blame(commit.id, newFileName)
-        if (blame != null) {
-            if (!blameAndFileContentAreTheSame(blame, commit.id))
-                LOG.error("File $newFileName is not correctly built")
-        } else
-            LOG.warn("Blame is null for $newFileName in ${commit.id}")
+        if (!file.isBinary && type != ChangeType.DELETE) {
+            val blame = gitClient.blame(commit.id, newFileName)
+            if (blame != null) {
+                if (!blameAndFileContentAreTheSame(blame, commit.id))
+                    LOG.error("File $newFileName is not correctly built in ${commit.id} from ${parentCommit?.id}.file last changed in ${parentChange?.commit?.id}")
+            } else
+                LOG.warn("Blame is null for $newFileName in ${commit.id}")
+        }
     }
 
 
     private fun blameAndFileContentAreTheSame(blame: List<String>, commitId: String): Boolean {
         if (blame.size != annotatedLines.size) {
-            LOG.error("$newFileName blames have a different number of lines")
+            LOG.error("$newFileName blames have a different number of lines: blame: ${blame.size}, IG: ${annotatedLines.size}")
             return false
         }
         val annotatedLineDTOs = blame.map { parseAnnotatedLine(it) }
+        var ok = true
         for (i in 1 until annotatedLineDTOs.size) {
             val annotatedLineDTO = annotatedLineDTOs[i]
             val annotatedLine = annotatedLines[i]
             if (!linesAreTheSame(annotatedLineDTO, annotatedLine, newFileName, commitId)) {
                 LOG.error("$newFileName is not correct in $commitId because:\n$annotatedLineDTO differs from $annotatedLine")
-                return false
+                ok = false
             }
         }
-        return true
+        return ok
     }
 
     private fun linesAreTheSame(annotatedLineDTO: AnnotatedLineDTO, annotatedLine: AnnotatedLine, fileName: String, commitId: String): Boolean {

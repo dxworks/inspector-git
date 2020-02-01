@@ -50,18 +50,7 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
             if (lastChange == null)
                 throw IllegalStateException("Last change is null")
             else {
-                val annotatedLine = lastChange.annotatedLines[lineChangeDTO.number - 1]
-                return if (annotatedLine.content != lineChangeDTO.content) {
-                    val errorInfo = "in file ${changeDTO.newFileName} at line ${lineChangeDTO.number}.\nExpected: ${lineChangeDTO.content}\nActual: ${annotatedLine.content}"
-                    if (lastChange.annotatedLines.size > lineChangeDTO.number) {
-                        LOG.debug("Line contents don't match but content was fount on next line. Picking that line instead.\n$errorInfo")
-                        lastChange.annotatedLines[lineChangeDTO.number]
-                    } else {
-                        LOG.error("Line contents don't match $errorInfo")
-                        annotatedLine
-                    }
-                } else
-                    annotatedLine
+                lastChange.annotatedLines[lineChangeDTO.number - 1]
             }
         }
     }
@@ -71,7 +60,7 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
         return when (change.type) {
             ChangeType.ADD -> {
                 val file = project.fileRegistry.getById(change.newFileName)
-                if (mergeCommit && file != null) {
+                if (file != null) {
                     file
                 } else {
                     val newFile = File(change.isBinary)
