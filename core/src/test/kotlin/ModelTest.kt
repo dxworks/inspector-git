@@ -36,7 +36,7 @@ internal class ModelTest {
             val tmpFolderFile = tmpFolder.toFile()
             tmpFolderFile.mkdirs()
 
-            val repoPath = manCxPath
+            val repoPath = kafkaPath
 
             val repoName = repoPath.fileName.toString()
             val repoCache = tmpFolder.resolve("$repoName.json").toFile()
@@ -44,7 +44,7 @@ internal class ModelTest {
             if (repoCache.exists())
                 gitLogDTO = Gson().fromJson(repoCache.readText(), GitLogDTO::class.java)
             else {
-                gitLogDTO = LogParser().parse(gitClient.getLogs())
+                gitLogDTO = LogParser(gitClient).parse(gitClient.getLogs())
                 repoCache.createNewFile()
                 repoCache.writeText(Gson().toJson(gitLogDTO))
             }

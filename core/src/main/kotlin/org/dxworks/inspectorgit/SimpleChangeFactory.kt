@@ -14,7 +14,7 @@ class SimpleChangeFactory : ChangeFactory() {
                         oldFileName: String,
                         newFileName: String,
                         lineChanges: MutableList<LineChange>,
-                        parentCommit: Commit?): Change =
+                        parentChange: Change?): Change =
             Change(commit = commit,
                     type = type,
                     file = file,
@@ -22,5 +22,5 @@ class SimpleChangeFactory : ChangeFactory() {
                     oldFileName = oldFileName,
                     newFileName = newFileName,
                     lineChanges = lineChanges,
-                    parentCommit = parentCommit)
+                    parentChange = parentChange)
 }

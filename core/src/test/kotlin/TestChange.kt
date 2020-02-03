@@ -12,7 +12,7 @@ class TestChange(
         oldFileName: String,
         newFileName: String,
         lineChanges: List<LineChange>,
-        parentCommit: Commit?,
+        parentChange: Change?,
         gitClient: GitClient
 ) : Change(
         commit = commit,
@@ -22,7 +22,7 @@ class TestChange(
         oldFileName = oldFileName,
         newFileName = newFileName,
         lineChanges = lineChanges,
-        parentCommit = parentCommit
+        parentChange = parentChange
 ) {
     companion object {
         private val LOG = LoggerFactory.getLogger(TestChange::class.java)
@@ -33,7 +33,7 @@ class TestChange(
             val blame = gitClient.blame(commit.id, newFileName)
             if (blame != null) {
                 if (!blameAndFileContentAreTheSame(blame, commit.id))
-                    LOG.error("File $newFileName is not correctly built in ${commit.id} from ${parentCommit?.id}.file last changed in ${parentChange?.commit?.id}")
+                    LOG.error("File $newFileName is not correctly built in ${commit.id} from ${parentCommits.firstOrNull()?.id}.file last changed in ${this.parentChange?.commit?.id}")
             } else
                 LOG.warn("Blame is null for $newFileName in ${commit.id}")
         }
@@ -51,7 +51,7 @@ class TestChange(
             val annotatedLineDTO = annotatedLineDTOs[i]
             val annotatedLine = annotatedLines[i]
             if (!linesAreTheSame(annotatedLineDTO, annotatedLine, newFileName, commitId)) {
-                LOG.error("$newFileName is not correct in $commitId because:\n$annotatedLineDTO differs from $annotatedLine")
+//                LOG.error("$newFileName is not correct in $commitId because:\n$annotatedLineDTO differs from $annotatedLine")
                 ok = false
             }
         }

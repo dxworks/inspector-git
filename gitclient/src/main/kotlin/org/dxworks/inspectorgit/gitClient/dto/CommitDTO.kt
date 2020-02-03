@@ -9,4 +9,4 @@ class CommitDTO(val id: String,
                 val committerEmail: String,
                 val committerDate: String,
                 val message: String,
-                val changes: List<ChangeDTO>)
+                var changes: List<ChangeDTO>)

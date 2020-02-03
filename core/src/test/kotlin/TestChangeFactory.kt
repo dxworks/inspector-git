@@ -14,7 +14,7 @@ class TestChangeFactory(private val gitClient: GitClient) : ChangeFactory() {
                         oldFileName: String,
                         newFileName: String,
                         lineChanges: MutableList<LineChange>,
-                        parentCommit: Commit?): Change =
+                        parentChange: Change?): Change =
             TestChange(commit = commit,
                     type = type,
                     file = file,
@@ -22,6 +22,6 @@ class TestChangeFactory(private val gitClient: GitClient) : ChangeFactory() {
                     oldFileName = oldFileName,
                     newFileName = newFileName,
                     lineChanges = lineChanges,
-                    parentCommit = parentCommit,
+                    parentChange = parentChange,
                     gitClient = gitClient)
 }

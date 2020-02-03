@@ -10,9 +10,9 @@ import java.nio.file.Paths
 
 class MergeChangesTransformer(private val changeDTOs: List<ChangeDTO>, val commit: Commit, val project: Project, private val changeFactory: ChangeFactory) {
 
-    fun transform(): Change {
+    fun transform(): Change? {
         val changes = changeDTOs.mapNotNull { ChangeTransformer(it, commit, project, changeFactory).transform() }
-        return mergeChanges(changes)
+        return if (changes.isEmpty()) return null else mergeChanges(changes)
     }
 
     private fun mergeChanges(changes: List<Change>): Change {
@@ -39,7 +39,7 @@ class MergeChangesTransformer(private val changeDTOs: List<ChangeDTO>, val commi
         }
         val firstChange = changes.first()
         // This is done temporarily until we figure out how to manage line changes in a merge commit
-        firstChange.lineChanges = firstChange.lineChanges + changes.subList(1, changes.size).flatMap { it.lineChanges }
+        firstChange.lineChanges = firstChange.lineChanges + changes.drop(1).flatMap { it.lineChanges }
         firstChange.lineChanges.filter { it.operation == LineOperation.ADD }.forEach { it.commit = it.annotatedLine.commit }
         firstChange.parentCommits = changes.flatMap { it.parentCommits }
         // till here

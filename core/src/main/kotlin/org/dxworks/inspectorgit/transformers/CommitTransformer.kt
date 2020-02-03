@@ -58,12 +58,13 @@ class CommitTransformer(private val commitDTO: CommitDTO, private val project: P
     private fun addChangesToCommit(changes: List<ChangeDTO>, commit: Commit, project: Project) {
         LOG.info("Filtering changes")
         if (commit.isMergeCommit) {
-            val fixedChanges = RenameChangesDetector(changes, project).detectAndReplace()
-            val changesByFile = fixedChanges.groupBy { it.newFileName }
-            commit.changes = changesByFile.map { MergeChangesTransformer(it.value, commit, project, changeFactory).transform() }
+//            val fixedChanges = RenameChangesDetector(changes, project).detectAndReplace()
+            val changesByFile = changes.groupBy { it.newFileName }
+            commit.changes = changesByFile.mapNotNull { MergeChangesTransformer(it.value, commit, project, changeFactory).transform() }
         } else {
             commit.changes = changes.mapNotNull { ChangeTransformer(it, commit, project, changeFactory).transform() }
         }
+        commit.changes.forEach { it.file.changes.add(it) }
         LOG.info("Transforming changes")
     }
 

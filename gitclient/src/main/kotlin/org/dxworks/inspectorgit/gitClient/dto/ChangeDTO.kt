@@ -6,5 +6,5 @@ class ChangeDTO(var oldFileName: String,
                 val newFileName: String,
                 var type: ChangeType,
                 var hunks: List<HunkDTO> = ArrayList(),
-                val parentCommitId: String,
+                var parentCommitId: String,
                 val isBinary: Boolean)

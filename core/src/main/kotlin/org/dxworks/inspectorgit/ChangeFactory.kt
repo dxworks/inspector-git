@@ -14,5 +14,5 @@ abstract class ChangeFactory {
                         oldFileName: String,
                         newFileName: String,
                         lineChanges: MutableList<LineChange>,
-                        parentCommit: Commit?): Change
+                        parentChange: Change?): Change
 }

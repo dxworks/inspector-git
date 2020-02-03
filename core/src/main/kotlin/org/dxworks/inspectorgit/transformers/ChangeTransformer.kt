@@ -18,7 +18,9 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
         LOG.info("Creating ${changeDTO.type} change for file: ${changeDTO.oldFileName} -> ${changeDTO.newFileName}")
         val file = getFileForChange(changeDTO, project, commit.isMergeCommit)
         val parentCommit = if (changeDTO.parentCommitId.isEmpty()) null else commit.parents.find { it.id == changeDTO.parentCommitId }!!
+        val lastChange = if (parentCommit == null || changeDTO.type == ChangeType.ADD) null else file.getLastChange(parentCommit)
         try {
+            if (lastChange == null && changeDTO.type != ChangeType.ADD) throw java.lang.IllegalStateException("Last change is null")
             val change = changeFactory.create(
                     commit = commit,
                     type = changeDTO.type,
@@ -26,9 +28,8 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
                     parentCommits = if (parentCommit == null) emptyList() else listOf(parentCommit),
                     oldFileName = changeDTO.oldFileName,
                     newFileName = changeDTO.newFileName,
-                    lineChanges = getLineChanges(changeDTO, commit, file, parentCommit),
-                    parentCommit = parentCommit)
-            change.file.changes.add(change)
+                    lineChanges = getLineChanges(changeDTO, commit, lastChange),
+                    parentChange = lastChange)
             LOG.info("Change created")
             return change
         } catch (e: IllegalStateException) {
@@ -37,9 +38,8 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
         }
     }
 
-    private fun getLineChanges(changeDTO: ChangeDTO, commit: Commit, file: File, parentCommit: Commit?): MutableList<LineChange> {
+    private fun getLineChanges(changeDTO: ChangeDTO, commit: Commit, lastChange: Change?): MutableList<LineChange> {
         LOG.info("Calculating line changes")
-        val lastChange = if (parentCommit == null) null else file.getLastChange(parentCommit)
         return changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, getAnnotatedLine(it, commit, lastChange), commit) }.toMutableList()
     }
 
@@ -47,10 +47,13 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
         return if (lineChangeDTO.operation == LineOperation.ADD)
             AnnotatedLine(commit, lineChangeDTO.number, lineChangeDTO.content)
         else {
-            if (lastChange == null)
-                throw IllegalStateException("Last change is null")
+            if (lastChange == null || lastChange.type == ChangeType.DELETE)
+                throw IllegalStateException("Last change is null or delete")
             else {
-                lastChange.annotatedLines[lineChangeDTO.number - 1]
+                val annotatedLine = lastChange.annotatedLines[lineChangeDTO.number - 1]
+                if(annotatedLine.content != lineChangeDTO.content)
+                    throw IllegalStateException("Removed lines content differ")
+                annotatedLine
             }
         }
     }
@@ -69,23 +72,12 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
                 }
             }
             ChangeType.RENAME -> {
-                if (mergeCommit) {
-                    project.fileRegistry.getById(change.newFileName)!!
-                } else {
-                    val file = getFileForChange(change.oldFileName, project.commitRegistry.getById(change.parentCommitId)!!, project.fileRegistry)
-                            ?: getFileAndSolveCaseOnlyRename(change)
-                    project.fileRegistry.add(file, change.newFileName)
-                    file
-                }
+                val file = getFileForChange(change.oldFileName, project.commitRegistry.getById(change.parentCommitId)!!, project.fileRegistry)
+                        ?: getFileAndSolveCaseOnlyRename(change)
+                project.fileRegistry.add(file, change.newFileName)
+                file
             }
-            else -> {
-                val file = if (mergeCommit)
-                    project.fileRegistry.getById(change.oldFileName)
-                else
-                    getFileForChange(change.oldFileName, project.commitRegistry.getById(change.parentCommitId)!!, project.fileRegistry)
-
-                file ?: getFileAndSolveCaseOnlyRename(change)
-            }
+            else -> getFileForChange(change.oldFileName, project.commitRegistry.getById(change.parentCommitId)!!, project.fileRegistry)!!
         }
     }
 

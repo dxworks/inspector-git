@@ -36,6 +36,6 @@ class GitRepositoryService {
 
     fun getGitLog(path: String): GitLogDTO {
         val gitClient = GitClient(getRepoFolderPath(path))
-        return LogParser().parse(gitClient.getLogs())
+        return LogParser(gitClient).parse(gitClient.getLogs())
     }
 }

@@ -12,12 +12,14 @@ class GitClient(path: Path) {
     }
 
     private val git = "git"
-    private val renameDetectionThreshold = "-M25%"
+    //    private val renameDetectionThreshold = "-M25%"
+    private val renameDetectionThreshold = "--no-renames"
     private val contextThreshold = "-U1"
 
-    private val gitLogCommand = "log $renameDetectionThreshold -c $contextThreshold --encoding=UTF-8 --format=\"commit: %H%nparents: %P%nauthor name: %an%nauthor email: %ae%nauthor date: %ad%ncommitter name: %cn%ncommitter email: %ce%ncommitter date: %cd %nmessage:%n%s%n%b\""
+    private val gitLogCommand = "log $renameDetectionThreshold -m $contextThreshold --encoding=UTF-8 --format=\"commit: %H%nparents: %P%nauthor name: %an%nauthor email: %ae%nauthor date: %ad%ncommitter name: %cn%ncommitter email: %ce%ncommitter date: %cd %nmessage:%n%s%n%b\""
     private val gitAffectedFilesCommand = "log $renameDetectionThreshold -m -1 --name-only --pretty=\"format:\""
     private val gitDiffCommand = "diff $renameDetectionThreshold $contextThreshold"
+    private val gitDiffFileNamesCommand = "diff $renameDetectionThreshold --name-only"
     private val gitBlameCommand = "blame -l"
     private val gitBranchCommand = "branch"
     private val processBuilder = ProcessBuilder()
@@ -31,6 +33,9 @@ class GitClient(path: Path) {
     fun getLogs(): List<String> = runGitCommand(gitLogCommand)!!
 
     fun diff(parent: String, revision: String, file: String): List<String> = runGitCommand("$gitDiffCommand $parent $revision -- $file")!!
+
+    fun diffFileNames(parent: String, revision: String): List<String> = runGitCommand("$gitDiffFileNamesCommand $revision..$parent")
+            ?: emptyList()
 
     fun blame(revision: String, file: String): List<String>? = runGitCommand("$gitBlameCommand $file $revision")
 

@@ -11,20 +11,30 @@ open class Change(val commit: Commit,
                   val newFileName: String,
                   var lineChanges: List<LineChange>,
                   var annotatedLines: List<AnnotatedLine> = emptyList(),
-                  parentCommit: Commit?) {
+                  protected var parentChange: Change?) {
 
-    protected var parentChange: Change? = if (parentCommit == null) null else file.getLastChange(parentCommit)
-
-    val parents: List<Change> = parentCommits.mapNotNull { file.getLastChange(it) }
+    val parents: List<Change> by lazy { parentCommits.mapNotNull { file.getLastChange(it) } }
 
     val isRenameChange: Boolean
         get() = type == ChangeType.RENAME
 
     init {
-        applyLineChanges(parentChange)
+        applyLineChanges(this.parentChange)
     }
 
     private fun applyLineChanges(parentChange: Change?) {
+        if (parentChange != null &&
+                parentChange.lineChanges.size == lineChanges.size &&
+                parentChange.lineChanges.mapIndexed { i, lineChange ->
+                    lineChange.operation == lineChanges[i].operation &&
+                            lineChange.annotatedLine.number == lineChanges[i].annotatedLine.number &&
+                            lineChange.annotatedLine.content == lineChanges[i].annotatedLine.content
+                }
+                        .all { it }) {
+            annotatedLines = parentChange.annotatedLines
+            return
+        }
+
         val newAnnotatedLines = parentChange?.annotatedLines
                 ?.map { AnnotatedLine(it.commit, it.number, it.content) }?.toMutableList() ?: ArrayList()
         newAnnotatedLines.removeAll(lineChanges.filter { it.operation == LineOperation.REMOVE }.map { it.annotatedLine })

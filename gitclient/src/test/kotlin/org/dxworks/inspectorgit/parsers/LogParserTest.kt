@@ -20,7 +20,7 @@ internal class LogParserTest {
         zipFile.extractAll(targetRepoPath.toString())
 
         val gitClient = GitClient(targetRepoPath.resolve("gitLogTest"))
-        val projectDTO = LogParser().parse(gitClient.getLogs())
+        val projectDTO = LogParser(gitClient).parse(gitClient.getLogs())
         val actual = JsonUtils.toJson(projectDTO)
         val expected = resourcesPath.resolve("gitLogTest.json").toFile().readLines().first()
         targetRepoPath.toFile().delete()
