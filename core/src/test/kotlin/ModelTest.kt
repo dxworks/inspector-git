@@ -36,7 +36,7 @@ internal class ModelTest {
             val tmpFolderFile = tmpFolder.toFile()
             tmpFolderFile.mkdirs()
 
-            val repoPath = kafkaPath
+            val repoPath = dxPlatformPath
 
             val repoName = repoPath.fileName.toString()
             val repoCache = tmpFolder.resolve("$repoName.json").toFile()

@@ -74,8 +74,8 @@ abstract class ChangeParser(private val parentCommitId: String) : GitParser<Chan
     }
 
     private fun extractFileNames(line: String, fromName: String? = null, toName: String? = null): Pair<String, String> {
-        val fromNameIndex = line.indexOf("a/") + 2
-        val lastSpaceIndex = line.lastIndexOf(" ")
+        val fromNameIndex = line.indexOf(" a/") + 3
+        val lastSpaceIndex = line.indexOf(" b/")
         val toNameIndex = lastSpaceIndex + 3
 
         return if (line.contains("--combined")) {

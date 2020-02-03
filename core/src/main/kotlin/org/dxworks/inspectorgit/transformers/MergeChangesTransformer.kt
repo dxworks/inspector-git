@@ -19,16 +19,6 @@ class MergeChangesTransformer(private val changeDTOs: List<ChangeDTO>, val commi
         val annotatedFiles = changes.map { it.annotatedLines }
         val size = annotatedFiles.first().size
 
-        if (annotatedFiles.any { it.size != size }) {
-            val dir = Paths.get("C:\\Users\\nagyd\\Documents\\DX\\kafkaRepo\\Log.scala")
-            val fileSnapshots = changes[0].file.changes.map { it.commit.id to it.annotatedLines.joinToString("\n") { l -> l.content } }
-
-            fileSnapshots.forEach {
-                val file = dir.resolve("${it.first}.scala").toFile()
-                file.createNewFile()
-                file.writeText(it.second)
-            }
-        }
 
         for (i in 0 until size) {
             val currentAnnotatedLines = annotatedFiles.map { it[i] }
