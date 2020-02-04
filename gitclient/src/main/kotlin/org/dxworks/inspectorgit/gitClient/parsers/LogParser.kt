@@ -14,12 +14,9 @@ class LogParser(private val gitClient: GitClient) : GitParser<GitLogDTO> {
     override fun parse(lines: List<String>): GitLogDTO {
         val commits = extractCommits(lines)
         LOG.info("Found ${commits.size} commits")
-        val idToCommitsMap = groupCommits(commits)
-        return GitLogDTO(idToCommitsMap.map { CommitParserFactory.createAndParse(it.value, gitClient) }.reversed())
+        val idToCommitMap = commits.groupBy { getCommitId(it) }
+        return GitLogDTO(idToCommitMap.map { CommitParserFactory.createAndParse(it.value, gitClient) }.reversed())
     }
-
-    private fun groupCommits(commits: List<List<String>>) =
-            commits.groupBy { getCommitId(it) }
 
     private fun getCommitId(it: List<String>) = it[0].removePrefix("commit: ")
 

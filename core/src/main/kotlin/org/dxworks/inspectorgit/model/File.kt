@@ -23,7 +23,7 @@ data class File(val isBinary: Boolean, val changes: MutableList<Change> = ArrayL
 
     val annotatedLines get() = annotatedLines(null)
 
-    fun fullyQualifiedName(commit: Commit?): String? = searchLastChange(commit)?.newFileName
+    fun fullyQualifiedName(commit: Commit?): String? = searchLastChange(commit)?.fileName
 
     fun name(commit: Commit?): String? = fullyQualifiedName(commit)?.split("/")?.last()
 

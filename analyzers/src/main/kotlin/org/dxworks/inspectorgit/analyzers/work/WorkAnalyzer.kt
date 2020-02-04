@@ -32,7 +32,7 @@ class WorkAnalyzer : AbstractConfigurable<WorkAnalyzerConfiguration>() {
             val currentResult = results[commit] ?: WorkAnalyzerResult(commit)
 
             val addedLines = getChangesOfType(change, LineOperation.ADD)
-            val removedLines = getChangesOfType(change, LineOperation.REMOVE)
+            val removedLines = getChangesOfType(change, LineOperation.DELETE)
 
             val brandNewWork = addedLines.filter { removedLines.none { removedLine -> removedLine.number == it.number } }
 

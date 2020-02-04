@@ -7,8 +7,7 @@ open class Change(val commit: Commit,
                   val type: ChangeType,
                   val file: File,
                   var parentCommits: List<Commit>,
-                  val oldFileName: String,
-                  val newFileName: String,
+                  val fileName: String,
                   var lineChanges: List<LineChange>,
                   var annotatedLines: List<AnnotatedLine> = emptyList(),
                   protected var parentChange: Change?) {
@@ -37,7 +36,7 @@ open class Change(val commit: Commit,
 
         val newAnnotatedLines = parentChange?.annotatedLines
                 ?.map { AnnotatedLine(it.commit, it.number, it.content) }?.toMutableList() ?: ArrayList()
-        newAnnotatedLines.removeAll(lineChanges.filter { it.operation == LineOperation.REMOVE }.map { it.annotatedLine })
+        newAnnotatedLines.removeAll(lineChanges.filter { it.operation == LineOperation.DELETE }.map { it.annotatedLine })
 
         lineChanges.filter { it.operation == LineOperation.ADD }
                 .forEach { newAnnotatedLines.add(it.annotatedLine.number - 1, it.annotatedLine) }
@@ -57,8 +56,7 @@ open class Change(val commit: Commit,
         other as Change
 
         if (type != other.type) return false
-        if (oldFileName != other.oldFileName) return false
-        if (newFileName != other.newFileName) return false
+        if (fileName != other.fileName) return false
         if (lineChanges != other.lineChanges) return false
         if (annotatedLines != other.annotatedLines) return false
 
@@ -67,8 +65,7 @@ open class Change(val commit: Commit,
 
     override fun hashCode(): Int {
         var result = type.hashCode()
-        result = 31 * result + oldFileName.hashCode()
-        result = 31 * result + newFileName.hashCode()
+        result = 31 * result + fileName.hashCode()
         result = 31 * result + lineChanges.hashCode()
         result = 31 * result + annotatedLines.hashCode()
         return result

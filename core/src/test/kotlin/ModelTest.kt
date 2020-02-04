@@ -36,7 +36,7 @@ internal class ModelTest {
             val tmpFolderFile = tmpFolder.toFile()
             tmpFolderFile.mkdirs()
 
-            val repoPath = dxPlatformPath
+            val repoPath = IGMergeTestPath
 
             val repoName = repoPath.fileName.toString()
             val repoCache = tmpFolder.resolve("$repoName.json").toFile()
@@ -48,8 +48,8 @@ internal class ModelTest {
                 repoCache.createNewFile()
                 repoCache.writeText(Gson().toJson(gitLogDTO))
             }
-            project = ProjectTransformer(gitLogDTO, repoName, TestChangeFactory(gitClient)).transform()
-//            project = ProjectTransformer(gitLogDTO, repoName).transform()
+//            project = ProjectTransformer(gitLogDTO, repoName, TestChangeFactory(gitClient)).transform()
+            project = ProjectTransformer(gitLogDTO, repoName).transform()
         }
     }
 
@@ -72,7 +72,7 @@ internal class ModelTest {
             i++
             commit.changes.filter { it.type != ChangeType.DELETE && !it.file.isBinary }
                     .forEach { change ->
-                        val fileName = change.newFileName
+                        val fileName = change.fileName
                         LOG.debug("$j) test change for $fileName in ${commit.id}")
                         j++
                         val blame = gitClient.blame(commit.id, fileName)
@@ -136,7 +136,7 @@ internal class ModelTest {
         var counter = 1
         val startIndex = other.indexOf("(") + 1
         val tail = other.substring(startIndex)
-        for (i in 0 until tail.length) {
+        for (i in tail.indices) {
             if (tail[i] == '(')
                 counter++
             if (tail[i] == ')')

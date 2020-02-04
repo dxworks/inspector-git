@@ -11,16 +11,14 @@ class SimpleChangeFactory : ChangeFactory() {
                         type: ChangeType,
                         file: File,
                         parentCommits: List<Commit>,
-                        oldFileName: String,
-                        newFileName: String,
+                        fileName: String,
                         lineChanges: MutableList<LineChange>,
                         parentChange: Change?): Change =
             Change(commit = commit,
                     type = type,
                     file = file,
                     parentCommits = parentCommits,
-                    oldFileName = oldFileName,
-                    newFileName = newFileName,
+                    fileName = fileName,
                     lineChanges = lineChanges,
                     parentChange = parentChange)
 }

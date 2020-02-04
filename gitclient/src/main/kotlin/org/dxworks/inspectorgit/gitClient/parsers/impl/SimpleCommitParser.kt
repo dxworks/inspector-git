@@ -6,7 +6,7 @@ import org.dxworks.inspectorgit.gitClient.parsers.abstracts.CommitParser
 class SimpleCommitParser : CommitParser() {
     override fun getChanges(lines: List<String>, commitId: String, parentIds: List<String>): List<ChangeDTO> {
         return if (lines.isNotEmpty()) {
-            extractChanges(lines).map { SimpleChangeParser(parentIds.first()).parse(it) }
+            extractChanges(lines).map { ChangeParser(parentIds.first()).parse(it) }
         } else ArrayList()
     }
 }

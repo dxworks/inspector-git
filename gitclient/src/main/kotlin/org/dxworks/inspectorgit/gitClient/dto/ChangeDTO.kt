@@ -2,9 +2,8 @@ package org.dxworks.inspectorgit.gitClient.dto
 
 import org.dxworks.inspectorgit.gitClient.enums.ChangeType
 
-class ChangeDTO(var oldFileName: String,
-                val newFileName: String,
+class ChangeDTO(val fileName: String,
                 var type: ChangeType,
-                var hunks: List<HunkDTO> = ArrayList(),
+                val hunks: List<HunkDTO>,
                 var parentCommitId: String,
                 val isBinary: Boolean)
