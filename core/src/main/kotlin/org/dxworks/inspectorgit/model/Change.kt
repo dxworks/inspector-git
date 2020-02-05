@@ -19,8 +19,9 @@ open class Change(val commit: Commit,
     }
 
     init {
-        LOG.info("Applying ${lineChanges.size} line changes for ${file.id} having ${annotatedLines.size} lines")
-        applyLineChanges(this.parentChange)
+        LOG.info("Applying ${lineChanges.size} line changes for ${file.id} having ${parentChange?.annotatedLines?.size
+                ?: 0} lines")
+        applyLineChanges(parentChange)
     }
 
     private fun applyLineChanges(parentChange: Change?) {

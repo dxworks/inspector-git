@@ -2,6 +2,7 @@ package org.dxworks.inspectorgit.transformers
 
 import org.dxworks.inspectorgit.ChangeFactory
 import org.dxworks.inspectorgit.gitClient.dto.ChangeDTO
+import org.dxworks.inspectorgit.gitClient.enums.ChangeType
 import org.dxworks.inspectorgit.gitClient.enums.LineOperation
 import org.dxworks.inspectorgit.model.AnnotatedLine
 import org.dxworks.inspectorgit.model.Change
@@ -23,7 +24,7 @@ class MergeChangesTransformer(private val changeDTOs: List<ChangeDTO>, val commi
     private fun mergeChanges(changes: List<Change>): Change {
         LOG.info("Merging ${changes.size} changes")
         val firstChange = changes.first()
-        if (changes.size < commit.parents.size) {
+        if (changes.size < commit.parents.size && !changes.all { it.type == ChangeType.DELETE }) {
             val cleanParent = commit.parents.first { changes.none { change -> change.parentCommits.first() == it } }
             val lastChange = firstChange.file.getLastChange(cleanParent)!!
             firstChange.annotatedLines = lastChange.annotatedLines.map { AnnotatedLine(it.commit, it.number, it.content) }
