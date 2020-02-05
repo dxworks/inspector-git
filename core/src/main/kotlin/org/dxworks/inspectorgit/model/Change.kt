@@ -2,38 +2,28 @@ package org.dxworks.inspectorgit.model
 
 import org.dxworks.inspectorgit.gitClient.enums.ChangeType
 import org.dxworks.inspectorgit.gitClient.enums.LineOperation
+import org.slf4j.LoggerFactory
 
 open class Change(val commit: Commit,
                   val type: ChangeType,
                   val file: File,
                   var parentCommits: List<Commit>,
-                  val fileName: String,
                   var lineChanges: List<LineChange>,
                   var annotatedLines: List<AnnotatedLine> = emptyList(),
                   protected var parentChange: Change?) {
 
     val parents: List<Change> by lazy { parentCommits.mapNotNull { file.getLastChange(it) } }
 
-    val isRenameChange: Boolean
-        get() = type == ChangeType.RENAME
+    companion object {
+        private val LOG = LoggerFactory.getLogger(Change::class.java)
+    }
 
     init {
+        LOG.info("Applying ${lineChanges.size} line changes for ${file.id} having ${annotatedLines.size} lines")
         applyLineChanges(this.parentChange)
     }
 
     private fun applyLineChanges(parentChange: Change?) {
-        if (parentChange != null &&
-                parentChange.lineChanges.size == lineChanges.size &&
-                parentChange.lineChanges.mapIndexed { i, lineChange ->
-                    lineChange.operation == lineChanges[i].operation &&
-                            lineChange.annotatedLine.number == lineChanges[i].annotatedLine.number &&
-                            lineChange.annotatedLine.content == lineChanges[i].annotatedLine.content
-                }
-                        .all { it }) {
-            annotatedLines = parentChange.annotatedLines
-            return
-        }
-
         val newAnnotatedLines = parentChange?.annotatedLines
                 ?.map { AnnotatedLine(it.commit, it.number, it.content) }?.toMutableList() ?: ArrayList()
         newAnnotatedLines.removeAll(lineChanges.filter { it.operation == LineOperation.DELETE }.map { it.annotatedLine })
@@ -56,7 +46,7 @@ open class Change(val commit: Commit,
         other as Change
 
         if (type != other.type) return false
-        if (fileName != other.fileName) return false
+        if (file != other.file) return false
         if (lineChanges != other.lineChanges) return false
         if (annotatedLines != other.annotatedLines) return false
 
@@ -65,7 +55,7 @@ open class Change(val commit: Commit,
 
     override fun hashCode(): Int {
         var result = type.hashCode()
-        result = 31 * result + fileName.hashCode()
+        result = 31 * result + file.hashCode()
         result = 31 * result + lineChanges.hashCode()
         result = 31 * result + annotatedLines.hashCode()
         return result

@@ -36,7 +36,7 @@ internal class ModelTest {
             val tmpFolderFile = tmpFolder.toFile()
             tmpFolderFile.mkdirs()
 
-            val repoPath = IGMergeTestPath
+            val repoPath = dxPlatformPath
 
             val repoName = repoPath.fileName.toString()
             val repoCache = tmpFolder.resolve("$repoName.json").toFile()
@@ -72,7 +72,7 @@ internal class ModelTest {
             i++
             commit.changes.filter { it.type != ChangeType.DELETE && !it.file.isBinary }
                     .forEach { change ->
-                        val fileName = change.fileName
+                        val fileName = change.file.id
                         LOG.debug("$j) test change for $fileName in ${commit.id}")
                         j++
                         val blame = gitClient.blame(commit.id, fileName)

@@ -23,7 +23,6 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
                 type = changeDTO.type,
                 file = file,
                 parentCommits = if (parentCommit == null) emptyList() else listOf(parentCommit),
-                fileName = changeDTO.fileName,
                 lineChanges = getLineChanges(lastChange),
                 parentChange = lastChange)
     }
@@ -48,7 +47,7 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
             if (file != null) {
                 file
             } else {
-                val newFile = File(change.isBinary)
+                val newFile = File(change.isBinary, change.fileName)
                 project.fileRegistry.add(newFile, change.fileName)
                 newFile
             }

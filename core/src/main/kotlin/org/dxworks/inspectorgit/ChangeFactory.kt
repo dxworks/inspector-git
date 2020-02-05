@@ -11,7 +11,6 @@ abstract class ChangeFactory {
                         type: ChangeType,
                         file: File,
                         parentCommits: List<Commit>,
-                        fileName: String,
                         lineChanges: MutableList<LineChange>,
                         parentChange: Change?): Change
 }
