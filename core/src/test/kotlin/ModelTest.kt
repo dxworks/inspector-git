@@ -105,9 +105,9 @@ internal class ModelTest {
 
     private fun linesAreTheSame(annotatedLineDTO: AnnotatedLineDTO, annotatedLine: AnnotatedLine, fileName: String, commitId: String): Boolean {
         val numberAndContentAreTheSame = annotatedLineDTO.number == annotatedLine.number &&
-                annotatedLineDTO.content == annotatedLine.content
-        if (project.commitRegistry.getById(annotatedLineDTO.commitId) != annotatedLine.commit)
-            LOG.warn("In $fileName at $commitId at line ${annotatedLineDTO.number} commits differ blame: ${annotatedLineDTO.commitId}, IG: ${annotatedLine.commit.id}")
+                annotatedLineDTO.content == annotatedLine.content.content
+        if (project.commitRegistry.getById(annotatedLineDTO.commitId) != annotatedLine.content.commit)
+            LOG.warn("In $fileName at $commitId at line ${annotatedLineDTO.number} commits differ blame: ${annotatedLineDTO.commitId}, IG: ${annotatedLine.content.commit.id}")
         return numberAndContentAreTheSame
     }
 

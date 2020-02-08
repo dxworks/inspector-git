@@ -26,11 +26,12 @@ open class Change(val commit: Commit,
 
     private fun applyLineChanges(parentChange: Change?) {
         val newAnnotatedLines = parentChange?.annotatedLines
-                ?.map { AnnotatedLine(it.commit, it.number, it.content) }?.toMutableList() ?: ArrayList()
-        newAnnotatedLines.removeAll(lineChanges.filter { it.operation == LineOperation.DELETE }.map { it.annotatedLine })
+                ?.map { AnnotatedLine(it.number, it.content) }?.toMutableList() ?: ArrayList()
+        val (deletes, adds) = lineChanges.partition { it.operation == LineOperation.DELETE }
+        deletes.sortedByDescending { it.number }
+                .forEach { newAnnotatedLines.removeAt(it.number -   1) }
 
-        lineChanges.filter { it.operation == LineOperation.ADD }
-                .forEach { newAnnotatedLines.add(it.annotatedLine.number - 1, it.annotatedLine) }
+        adds.forEach { newAnnotatedLines.add(it.number - 1, AnnotatedLine(it.number, it.content)) }
 
         reindex(newAnnotatedLines)
         annotatedLines = newAnnotatedLines

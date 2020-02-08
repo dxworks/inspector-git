@@ -4,7 +4,6 @@ import org.dxworks.inspectorgit.api.configuration.AbstractConfigurable
 import org.dxworks.inspectorgit.api.configuration.exceptions.NotConfiguredException
 import org.dxworks.inspectorgit.gitClient.enums.LineOperation
 import org.dxworks.inspectorgit.model.AnnotatedLine
-import org.dxworks.inspectorgit.model.Change
 import org.dxworks.inspectorgit.model.Commit
 import org.dxworks.inspectorgit.model.Project
 import org.springframework.stereotype.Component
@@ -31,20 +30,21 @@ class WorkAnalyzer : AbstractConfigurable<WorkAnalyzerConfiguration>() {
         commit.changes.forEach { change ->
             val currentResult = results[commit] ?: WorkAnalyzerResult(commit)
 
-            val addedLines = getChangesOfType(change, LineOperation.ADD)
-            val removedLines = getChangesOfType(change, LineOperation.DELETE)
+            val (deleteLineChanges, addLineChanges) = change.lineChanges.partition { it.operation == LineOperation.DELETE }
+            val addedLines = addLineChanges.map { AnnotatedLine(it.number, it.content) }
+            val deletedLines = deleteLineChanges.map { AnnotatedLine(it.number, it.content) }
 
-            val brandNewWork = addedLines.filter { removedLines.none { removedLine -> removedLine.number == it.number } }
+            val brandNewWork = addedLines.filter { deletedLines.none { removedLine -> removedLine.number == it.number } }
 
-            val codeChangingWork = addedLines.subtract(brandNewWork).map { CodeChange(it, getReplacedLine(removedLines, it)) }
-            val legacyRefactor = codeChangingWork.filter { it.removedLine.commit.olderThan(configuration.legacyCodeAge, it.addedLine.commit) }
+            val codeChangingWork = addedLines.subtract(brandNewWork).map { CodeChange(it, getReplacedLine(deletedLines, it)) }
+            val legacyRefactor = codeChangingWork.filter { it.removedLine.content.commit.olderThan(configuration.legacyCodeAge, it.addedLine.content.commit) }
 
-            val recentChanges = codeChangingWork.filter { !it.removedLine.commit.olderThan(configuration.recentWorkPeriod, it.addedLine.commit) }
-            val helpOthers = recentChanges.filter { it.removedLine.commit.author != commit.author }
+            val recentChanges = codeChangingWork.filter { !it.removedLine.content.commit.olderThan(configuration.recentWorkPeriod, it.addedLine.content.commit) }
+            val helpOthers = recentChanges.filter { it.removedLine.content.commit.author != commit.author }
 
             val recentRemovedLines = recentChanges.map { it.removedLine }
             recentRemovedLines.forEach {
-                val result = results[it.commit]!!
+                val result = results[it.content.commit]!!
                 result.newWork.remove(it)
                 result.churn.add(it)
             }
@@ -58,6 +58,4 @@ class WorkAnalyzer : AbstractConfigurable<WorkAnalyzerConfiguration>() {
     private fun getReplacedLine(removedLines: List<AnnotatedLine>, addedLine: AnnotatedLine) =
             removedLines.find { removedLine -> removedLine.number == addedLine.number }!!
 
-    private fun getChangesOfType(change: Change, operation: LineOperation) =
-            change.lineChanges.filter { it.operation == operation }.map { it.annotatedLine }
 }

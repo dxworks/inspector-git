@@ -29,14 +29,14 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
 
     private fun getLineChanges(lastChange: Change?): MutableList<LineChange> {
         LOG.info("Calculating line changes")
-        return changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, getAnnotatedLine(it, commit, lastChange), commit) }.toMutableList()
+        return changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, it.number, getContent(it, lastChange), commit) }.toMutableList()
     }
 
-    private fun getAnnotatedLine(lineChangeDTO: LineChangeDTO, commit: Commit, lastChange: Change?): AnnotatedLine {
+    private fun getContent(lineChangeDTO: LineChangeDTO, lastChange: Change?): AnnotatedContent {
         return if (lineChangeDTO.operation == LineOperation.ADD)
-            AnnotatedLine(commit, lineChangeDTO.number, lineChangeDTO.content)
+            AnnotatedContent(commit, lineChangeDTO.content)
         else {
-            lastChange!!.annotatedLines[lineChangeDTO.number - 1]
+            lastChange!!.annotatedLines[lineChangeDTO.number - 1].content
         }
     }
 

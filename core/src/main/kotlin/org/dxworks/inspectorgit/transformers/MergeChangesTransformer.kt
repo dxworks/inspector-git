@@ -27,21 +27,21 @@ class MergeChangesTransformer(private val changeDTOs: List<ChangeDTO>, val commi
         if (changes.size < commit.parents.size && !changes.all { it.type == ChangeType.DELETE }) {
             val cleanParent = commit.parents.first { changes.none { change -> change.parentCommits.first() == it } }
             val lastChange = firstChange.file.getLastChange(cleanParent)!!
-            firstChange.annotatedLines = lastChange.annotatedLines.map { AnnotatedLine(it.commit, it.number, it.content) }
+            firstChange.annotatedLines = lastChange.annotatedLines.map { AnnotatedLine(it.number, it.content) }
         } else {
             val annotatedFiles = changes.map { it.annotatedLines }
-            val size = annotatedFiles.first().size
-            for (i in 0 until size) {
+            val fileSize = annotatedFiles.first().size
+            for (i in 0 until fileSize) {
                 val currentAnnotatedLines = annotatedFiles.map { it[i] }
                 val firstAnnotatedLine = currentAnnotatedLines[0]
                 val annotatedLines = currentAnnotatedLines.drop(1)
-                if (firstAnnotatedLine.commit == commit)
-                    annotatedLines.find { it.commit != commit }?.let { firstAnnotatedLine.commit = it.commit }
+                if (firstAnnotatedLine.content.commit == commit)
+                    annotatedLines.find { it.content.commit != commit }?.let { firstAnnotatedLine.content = it.content }
             }
         }
         // This is done temporarily until we figure out how to manage line changes in a merge commit
-        firstChange.lineChanges = firstChange.lineChanges + changes.drop(1).flatMap { it.lineChanges }
-        firstChange.lineChanges.filter { it.operation == LineOperation.ADD }.forEach { it.commit = it.annotatedLine.commit }
+        firstChange.lineChanges = changes.flatMap { it.lineChanges }
+        firstChange.lineChanges.filter { it.operation == LineOperation.ADD }.forEach { it.content = firstChange.annotatedLines[it.number - 1].content }
         firstChange.parentCommits = changes.flatMap { it.parentCommits }
         // till here
 
