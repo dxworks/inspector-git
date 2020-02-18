@@ -55,8 +55,7 @@ class TestChange(
     }
 
     private fun linesAreTheSame(annotatedLineDTO: AnnotatedLineDTO, annotatedLine: AnnotatedLine): Boolean {
-        val numberAndContentAreTheSame = annotatedLineDTO.number == annotatedLine.number &&
-                annotatedLineDTO.content == annotatedLine.content.content
+        val numberAndContentAreTheSame = annotatedLineDTO.number == annotatedLine.number
         val lineDTOCommitId = annotatedLineDTO.commitId
         val lineCommitId = annotatedLine.content.commit.id
         val commitsAreEqual = if (lineDTOCommitId.startsWith("^"))
@@ -76,7 +75,7 @@ class TestChange(
         val authorTimeLineNo = other.substring(0, contentDelimiterIndex)
         val content = other.substring(contentDelimiterIndex + 2)
         val lineNumber = authorTimeLineNo.substring(authorTimeLineNo.lastIndexOf(" ") + 1).toInt()
-        return AnnotatedLineDTO(commitId, lineNumber, content)
+        return AnnotatedLineDTO(commitId, lineNumber)
     }
 
     private fun getContentDelimiterIndex(other: String): Int {

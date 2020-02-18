@@ -34,7 +34,7 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
 
     private fun getContent(lineChangeDTO: LineChangeDTO, lastChange: Change?): AnnotatedContent {
         return if (lineChangeDTO.operation == LineOperation.ADD)
-            AnnotatedContent(commit, lineChangeDTO.content)
+            AnnotatedContent(commit)
         else {
             lastChange!!.annotatedLines[lineChangeDTO.number - 1].content
         }

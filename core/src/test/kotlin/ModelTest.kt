@@ -27,6 +27,7 @@ internal class ModelTest {
         private val kafkaPath = Paths.get("C:\\Users\\nagyd\\Documents\\DX\\kafkaRepo\\kafka")
         private val manCxPath = Paths.get("C:\\Users\\nagyd\\Documents\\DD\\man\\mansp-cx")
         private val manUiPath = Paths.get("C:\\Users\\nagyd\\Documents\\DD\\man\\mansp-ui")
+        private val elasticsearchPath = Paths.get("C:\\Users\\nagyd\\Documents\\DX\\elasticSearchRepo\\elasticsearch")
 
         private val tmpFolder = Paths.get(System.getProperty("java.io.tmpdir")).resolve("inspectorGitTest")
 
@@ -36,7 +37,7 @@ internal class ModelTest {
             val tmpFolderFile = tmpFolder.toFile()
             tmpFolderFile.mkdirs()
 
-            val repoPath = kafkaPath
+            val repoPath = elasticsearchPath
 
             val repoName = repoPath.fileName.toString()
             val repoCache = tmpFolder.resolve("$repoName.json").toFile()
@@ -104,8 +105,7 @@ internal class ModelTest {
     }
 
     private fun linesAreTheSame(annotatedLineDTO: AnnotatedLineDTO, annotatedLine: AnnotatedLine, fileName: String, commitId: String): Boolean {
-        val numberAndContentAreTheSame = annotatedLineDTO.number == annotatedLine.number &&
-                annotatedLineDTO.content == annotatedLine.content.content
+        val numberAndContentAreTheSame = annotatedLineDTO.number == annotatedLine.number
         if (project.commitRegistry.getById(annotatedLineDTO.commitId) != annotatedLine.content.commit)
             LOG.warn("In $fileName at $commitId at line ${annotatedLineDTO.number} commits differ blame: ${annotatedLineDTO.commitId}, IG: ${annotatedLine.content.commit.id}")
         return numberAndContentAreTheSame
@@ -117,9 +117,8 @@ internal class ModelTest {
         val other = it.substring(commitDelimiterIndex + 1)
         val contentDelimiterIndex = getContentDelimiterIndex(other)
         val authorTimeLineNo = other.substring(0, contentDelimiterIndex)
-        val content = other.substring(contentDelimiterIndex + 2)
         val lineNumber = authorTimeLineNo.substring(authorTimeLineNo.lastIndexOf(" ") + 1).toInt()
-        return AnnotatedLineDTO(commitId, lineNumber, content)
+        return AnnotatedLineDTO(commitId, lineNumber)
     }
 
     @Test

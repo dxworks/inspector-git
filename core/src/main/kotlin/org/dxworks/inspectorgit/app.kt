@@ -43,15 +43,14 @@ fun main(args: Array<String>) {
     val builder = StringBuilder()
     builder.append(csvHeader).append("\n")
     project.fileRegistry.all.filter { it.isAlive }.forEach {
-        val lastChange = it.lastChange!!
         val numberOfAllAuthorsForFile = getNumberOfAllAuthorsForFile(it)
-        val numberOfAuthorsOfCurrentCodeInFile = getNumberOfAuthorsOfCurrentCodeInFile(lastChange)
+        val numberOfAuthorsOfCurrentCodeInFile = getNumberOfAuthorsOfCurrentCodeInFile(it.lastChange!!)
 
-        builder.append("${lastChange.newFileName}, ${it.changes.size}, $numberOfAllAuthorsForFile, $numberOfAuthorsOfCurrentCodeInFile\n")
+        builder.append("${it.id}, ${it.changes.size}, $numberOfAllAuthorsForFile, $numberOfAuthorsOfCurrentCodeInFile\n")
     }
     file.writeText(builder.toString())
 }
 
-fun getNumberOfAuthorsOfCurrentCodeInFile(change: Change) = change.annotatedLines.map { it.commit.author.id }.distinct().count()
+fun getNumberOfAuthorsOfCurrentCodeInFile(change: Change) = change.annotatedLines.map { it.content.commit.author.id }.distinct().count()
 
 fun getNumberOfAllAuthorsForFile(file: File) = file.changes.map { it.commit.author.id }.distinct().count()

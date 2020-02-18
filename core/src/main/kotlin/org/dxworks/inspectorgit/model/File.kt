@@ -11,6 +11,10 @@ data class File(val isBinary: Boolean, val id: String, val changes: MutableList<
 
     val name get() = id.split("/").last()
 
+    val isAlive get() = isAlive(null)
+
+    val lastChange get() = getLastChange(null)
+
     fun isAlive(commit: Commit?): Boolean {
         val type = getLastChange(commit)?.type
         return type != null && type != ChangeType.DELETE

@@ -18,8 +18,8 @@ class HunkParser : GitParser<HunkDTO> {
 
         return lines.drop(1).mapNotNull {
             when {
-                it.startsWith("-") -> LineChangeDTO(operation = LineOperation.DELETE, number = fromLineNumber + deletedLineIndex++, content = it.removePrefix("-"))
-                it.startsWith("+") -> LineChangeDTO(operation = LineOperation.ADD, number = toLineNumber + addedLineIndex++, content = it.removePrefix("+"))
+                it.startsWith("-") -> LineChangeDTO(operation = LineOperation.DELETE, number = fromLineNumber + deletedLineIndex++)
+                it.startsWith("+") -> LineChangeDTO(operation = LineOperation.ADD, number = toLineNumber + addedLineIndex++)
                 else -> {
                     deletedLineIndex++
                     addedLineIndex++

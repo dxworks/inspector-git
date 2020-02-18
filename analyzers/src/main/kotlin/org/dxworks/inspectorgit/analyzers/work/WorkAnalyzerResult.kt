@@ -48,8 +48,8 @@ class WorkAnalyzerResultDTO {
             val dto = WorkAnalyzerResultDTO()
             dto.commitId = result.commit.id
             dto.authorId = result.commit.author.id
-            dto.newWork = result.newWork.map { AnnotatedLineDTO(it.content.commit.id, it.number, it.content.content) }
-            dto.churn = result.churn.map { AnnotatedLineDTO(it.content.commit.id, it.number, it.content.content) }
+            dto.newWork = result.newWork.map { AnnotatedLineDTO(it.content.commit.id, it.number) }
+            dto.churn = result.churn.map { AnnotatedLineDTO(it.content.commit.id, it.number) }
             dto.legacyRefactor = result.legacyRefactor.map { CodeChangeDTO.get(it) }
             dto.helpOthers = result.helpOthers.map { CodeChangeDTO.get(it) }
             return dto
@@ -65,9 +65,9 @@ class CodeChangeDTO {
         fun get(codeChange: CodeChange): CodeChangeDTO {
             val dto = CodeChangeDTO()
             val addedLine = codeChange.addedLine
-            dto.addedLine = AnnotatedLineDTO(addedLine.content.commit.id, addedLine.number, addedLine.content.content)
+            dto.addedLine = AnnotatedLineDTO(addedLine.content.commit.id, addedLine.number)
             val removedLine = codeChange.removedLine
-            dto.removedLine = AnnotatedLineDTO(removedLine.content.commit.id, removedLine.number, removedLine.content.content)
+            dto.removedLine = AnnotatedLineDTO(removedLine.content.commit.id, removedLine.number)
             return dto
         }
     }
