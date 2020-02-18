@@ -1,93 +1,56 @@
 package org.dxworks.inspectorgit.transformers
 
+import org.dxworks.inspectorgit.ChangeFactory
 import org.dxworks.inspectorgit.gitClient.dto.ChangeDTO
 import org.dxworks.inspectorgit.gitClient.dto.LineChangeDTO
 import org.dxworks.inspectorgit.gitClient.enums.ChangeType
 import org.dxworks.inspectorgit.gitClient.enums.LineOperation
 import org.dxworks.inspectorgit.model.*
-import org.dxworks.inspectorgit.registries.FileRegistry
 import org.slf4j.LoggerFactory
 
-class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Commit, private val project: Project) {
+class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Commit, private val project: Project, private val changeFactory: ChangeFactory) {
     companion object {
         private val LOG = LoggerFactory.getLogger(ChangeTransformer::class.java)
     }
 
-    fun transform(): Change {
-        LOG.info("Creating ${changeDTO.type} change for file: ${changeDTO.oldFileName} -> ${changeDTO.newFileName}")
-        val annotatedLines = getAnnotatedLines(changeDTO, project)
-        val file = getFileForChange(changeDTO, project, commit.isMergeCommit)
+    fun transform(): Change? {
+        LOG.info("Creating ${changeDTO.type} change for file: ${changeDTO.fileName}")
+        val file = getFileForChange(changeDTO, project)
         val parentCommit = if (changeDTO.parentCommitId.isEmpty()) null else commit.parents.find { it.id == changeDTO.parentCommitId }!!
-        val change = Change(
+        val lastChange = if (changeDTO.type == ChangeType.ADD) null else file.getLastChange(parentCommit!!)
+        return changeFactory.create(
                 commit = commit,
                 type = changeDTO.type,
                 file = file,
-                parentCommit = parentCommit,
-                oldFileName = changeDTO.oldFileName,
-                newFileName = changeDTO.newFileName,
-                lineChanges = getLineChanges(changeDTO, annotatedLines, commit, file, parentCommit),
-                annotatedLines = annotatedLines)
-        change.file.changes.add(change)
-        LOG.info("Change created")
-        return change
+                parentCommits = if (parentCommit == null) emptyList() else listOf(parentCommit),
+                lineChanges = getLineChanges(lastChange),
+                parentChange = lastChange)
     }
 
-    private fun getLineChanges(changeDTO: ChangeDTO, annotatedLines: MutableList<AnnotatedLine>, commit: Commit, file: File, parentCommit: Commit?): MutableList<LineChange> {
+    private fun getLineChanges(lastChange: Change?): MutableList<LineChange> {
         LOG.info("Calculating line changes")
-        return changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, getAnnotatedLine(it, annotatedLines, commit, file, parentCommit)) }.toMutableList()
+        return changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, it.number, getContent(it, lastChange), commit) }.toMutableList()
     }
 
-    private fun getAnnotatedLine(lineChangeDTO: LineChangeDTO, annotatedLines: MutableList<AnnotatedLine>, commit: Commit, file: File, parentCommit: Commit?): AnnotatedLine {
+    private fun getContent(lineChangeDTO: LineChangeDTO, lastChange: Change?): AnnotatedContent {
         return if (lineChangeDTO.operation == LineOperation.ADD)
-            annotatedLines.getOrElse(lineChangeDTO.number) {
-                AnnotatedLine(commit, lineChangeDTO.number, lineChangeDTO.content)
-            }
+            AnnotatedContent(commit, lineChangeDTO.content)
         else {
-            val latChange = file.getLastChange(parentCommit) ?: file.lastChange!!
-            latChange.annotatedLines[lineChangeDTO.number - 1]
+            lastChange!!.annotatedLines[lineChangeDTO.number - 1].content
         }
     }
 
-    private fun getAnnotatedLines(changeDTO: ChangeDTO, project: Project): MutableList<AnnotatedLine> {
-        LOG.info("Calculating annotated lines")
-        return changeDTO.annotatedLines.map { AnnotatedLine(project.commitRegistry.getByID(it.commitId)!!, it.number, it.content) }.toMutableList()
-    }
-
-    private fun getFileForChange(change: ChangeDTO, project: Project, mergeCommit: Boolean): File {
+    private fun getFileForChange(change: ChangeDTO, project: Project): File {
         LOG.info("Getting file")
-        return when (change.type) {
-            ChangeType.ADD -> {
-                val file = project.fileRegistry.getByID(change.newFileName)
-                if (mergeCommit && file != null) {
-                    file
-                } else {
-                    val newFile = File(change.isBinary)
-                    project.fileRegistry.add(newFile, change.newFileName)
-                    newFile
-                }
+        return if (change.type == ChangeType.ADD) {
+            val file = project.fileRegistry.getById(change.fileName)
+            if (file != null) {
+                file
+            } else {
+                val newFile = File(change.isBinary, change.fileName)
+                project.fileRegistry.add(newFile, change.fileName)
+                newFile
             }
-            ChangeType.RENAME -> {
-                if (mergeCommit) {
-                    project.fileRegistry.getByID(change.newFileName)!!
-                } else {
-                    val file = getFileForChange(change.oldFileName, project.commitRegistry.getByID(change.parentCommitId)!!, project.fileRegistry)
-                    project.fileRegistry.add(file, change.newFileName)
-                    file
-                }
-            }
-            else -> {
-                if (mergeCommit)
-                    project.fileRegistry.getByID(change.oldFileName)!!
-                else
-                    getFileForChange(change.oldFileName, project.commitRegistry.getByID(change.parentCommitId)!!, project.fileRegistry)
-            }
-        }
-    }
-
-    private tailrec fun getFileForChange(name: String, commit: Commit?, fileRegistry: FileRegistry): File {
-        if (commit == null)
-            return fileRegistry.getByID(name)!!
-        val change = commit.changes.find { it.newFileName == name }
-        return change?.file ?: getFileForChange(name, commit.parents.firstOrNull(), fileRegistry)
+        } else project.fileRegistry.getById(change.fileName)!!
     }
 }

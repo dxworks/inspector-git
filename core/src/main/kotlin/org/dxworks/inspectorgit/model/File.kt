@@ -1,28 +1,15 @@
 package org.dxworks.inspectorgit.model
 
 import org.dxworks.inspectorgit.gitClient.enums.ChangeType
-import java.nio.file.Path
-import java.nio.file.Paths
+import org.slf4j.LoggerFactory
 
-data class File(val isBinary: Boolean, val changes: MutableList<Change> = ArrayList()) {
+data class File(val isBinary: Boolean, val id: String, val changes: MutableList<Change> = ArrayList()) {
 
-    val name get() = name(null)
+    companion object {
+        private val LOG = LoggerFactory.getLogger(File::class.java)
+    }
 
-    val path get() = path(null)
-
-    val fullyQualifiedName get() = fullyQualifiedName(null)
-
-    val lastChange get() = getLastChange(null)
-
-    val isAlive get() = isAlive(null)
-
-    val annotatedLines get() = annotatedLines(null)
-
-    fun fullyQualifiedName(commit: Commit?): String? = getLastChange(commit)?.newFileName
-
-    fun name(commit: Commit?): String? = fullyQualifiedName(commit)?.split("/")?.last()
-
-    fun path(commit: Commit?): Path? = fullyQualifiedName(commit)?.let { Paths.get(it) }
+    val name get() = id.split("/").last()
 
     fun isAlive(commit: Commit?): Boolean {
         val type = getLastChange(commit)?.type
@@ -33,18 +20,21 @@ data class File(val isBinary: Boolean, val changes: MutableList<Change> = ArrayL
         return getLastChange(commit)?.annotatedLines ?: emptyList()
     }
 
-
-    tailrec fun getLastChange(commit: Commit?): Change? {
+    fun getLastChange(commit: Commit?): Change? {
         return when {
             changes.isEmpty() -> null
-            commit == null -> return changes.last()
+            commit == null -> changes.last()
             else -> {
-                val change = changes.find { it.commit == commit }
-                if (change != null) change else {
-                    val parent = commit.parents.firstOrNull()
-                    if (parent == null) null else getLastChange(parent)
-                }
+                getLastChangeRecursively(commit)
             }
+        }
+    }
+
+    private tailrec fun getLastChangeRecursively(commit: Commit): Change? {
+        val change = changes.find { it.commit == commit }
+        return if (change != null) change else {
+            val parent = commit.parents.firstOrNull()
+            if (parent == null) null else getLastChangeRecursively(parent)
         }
     }
 }

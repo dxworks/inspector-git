@@ -1,7 +1,7 @@
 package org.dxworks.inspectorgit.model
 
-data class AnnotatedLine(var commit: Commit, var number: Int, var content: String) {
+data class AnnotatedLine(var number: Int, var content: AnnotatedContent) {
     override fun toString(): String {
-        return "${commit.id} (${commit.author.id} ${commit.committerDate} $number) $content"
+        return "${content.commit.id} (${content.commit.author.id} ${content.commit.committerDate} $number) ${content.content}"
     }
 }

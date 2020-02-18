@@ -11,8 +11,12 @@ abstract class AbstractRegistry<TYPE, ID> {
     val allIDs: Set<ID>
         get() = map.keys
 
-    open fun getByID(id: ID): TYPE? {
+    open fun getById(id: ID): TYPE? {
         return map[id]
+    }
+
+    open fun contains(id: ID): Boolean {
+        return map.contains(id)
     }
 
     fun add(entity: TYPE, id: ID): TYPE? {
