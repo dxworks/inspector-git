@@ -1,6 +1,6 @@
 package org.dxworks.inspectorgit.model
 
-import org.dxworks.inspectorgit.gitClient.enums.ChangeType
+import org.dxworks.inspectorgit.gitclient.enums.ChangeType
 import org.slf4j.LoggerFactory
 
 data class File(val isBinary: Boolean, val id: String, val changes: MutableList<Change> = ArrayList()) {

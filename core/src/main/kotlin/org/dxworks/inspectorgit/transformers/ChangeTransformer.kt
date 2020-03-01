@@ -1,10 +1,10 @@
 package org.dxworks.inspectorgit.transformers
 
 import org.dxworks.inspectorgit.ChangeFactory
-import org.dxworks.inspectorgit.gitClient.dto.ChangeDTO
-import org.dxworks.inspectorgit.gitClient.dto.LineChangeDTO
-import org.dxworks.inspectorgit.gitClient.enums.ChangeType
-import org.dxworks.inspectorgit.gitClient.enums.LineOperation
+import org.dxworks.inspectorgit.gitclient.dto.ChangeDTO
+import org.dxworks.inspectorgit.gitclient.dto.LineChangeDTO
+import org.dxworks.inspectorgit.gitclient.enums.ChangeType
+import org.dxworks.inspectorgit.gitclient.enums.LineOperation
 import org.dxworks.inspectorgit.model.*
 import org.slf4j.LoggerFactory
 

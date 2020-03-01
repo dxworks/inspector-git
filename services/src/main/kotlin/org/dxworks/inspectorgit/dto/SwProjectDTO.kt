@@ -1,7 +1,7 @@
 package org.dxworks.inspectorgit.dto
 
 import com.google.gson.Gson
-import org.dxworks.inspectorgit.gitClient.dto.GitLogDTO
+import org.dxworks.inspectorgit.gitclient.dto.GitLogDTO
 import org.dxworks.inspectorgit.persistence.entities.SwProjectEntity
 
 class SwProjectDTO : ProjectDTO() {

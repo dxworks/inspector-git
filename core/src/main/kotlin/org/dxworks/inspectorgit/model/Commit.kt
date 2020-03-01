@@ -1,12 +1,12 @@
 package org.dxworks.inspectorgit.model
 
-import java.time.LocalDateTime
 import java.time.Period
+import java.time.ZonedDateTime
 
 data class Commit(var id: String,
                   var message: String,
-                  val authorDate: LocalDateTime,
-                  val committerDate: LocalDateTime,
+                  val authorDate: ZonedDateTime,
+                  val committerDate: ZonedDateTime,
                   val author: Author,
                   val committer: Author,
                   var parents: List<Commit>,

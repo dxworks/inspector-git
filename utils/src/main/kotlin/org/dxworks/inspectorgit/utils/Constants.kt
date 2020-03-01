@@ -2,6 +2,11 @@ package org.dxworks.inspectorgit.utils
 
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.time.format.DateTimeFormatter
+
+
+const val dateFormat = "EEE MMM d HH:mm:ss yyyy Z"
+val commitDateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(dateFormat)
 
 
 const val devNull = "dev/null"

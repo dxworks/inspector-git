@@ -1,7 +1,7 @@
 package org.dxworks.inspectorgit.model
 
-import org.dxworks.inspectorgit.gitClient.enums.ChangeType
-import org.dxworks.inspectorgit.gitClient.enums.LineOperation
+import org.dxworks.inspectorgit.gitclient.enums.ChangeType
+import org.dxworks.inspectorgit.gitclient.enums.LineOperation
 import org.slf4j.LoggerFactory
 
 open class Change(val commit: Commit,
@@ -12,7 +12,7 @@ open class Change(val commit: Commit,
                   var annotatedLines: List<AnnotatedLine> = emptyList(),
                   protected var parentChange: Change?) {
 
-    val parents: List<Change> by lazy { parentCommits.mapNotNull { file.getLastChange(it) } }
+    val id: String get() = "${commit.id}-${file.id}"
 
     companion object {
         private val LOG = LoggerFactory.getLogger(Change::class.java)
@@ -29,7 +29,7 @@ open class Change(val commit: Commit,
                 ?.map { AnnotatedLine(it.number, it.content) }?.toMutableList() ?: ArrayList()
         val (deletes, adds) = lineChanges.partition { it.operation == LineOperation.DELETE }
         deletes.sortedByDescending { it.number }
-                .forEach { newAnnotatedLines.removeAt(it.number -   1) }
+                .forEach { newAnnotatedLines.removeAt(it.number - 1) }
 
         adds.forEach { newAnnotatedLines.add(it.number - 1, AnnotatedLine(it.number, it.content)) }
 

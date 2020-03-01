@@ -1,19 +1,19 @@
 package org.dxworks.inspectorgit.transformers
 
 import org.dxworks.inspectorgit.ChangeFactory
-import org.dxworks.inspectorgit.gitClient.dto.ChangeDTO
-import org.dxworks.inspectorgit.gitClient.dto.CommitDTO
+import org.dxworks.inspectorgit.SimpleChangeFactory
+import org.dxworks.inspectorgit.gitclient.dto.ChangeDTO
+import org.dxworks.inspectorgit.gitclient.dto.CommitDTO
 import org.dxworks.inspectorgit.model.Author
 import org.dxworks.inspectorgit.model.AuthorId
 import org.dxworks.inspectorgit.model.Commit
 import org.dxworks.inspectorgit.model.Project
+import org.dxworks.inspectorgit.utils.commitDateTimeFormatter
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import java.time.ZonedDateTime
 
-class CommitTransformer(private val commitDTO: CommitDTO, private val project: Project, private val changeFactory: ChangeFactory) {
+class CommitTransformer(private val commitDTO: CommitDTO, private val project: Project, private val changeFactory: ChangeFactory = SimpleChangeFactory()) {
     companion object {
-        private const val dateFormat = "EEE MMM d HH:mm:ss yyyy Z"
         private val LOG = LoggerFactory.getLogger(CommitTransformer::class.java)
     }
 
@@ -53,7 +53,7 @@ class CommitTransformer(private val commitDTO: CommitDTO, private val project: P
     }
 
     private fun parseDate(timestamp: String) =
-            LocalDateTime.parse(timestamp, DateTimeFormatter.ofPattern(dateFormat))
+            ZonedDateTime.parse(timestamp, commitDateTimeFormatter)
 
     private fun addChangesToCommit(changes: List<ChangeDTO>, commit: Commit, project: Project) {
         LOG.info("Filtering changes")

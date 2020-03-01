@@ -1,9 +1,9 @@
 import com.google.gson.Gson
-import org.dxworks.inspectorgit.gitClient.GitClient
-import org.dxworks.inspectorgit.gitClient.dto.AnnotatedLineDTO
-import org.dxworks.inspectorgit.gitClient.dto.GitLogDTO
-import org.dxworks.inspectorgit.gitClient.enums.ChangeType
-import org.dxworks.inspectorgit.gitClient.parsers.LogParser
+import org.dxworks.inspectorgit.gitclient.GitClient
+import org.dxworks.inspectorgit.gitclient.dto.AnnotatedLineDTO
+import org.dxworks.inspectorgit.gitclient.dto.GitLogDTO
+import org.dxworks.inspectorgit.gitclient.enums.ChangeType
+import org.dxworks.inspectorgit.gitclient.parsers.LogParser
 import org.dxworks.inspectorgit.model.AnnotatedLine
 import org.dxworks.inspectorgit.model.Project
 import org.dxworks.inspectorgit.transformers.ProjectTransformer
@@ -48,7 +48,7 @@ internal class ModelTest {
                 repoCache.createNewFile()
                 repoCache.writeText(Gson().toJson(gitLogDTO))
             }
-//            project = ProjectTransformer(gitLogDTO, repoName, TestChangeFactory(gitClient)).transform()
+//            project = ProjectTransformer(gitLogDTO, repoName, org.dxworks.inspectorgit.TestChangeFactory(gitClient)).transform()
             project = ProjectTransformer(gitLogDTO, repoName).transform()
         }
     }

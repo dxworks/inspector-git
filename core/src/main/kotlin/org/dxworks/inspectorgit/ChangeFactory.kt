@@ -1,6 +1,6 @@
 package org.dxworks.inspectorgit
 
-import org.dxworks.inspectorgit.gitClient.enums.ChangeType
+import org.dxworks.inspectorgit.gitclient.enums.ChangeType
 import org.dxworks.inspectorgit.model.Change
 import org.dxworks.inspectorgit.model.Commit
 import org.dxworks.inspectorgit.model.File

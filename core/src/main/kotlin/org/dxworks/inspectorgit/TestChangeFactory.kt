@@ -1,22 +1,21 @@
 package org.dxworks.inspectorgit
 
+import org.dxworks.inspectorgit.gitclient.GitClient
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
-import org.dxworks.inspectorgit.model.Change
-import org.dxworks.inspectorgit.model.Commit
-import org.dxworks.inspectorgit.model.File
-import org.dxworks.inspectorgit.model.LineChange
+import org.dxworks.inspectorgit.model.*
 
-class SimpleChangeFactory : ChangeFactory() {
+class TestChangeFactory(private val gitClient: GitClient) : ChangeFactory() {
     override fun create(commit: Commit,
                         type: ChangeType,
                         file: File,
                         parentCommits: List<Commit>,
                         lineChanges: MutableList<LineChange>,
                         parentChange: Change?): Change =
-            Change(commit = commit,
+            TestChange(commit = commit,
                     type = type,
                     file = file,
                     parentCommits = parentCommits,
                     lineChanges = lineChanges,
-                    parentChange = parentChange)
+                    parentChange = parentChange,
+                    gitClient = gitClient)
 }

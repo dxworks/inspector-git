@@ -1,8 +1,8 @@
 package org.dxworks.inspectorgit.services
 
-import org.dxworks.inspectorgit.gitClient.GitClient
-import org.dxworks.inspectorgit.gitClient.dto.GitLogDTO
-import org.dxworks.inspectorgit.gitClient.parsers.LogParser
+import org.dxworks.inspectorgit.gitclient.GitClient
+import org.dxworks.inspectorgit.gitclient.dto.GitLogDTO
+import org.dxworks.inspectorgit.gitclient.parsers.LogParser
 import org.dxworks.inspectorgit.utils.FileSystemUtils
 import org.dxworks.inspectorgit.utils.FileSystemUtils.Companion.getRepoFolderPath
 import org.eclipse.jgit.api.Git
