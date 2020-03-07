@@ -9,6 +9,8 @@ import org.dxworks.inspectorgit.model.LineChange
 abstract class ChangeFactory {
     abstract fun create(commit: Commit,
                         type: ChangeType,
+                        oldFileName: String,
+                        newFileName: String,
                         file: File,
                         parentCommits: List<Commit>,
                         lineChanges: MutableList<LineChange>,

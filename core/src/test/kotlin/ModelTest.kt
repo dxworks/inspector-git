@@ -22,11 +22,8 @@ internal class ModelTest {
         private lateinit var project: Project
 
         private val LOG = LoggerFactory.getLogger(ModelTest::class.java)
-        private val dxPlatformPath = Paths.get("C:\\Users\\nagyd\\Documents\\DX\\dx\\dx-platform")
-        private val IGMergeTestPath = Paths.get("C:\\Users\\nagyd\\Documents\\DX\\testRepo\\IGmergeTest")
-        private val kafkaPath = Paths.get("C:\\Users\\nagyd\\Documents\\DX\\kafkaRepo\\kafka")
-        private val manCxPath = Paths.get("C:\\Users\\nagyd\\Documents\\DD\\man\\mansp-cx")
-        private val manUiPath = Paths.get("C:\\Users\\nagyd\\Documents\\DD\\man\\mansp-ui")
+        private val kafkaPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\licenta\\kafka\\kafka")
+        private val dxPlatformPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\dx\\dx-platform")
 
         private val tmpFolder = Paths.get(System.getProperty("java.io.tmpdir")).resolve("inspectorGitTest")
 
@@ -36,7 +33,7 @@ internal class ModelTest {
             val tmpFolderFile = tmpFolder.toFile()
             tmpFolderFile.mkdirs()
 
-            val repoPath = kafkaPath
+            val repoPath = dxPlatformPath
 
             val repoName = repoPath.fileName.toString()
             val repoCache = tmpFolder.resolve("$repoName.json").toFile()
@@ -72,7 +69,7 @@ internal class ModelTest {
             i++
             commit.changes.filter { it.type != ChangeType.DELETE && !it.file.isBinary }
                     .forEach { change ->
-                        val fileName = change.file.id
+                        val fileName = change.newFileName
                         LOG.debug("$j) test change for $fileName in ${commit.id}")
                         j++
                         val blame = gitClient.blame(commit.id, fileName)

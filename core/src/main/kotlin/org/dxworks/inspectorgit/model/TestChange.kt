@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory
 class TestChange(
         commit: Commit,
         type: ChangeType,
+        oldFileName: String,
+        newFileName: String,
         file: File,
         parentCommits: List<Commit>,
         lineChanges: List<LineChange>,
@@ -16,6 +18,8 @@ class TestChange(
 ) : Change(
         commit = commit,
         type = type,
+        oldFileName = oldFileName,
+        newFileName = newFileName,
         file = file,
         parentCommits = parentCommits,
         lineChanges = lineChanges,
@@ -27,19 +31,19 @@ class TestChange(
 
     init {
         if (!file.isBinary && type != ChangeType.DELETE) {
-            val blame = gitClient.blame(commit.id, file.id)
+            val blame = gitClient.blame(commit.id, newFileName)
             if (blame != null) {
                 if (!blameAndFileContentAreTheSame(blame))
-                    LOG.error("File ${file.id} is not correctly built in ${commit.id} from ${parentCommits.firstOrNull()?.id}.file last changed in ${this.parentChange?.commit?.id}")
+                    LOG.error("File $newFileName is not correctly built in ${commit.id} from ${parentCommits.firstOrNull()?.id}.file last changed in ${this.parentChange?.commit?.id}")
             } else
-                LOG.warn("Blame is null for ${file.id} in ${commit.id}")
+                LOG.warn("Blame is null for $newFileName in ${commit.id}")
         }
     }
 
 
     private fun blameAndFileContentAreTheSame(blame: List<String>): Boolean {
         if (blame.size != annotatedLines.size) {
-            LOG.error("${file.id} blames have a different number of lines: blame: ${blame.size}, IG: ${annotatedLines.size}")
+            LOG.error("$newFileName blames have a different number of lines: blame: ${blame.size}, IG: ${annotatedLines.size}")
             return false
         }
         val annotatedLineDTOs = blame.map { parseAnnotatedLine(it) }
@@ -65,7 +69,7 @@ class TestChange(
         else
             lineCommitId == lineDTOCommitId
         if (!commitsAreEqual)
-            LOG.warn("In ${file.id} at ${commit.id} at line ${annotatedLineDTO.number} commits differ blame: $lineDTOCommitId, IG: $lineCommitId")
+            LOG.warn("In $newFileName at ${commit.id} at line ${annotatedLineDTO.number} commits differ blame: $lineDTOCommitId, IG: $lineCommitId")
         return numberAndContentAreTheSame
     }
 

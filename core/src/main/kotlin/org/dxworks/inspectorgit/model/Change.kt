@@ -6,20 +6,22 @@ import org.slf4j.LoggerFactory
 
 open class Change(val commit: Commit,
                   val type: ChangeType,
+                  val oldFileName: String,
+                  val newFileName: String,
                   val file: File,
                   var parentCommits: List<Commit>,
                   var lineChanges: List<LineChange>,
                   var annotatedLines: List<AnnotatedLine> = emptyList(),
                   protected var parentChange: Change?) {
 
-    val id: String get() = "${commit.id}-${file.id}"
+    val id: String get() = "${commit.id}-$oldFileName->$newFileName"
 
     companion object {
         private val LOG = LoggerFactory.getLogger(Change::class.java)
     }
 
     init {
-        LOG.info("Applying ${lineChanges.size} line changes for ${file.id} having ${parentChange?.annotatedLines?.size
+        LOG.info("Applying ${lineChanges.size} line changes for $newFileName having ${parentChange?.annotatedLines?.size
                 ?: 0} lines")
         applyLineChanges(parentChange)
     }

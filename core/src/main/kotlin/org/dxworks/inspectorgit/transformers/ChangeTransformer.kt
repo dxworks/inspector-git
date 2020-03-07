@@ -14,13 +14,15 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
     }
 
     fun transform(): Change? {
-        LOG.info("Creating ${changeDTO.type} change for file: ${changeDTO.fileName}")
+        LOG.info("Creating ${changeDTO.type} change for file: ${changeDTO.oldFileName} -> ${changeDTO.newFileName}")
         val file = getFileForChange(changeDTO, project)
         val parentCommit = if (changeDTO.parentCommitId.isEmpty()) null else commit.parents.find { it.id == changeDTO.parentCommitId }!!
         val lastChange = if (changeDTO.type == ChangeType.ADD) null else file.getLastChange(parentCommit!!)
         return changeFactory.create(
                 commit = commit,
                 type = changeDTO.type,
+                oldFileName = changeDTO.oldFileName,
+                newFileName = changeDTO.newFileName,
                 file = file,
                 parentCommits = if (parentCommit == null) emptyList() else listOf(parentCommit),
                 lineChanges = getLineChanges(lastChange),
@@ -43,14 +45,19 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
     private fun getFileForChange(change: ChangeDTO, project: Project): File {
         LOG.info("Getting file")
         return if (change.type == ChangeType.ADD) {
-            val file = project.fileRegistry.getById(change.fileName)
+            val file = project.fileRegistry.getById(change.newFileName)
             if (file != null) {
                 file
             } else {
-                val newFile = File(change.isBinary, change.fileName)
-                project.fileRegistry.add(newFile, change.fileName)
+                val newFile = File(change.isBinary)
+                project.fileRegistry.add(newFile, change.newFileName)
                 newFile
             }
-        } else project.fileRegistry.getById(change.fileName)!!
+        } else {
+            val file = project.fileRegistry.getById(change.oldFileName)!!
+            if (change.type == ChangeType.RENAME)
+                project.fileRegistry.add(file, change.newFileName)
+            file
+        }
     }
 }

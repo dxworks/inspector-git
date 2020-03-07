@@ -3,6 +3,7 @@ package org.dxworks.inspectorgit.gitclient.parsers.impl
 import org.dxworks.inspectorgit.gitclient.dto.ChangeDTO
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
 import org.dxworks.inspectorgit.gitclient.parsers.GitParser
+import org.dxworks.inspectorgit.utils.devNull
 import org.slf4j.LoggerFactory
 
 class ChangeParser(private val parentCommitId: String) : GitParser<ChangeDTO> {
@@ -12,11 +13,12 @@ class ChangeParser(private val parentCommitId: String) : GitParser<ChangeDTO> {
 
     override fun parse(lines: List<String>): ChangeDTO {
         val type = extractChangeType(lines)
-        val fileName = extractFileName(lines.first())
-        LOG.info("Parsing $type change for $fileName")
+        val (oldFileName, newFileName) = extractFileNames(lines)
+        LOG.info("Parsing $type change for $oldFileName -> $newFileName")
         return ChangeDTO(
                 type = type,
-                fileName = fileName,
+                oldFileName = oldFileName,
+                newFileName = newFileName,
                 parentCommitId = parentCommitId,
                 hunks = extractHunks(lines).map { HunkParser().parse(it) },
                 isBinary = lines.any { it.startsWith("Binary files") })
@@ -47,14 +49,15 @@ class ChangeParser(private val parentCommitId: String) : GitParser<ChangeDTO> {
         return when {
             lines.find { it.startsWith("new file mode") } != null -> ChangeType.ADD
             lines.find { it.startsWith("deleted file mode") } != null -> ChangeType.DELETE
+            lines.find { it.startsWith("similarity index") } != null -> ChangeType.RENAME
             else -> ChangeType.MODIFY
         }
     }
 
-    private fun extractFileName(diffLine: String): String {
-        val namesStartIndex = diffLine.indexOf(" a/") + 3
-        val names = diffLine.substring(namesStartIndex)
-        val namesParts = names.split(" b/")
-        return namesParts.take(namesParts.size / 2).joinToString(" b/")
+    private fun extractFileNames(lines: List<String>): Pair<String, String> {
+        val oldFilePrefix = "--- a/"
+        val newFilePrefix = "+++ b/"
+        return Pair(lines.find { it.startsWith(oldFilePrefix) }!!.removePrefix(oldFilePrefix),
+                lines.find { it.startsWith(newFilePrefix) }!!.removePrefix(newFilePrefix))
     }
 }

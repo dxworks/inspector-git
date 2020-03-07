@@ -3,13 +3,11 @@ package org.dxworks.inspectorgit.model
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
 import org.slf4j.LoggerFactory
 
-data class File(val isBinary: Boolean, val id: String, val changes: MutableList<Change> = ArrayList()) {
+data class File(val isBinary: Boolean, val changes: MutableList<Change> = ArrayList()) {
 
     companion object {
         private val LOG = LoggerFactory.getLogger(File::class.java)
     }
-
-    val name get() = id.split("/").last()
 
     fun isAlive(commit: Commit?): Boolean {
         val type = getLastChange(commit)?.type
