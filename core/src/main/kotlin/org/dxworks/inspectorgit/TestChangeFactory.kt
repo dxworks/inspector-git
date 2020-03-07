@@ -10,7 +10,7 @@ class TestChangeFactory(private val gitClient: GitClient) : ChangeFactory() {
                         oldFileName: String,
                         newFileName: String,
                         file: File,
-                        parentCommits: List<Commit>,
+                        parentCommit: Commit?,
                         lineChanges: MutableList<LineChange>,
                         parentChange: Change?): Change =
             TestChange(commit = commit,
@@ -18,7 +18,7 @@ class TestChangeFactory(private val gitClient: GitClient) : ChangeFactory() {
                     oldFileName = oldFileName,
                     newFileName = newFileName,
                     file = file,
-                    parentCommits = parentCommits,
+                    parentCommit = parentCommit,
                     lineChanges = lineChanges,
                     parentChange = parentChange,
                     gitClient = gitClient)

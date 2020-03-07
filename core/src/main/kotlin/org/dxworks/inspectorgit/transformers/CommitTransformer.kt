@@ -60,7 +60,7 @@ class CommitTransformer(private val commitDTO: CommitDTO, private val project: P
         if (commit.isMergeCommit) {
 //            val fixedChanges = RenameChangesDetector(changes, project).detectAndReplace()
             val changesByFile = changes.groupBy { it.newFileName }
-            commit.changes = changesByFile.mapNotNull { MergeChangesTransformer(it.value, commit, project, changeFactory).transform() }
+            commit.changes = changesByFile.mapNotNull { MergeChangesTransformer(it.value, commit, project, changeFactory).transform() }.flatten()
         } else {
             commit.changes = changes.mapNotNull { ChangeTransformer(it, commit, project, changeFactory).transform() }
         }

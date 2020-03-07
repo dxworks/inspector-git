@@ -12,7 +12,7 @@ abstract class ChangeFactory {
                         oldFileName: String,
                         newFileName: String,
                         file: File,
-                        parentCommits: List<Commit>,
+                        parentCommit: Commit?,
                         lineChanges: MutableList<LineChange>,
                         parentChange: Change?): Change
 }

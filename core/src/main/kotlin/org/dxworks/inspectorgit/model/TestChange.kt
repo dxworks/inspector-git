@@ -11,7 +11,7 @@ class TestChange(
         oldFileName: String,
         newFileName: String,
         file: File,
-        parentCommits: List<Commit>,
+        parentCommit: Commit?,
         lineChanges: List<LineChange>,
         parentChange: Change?,
         gitClient: GitClient
@@ -21,7 +21,7 @@ class TestChange(
         oldFileName = oldFileName,
         newFileName = newFileName,
         file = file,
-        parentCommits = parentCommits,
+        parentCommit = parentCommit,
         lineChanges = lineChanges,
         parentChange = parentChange
 ) {
@@ -34,7 +34,7 @@ class TestChange(
             val blame = gitClient.blame(commit.id, newFileName)
             if (blame != null) {
                 if (!blameAndFileContentAreTheSame(blame))
-                    LOG.error("File $newFileName is not correctly built in ${commit.id} from ${parentCommits.firstOrNull()?.id}.file last changed in ${this.parentChange?.commit?.id}")
+                    LOG.error("File $newFileName is not correctly built in ${commit.id} from ${parentCommit?.id}.file last changed in ${this.parentChange?.commit?.id}")
             } else
                 LOG.warn("Blame is null for $newFileName in ${commit.id}")
         }

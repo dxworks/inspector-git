@@ -3,7 +3,6 @@ package org.dxworks.inspectorgit.transformers
 import org.dxworks.inspectorgit.ChangeFactory
 import org.dxworks.inspectorgit.gitclient.dto.ChangeDTO
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
-import org.dxworks.inspectorgit.gitclient.enums.LineOperation
 import org.dxworks.inspectorgit.model.AnnotatedLine
 import org.dxworks.inspectorgit.model.Change
 import org.dxworks.inspectorgit.model.Commit
@@ -16,18 +15,20 @@ class MergeChangesTransformer(private val changeDTOs: List<ChangeDTO>, val commi
         val LOG = LoggerFactory.getLogger(MergeChangesTransformer::class.java)
     }
 
-    fun transform(): Change? {
+    fun transform(): List<Change> {
         val changes = changeDTOs.mapNotNull { ChangeTransformer(it, commit, project, changeFactory).transform() }
-        return if (changes.isEmpty()) return null else mergeChanges(changes)
+        return if (changes.isEmpty()) return emptyList() else mergeChanges(changes)
     }
 
-    private fun mergeChanges(changes: List<Change>): Change {
+    private fun mergeChanges(changes: List<Change>): List<Change> {
         LOG.info("Merging ${changes.size} changes")
         val firstChange = changes.first()
         if (changes.size < commit.parents.size && !changes.all { it.type == ChangeType.DELETE }) {
-            val cleanParent = commit.parents.first { changes.none { change -> change.parentCommits.first() == it } }
-            val lastChange = firstChange.file.getLastChange(cleanParent)!!
-            firstChange.annotatedLines = lastChange.annotatedLines.map { AnnotatedLine(it.number, it.content) }
+            val cleanParent = commit.parents.first { changes.none { change -> change.parentCommit == it } }
+            firstChange.file.getLastChange(cleanParent)?.let { lastChange ->
+                if (lastChange.annotatedLines.size == firstChange.annotatedLines.size)
+                firstChange.annotatedLines = lastChange.annotatedLines.map { AnnotatedLine(it.number, it.content) }
+            }
         } else {
             val annotatedFiles = changes.map { it.annotatedLines }
             val fileSize = annotatedFiles.first().size
@@ -39,15 +40,20 @@ class MergeChangesTransformer(private val changeDTOs: List<ChangeDTO>, val commi
                     annotatedLines.find { it.content.commit != commit }?.let { firstAnnotatedLine.content = it.content }
             }
         }
-        // This is done temporarily until we figure out how to manage line changes in a merge commit
-        firstChange.lineChanges = changes.flatMap { it.lineChanges }
-        firstChange.lineChanges.filter { it.operation == LineOperation.ADD }.forEach { it.content = firstChange.annotatedLines[it.number - 1].content }
-        firstChange.parentCommits = changes.flatMap { it.parentCommits }
-        // till here
 
-        // filter or mark changes so that we take into consideration only the relevant ones
-        // maybe changes need to know where they come from
+        changes.drop(1).forEach { it.annotatedLines = changes.first().annotatedLines }
+
+        val files = changes.map { it.file }.distinct()
+        if (files.size > 1) {
+            val allFileChanges = files.flatMap { it.changes }.distinct()
+            val file = files.first()
+            file.changes = allFileChanges.sortedBy { it.commit.committerDate }.toMutableList()
+            changes.forEach { it.file = file }
+
+            files.drop(1).forEach { project.fileRegistry.delete(it) }
+        }
+
         LOG.info("Finished merging changes")
-        return firstChange
+        return changes
     }
 }

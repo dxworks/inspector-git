@@ -35,5 +35,9 @@ abstract class AbstractRegistry<TYPE, ID> {
         return map.remove(id)
     }
 
+    fun delete(entity: TYPE): TYPE? {
+        return map.remove(getID(entity))
+    }
+
     protected abstract fun getID(entity: TYPE): ID
 }

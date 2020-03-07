@@ -8,8 +8,8 @@ open class Change(val commit: Commit,
                   val type: ChangeType,
                   val oldFileName: String,
                   val newFileName: String,
-                  val file: File,
-                  var parentCommits: List<Commit>,
+                  var file: File,
+                  var parentCommit: Commit?,
                   var lineChanges: List<LineChange>,
                   var annotatedLines: List<AnnotatedLine> = emptyList(),
                   protected var parentChange: Change?) {
@@ -59,7 +59,9 @@ open class Change(val commit: Commit,
 
     override fun hashCode(): Int {
         var result = type.hashCode()
-        result = 31 * result + file.hashCode()
+        result = 31 * result + commit.hashCode()
+        result = 31 * result + oldFileName.hashCode()
+        result = 31 * result + newFileName.hashCode()
         result = 31 * result + lineChanges.hashCode()
         result = 31 * result + annotatedLines.hashCode()
         return result

@@ -14,19 +14,24 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
     }
 
     fun transform(): Change? {
-        LOG.info("Creating ${changeDTO.type} change for file: ${changeDTO.oldFileName} -> ${changeDTO.newFileName}")
-        val file = getFileForChange(changeDTO, project)
         val parentCommit = if (changeDTO.parentCommitId.isEmpty()) null else commit.parents.find { it.id == changeDTO.parentCommitId }!!
-        val lastChange = if (changeDTO.type == ChangeType.ADD) null else file.getLastChange(parentCommit!!)
+        val lastChange = if (changeDTO.type == ChangeType.ADD) null else getLastChange(parentCommit!!)
+        LOG.info("Creating ${changeDTO.type} change for file: ${changeDTO.oldFileName} -> ${changeDTO.newFileName}")
+        val file = getFileForChange(changeDTO, project, lastChange)
         return changeFactory.create(
                 commit = commit,
                 type = changeDTO.type,
                 oldFileName = changeDTO.oldFileName,
                 newFileName = changeDTO.newFileName,
                 file = file,
-                parentCommits = if (parentCommit == null) emptyList() else listOf(parentCommit),
+                parentCommit = parentCommit,
                 lineChanges = getLineChanges(lastChange),
                 parentChange = lastChange)
+    }
+
+    private tailrec fun getLastChange(parentCommit: Commit): Change {
+        return parentCommit.changes.find { it.newFileName == changeDTO.oldFileName }
+                ?: getLastChange(parentCommit.parents.first())
     }
 
     private fun getLineChanges(lastChange: Change?): MutableList<LineChange> {
@@ -42,22 +47,15 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
         }
     }
 
-    private fun getFileForChange(change: ChangeDTO, project: Project): File {
+    private fun getFileForChange(change: ChangeDTO, project: Project, lastChange: Change?): File {
         LOG.info("Getting file")
         return if (change.type == ChangeType.ADD) {
-            val file = project.fileRegistry.getById(change.newFileName)
-            if (file != null) {
-                file
-            } else {
-                val newFile = File(change.isBinary)
-                project.fileRegistry.add(newFile, change.newFileName)
-                newFile
-            }
+            val newFile = File(change.isBinary)
+            project.fileRegistry.add(newFile)
+            newFile
+
         } else {
-            val file = project.fileRegistry.getById(change.oldFileName)!!
-            if (change.type == ChangeType.RENAME)
-                project.fileRegistry.add(file, change.newFileName)
-            file
+            lastChange!!.file
         }
     }
 }
