@@ -11,11 +11,16 @@ import org.slf4j.LoggerFactory
 class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Commit, private val project: Project, private val changeFactory: ChangeFactory) {
     companion object {
         private val LOG = LoggerFactory.getLogger(ChangeTransformer::class.java)
+
+        tailrec fun getLastChange(parentCommit: Commit, fileName: String): Change {
+            return parentCommit.changes.find { it.newFileName == fileName }
+                    ?: getLastChange(parentCommit.parents.first(), fileName)
+        }
     }
 
     fun transform(): Change? {
         val parentCommit = if (changeDTO.parentCommitId.isEmpty()) null else commit.parents.find { it.id == changeDTO.parentCommitId }!!
-        val lastChange = if (changeDTO.type == ChangeType.ADD) null else getLastChange(parentCommit!!)
+        val lastChange = if (changeDTO.type == ChangeType.ADD) null else getLastChange(parentCommit!!, changeDTO.oldFileName)
         LOG.info("Creating ${changeDTO.type} change for file: ${changeDTO.oldFileName} -> ${changeDTO.newFileName}")
         val file = getFileForChange(changeDTO, project, lastChange)
         return changeFactory.create(
@@ -27,11 +32,6 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
                 parentCommit = parentCommit,
                 lineChanges = getLineChanges(lastChange),
                 parentChange = lastChange)
-    }
-
-    private tailrec fun getLastChange(parentCommit: Commit): Change {
-        return parentCommit.changes.find { it.newFileName == changeDTO.oldFileName }
-                ?: getLastChange(parentCommit.parents.first())
     }
 
     private fun getLineChanges(lastChange: Change?): MutableList<LineChange> {

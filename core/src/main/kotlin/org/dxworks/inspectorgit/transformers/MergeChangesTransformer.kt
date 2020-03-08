@@ -23,16 +23,20 @@ class MergeChangesTransformer(private val changeDTOs: List<ChangeDTO>, val commi
     private fun mergeChanges(changes: List<Change>): List<Change> {
         LOG.info("Merging ${changes.size} changes")
         val firstChange = changes.first()
+        val lastChange: Change?
         if (changes.size < commit.parents.size && !changes.all { it.type == ChangeType.DELETE }) {
             val cleanParent = commit.parents.first { changes.none { change -> change.parentCommit == it } }
-            firstChange.file.getLastChange(cleanParent)?.let { lastChange ->
-                if (lastChange.annotatedLines.size == firstChange.annotatedLines.size)
+            lastChange = ChangeTransformer.getLastChange(cleanParent, firstChange.newFileName)
+            if (firstChange.annotatedLines.size == lastChange.annotatedLines.size && contentsAreTheSame(firstChange, lastChange))
                 firstChange.annotatedLines = lastChange.annotatedLines.map { AnnotatedLine(it.number, it.content) }
-            }
+            else
+                LOG.warn("Annotated line numbers don't match")
         } else {
+            lastChange = null
+        }
+        if (changes.size > 1) {
             val annotatedFiles = changes.map { it.annotatedLines }
-            val fileSize = annotatedFiles.first().size
-            for (i in 0 until fileSize) {
+            for (i in annotatedFiles.first().indices) {
                 val currentAnnotatedLines = annotatedFiles.map { it[i] }
                 val firstAnnotatedLine = currentAnnotatedLines[0]
                 val annotatedLines = currentAnnotatedLines.drop(1)
@@ -43,7 +47,7 @@ class MergeChangesTransformer(private val changeDTOs: List<ChangeDTO>, val commi
 
         changes.drop(1).forEach { it.annotatedLines = changes.first().annotatedLines }
 
-        val files = changes.map { it.file }.distinct()
+        val files = (changes.map { it.file } + listOf(lastChange?.file)).filterNotNull().distinct()
         if (files.size > 1) {
             val allFileChanges = files.flatMap { it.changes }.distinct()
             val file = files.first()
@@ -55,5 +59,13 @@ class MergeChangesTransformer(private val changeDTOs: List<ChangeDTO>, val commi
 
         LOG.info("Finished merging changes")
         return changes
+    }
+
+    private fun contentsAreTheSame(firstChange: Change, lastChange: Change): Boolean {
+        for (i in firstChange.annotatedLines.indices) {
+            if (firstChange.annotatedLines[i].content.content != lastChange.annotatedLines[i].content.content)
+                return false
+        }
+        return true
     }
 }
