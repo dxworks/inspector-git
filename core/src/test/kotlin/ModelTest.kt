@@ -27,13 +27,16 @@ internal class ModelTest {
 
         private val tmpFolder = Paths.get(System.getProperty("java.io.tmpdir")).resolve("inspectorGitTest")
 
+        private var lines = 0.0
+        private var linesWithDifferentCommit = 0.0
+
         @BeforeAll
         @JvmStatic
         internal fun beforeAll() {
             val tmpFolderFile = tmpFolder.toFile()
             tmpFolderFile.mkdirs()
 
-            val repoPath = dxPlatformPath
+            val repoPath = kafkaPath
 
             val repoName = repoPath.fileName.toString()
             val repoCache = tmpFolder.resolve("$repoName.json").toFile()
@@ -80,7 +83,10 @@ internal class ModelTest {
                             LOG.warn("Blame is null for $fileName in ${commit.id}")
                     }
         }
+
         assertTrue { ok }
+        LOG.info("Test passed with ${(lines - linesWithDifferentCommit) / lines * 100}% line owner accuracy(against git).")
+        LOG.info("$linesWithDifferentCommit / $lines")
     }
 
     private fun blameAndFileContentAreTheSame(blame: List<String>, annotatedLines: List<AnnotatedLine>, fileName: String, commitId: String): Boolean {
@@ -101,10 +107,13 @@ internal class ModelTest {
     }
 
     private fun linesAreTheSame(annotatedLineDTO: AnnotatedLineDTO, annotatedLine: AnnotatedLine, fileName: String, commitId: String): Boolean {
+        lines++
         val numberAndContentAreTheSame = annotatedLineDTO.number == annotatedLine.number &&
                 annotatedLineDTO.content == annotatedLine.content.content
-        if (project.commitRegistry.getById(annotatedLineDTO.commitId) != annotatedLine.content.commit)
+        if (project.commitRegistry.getById(annotatedLineDTO.commitId) != annotatedLine.content.commit) {
             LOG.warn("In $fileName at $commitId at line ${annotatedLineDTO.number} commits differ blame: ${annotatedLineDTO.commitId}, IG: ${annotatedLine.content.commit.id}")
+            linesWithDifferentCommit++
+        }
         return numberAndContentAreTheSame
     }
 
