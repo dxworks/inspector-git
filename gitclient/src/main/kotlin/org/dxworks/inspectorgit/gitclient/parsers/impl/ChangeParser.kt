@@ -13,7 +13,7 @@ class ChangeParser(private val parentCommitId: String) : GitParser<ChangeDTO> {
 
     override fun parse(lines: List<String>): ChangeDTO {
         val type = extractChangeType(lines)
-        val (oldFileName, newFileName) = extractFileNames(lines)
+        val (oldFileName, newFileName) = extractFileNames(lines, type)
         LOG.info("Parsing $type change for $oldFileName -> $newFileName")
         return ChangeDTO(
                 type = type,
@@ -54,10 +54,11 @@ class ChangeParser(private val parentCommitId: String) : GitParser<ChangeDTO> {
         }
     }
 
-    private fun extractFileNames(lines: List<String>): Pair<String, String> {
+    private fun extractFileNames(lines: List<String>, type: ChangeType): Pair<String, String> {
         val oldFilePrefix = "--- a/"
         val newFilePrefix = "+++ b/"
-        return Pair(lines.find { it.startsWith(oldFilePrefix) }!!.removePrefix(oldFilePrefix),
-                lines.find { it.startsWith(newFilePrefix) }!!.removePrefix(newFilePrefix))
+        val oldFileName = if (type == ChangeType.ADD) devNull else lines.find { it.startsWith(oldFilePrefix) }!!.removePrefix(oldFilePrefix)
+        val newFileName = if (type == ChangeType.DELETE) devNull else lines.find { it.startsWith(newFilePrefix) }!!.removePrefix(newFilePrefix)
+        return Pair(oldFileName, newFileName)
     }
 }
