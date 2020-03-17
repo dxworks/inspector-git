@@ -1,5 +1,6 @@
 package org.dxworks.inspectorgit.gitclient
 
+import org.dxworks.inspectorgit.gitclient.iglog.IGLogConstants
 import org.dxworks.inspectorgit.utils.OsUtils
 import org.slf4j.LoggerFactory
 import java.io.BufferedReader
@@ -17,9 +18,9 @@ class GitClient(path: Path) {
     //    private val renameDetectionThreshold = "--no-renames"
     private val contextThreshold = "-U1"
 
-    private val gitLogCommand = "log $renameDetectionThreshold -m $contextThreshold --encoding=UTF-8 --format=\"commit: %H%nparents: %P%nauthor name: %an%nauthor email: %ae%nauthor date: %ad%ncommitter name: %cn%ncommitter email: %ce%ncommitter date: %cd %nmessage:%n%s%n%b\" --reverse"
+    private val gitLogCommand = "log $renameDetectionThreshold -m $contextThreshold --encoding=UTF-8 --format=\"${IGLogConstants.commitIdPrefix}%H%n%P%n%an%n%ae%n%ad%n%cn%n%ce%n%cd %n%s%n%b\" --reverse"
     private val gitAffectedFilesCommand = "log $renameDetectionThreshold -m -1 --name-only --pretty=\"format:\""
-    private val gitCommitLinksCommand = "log -m  --encoding=UTF-8 --format=\"commit: %H%nparents: %P\" --reverse"
+    private val gitCommitLinksCommand = "log -m  --encoding=UTF-8 --format=\"${IGLogConstants.commitIdPrefix}%H%n%P\" --reverse"
     private val gitCountCommitsCommand = "rev-list HEAD --count"
     private val gitDiffCommand = "diff $renameDetectionThreshold $contextThreshold"
     private val gitDiffFileNamesCommand = "diff $renameDetectionThreshold --name-only"

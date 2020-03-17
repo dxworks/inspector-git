@@ -1,6 +1,7 @@
 package org.dxworks.inspectorgit.gitclient
 
 import org.dxworks.inspectorgit.gitclient.dto.CommitNodeDTO
+import org.dxworks.inspectorgit.gitclient.iglog.IGLogConstants
 import java.nio.file.Paths
 
 class CommitGraphTool(private val gitClient: GitClient) {
@@ -25,7 +26,7 @@ class CommitGraphTool(private val gitClient: GitClient) {
     }
 
     private fun extractIdAndParentIds(commitLines: List<String>): Pair<String, List<String>> {
-        return Pair(commitLines[0].removePrefix("commit: "), commitLines[1].removePrefix("parents: ").split(" ").filter { it.isNotEmpty() })
+        return Pair(commitLines[0].removePrefix(IGLogConstants.commitIdPrefix), commitLines[1].split(" ").filter { it.isNotEmpty() })
     }
 }
 

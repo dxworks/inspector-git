@@ -2,6 +2,7 @@ package org.dxworks.inspectorgit.gitclient.parsers.abstracts
 
 import org.dxworks.inspectorgit.gitclient.dto.ChangeDTO
 import org.dxworks.inspectorgit.gitclient.dto.CommitDTO
+import org.dxworks.inspectorgit.gitclient.iglog.IGLogConstants
 import org.dxworks.inspectorgit.gitclient.parsers.GitParser
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -22,12 +23,12 @@ abstract class CommitParser : GitParser<CommitDTO> {
         return CommitDTO(
                 id = commitId,
                 parentIds = parentIds,
-                authorName = extractName(mutableLines, author),
-                authorEmail = extractEmail(mutableLines, author),
-                authorDate = extractDate(mutableLines, author),
-                committerName = extractName(mutableLines, committer),
-                committerEmail = extractEmail(mutableLines, committer),
-                committerDate = extractDate(mutableLines, committer),
+                authorName = mutableLines.removeAt(0).trim(),
+                authorEmail = mutableLines.removeAt(0).trim(),
+                authorDate = mutableLines.removeAt(0).trim(),
+                committerName = mutableLines.removeAt(0).trim(),
+                committerEmail = mutableLines.removeAt(0).trim(),
+                committerDate = mutableLines.removeAt(0).trim(),
                 message = extractMessage(mutableLines),
                 changes = getChanges(mutableLines, commitId, parentIds))
     }
@@ -50,20 +51,11 @@ abstract class CommitParser : GitParser<CommitDTO> {
     }
 
     private fun extractCommitId(lines: MutableList<String>) =
-            lines.removeAt(0).removePrefix("commit: ")
+            lines.removeAt(0).removePrefix(IGLogConstants.commitIdPrefix)
 
     private fun extractParentIds(lines: MutableList<String>) =
-            lines.removeAt(0).removePrefix("parents: ").split(" ").filter { it.isNotEmpty() }
+            lines.removeAt(0).split(" ").filter { it.isNotEmpty() }
 
-    private fun extractName(lines: MutableList<String>, devType: String) =
-            lines.removeAt(0).removePrefix("$devType name: ")
-
-    private fun extractEmail(lines: MutableList<String>, devType: String) =
-            lines.removeAt(0).removePrefix("$devType email: ")
-
-
-    private fun extractDate(lines: MutableList<String>, devType: String): String =
-            lines.removeAt(0).removePrefix("$devType date: ").trim()
 
     private fun extractMessage(lines: MutableList<String>): String {
         lines.removeAt(0)

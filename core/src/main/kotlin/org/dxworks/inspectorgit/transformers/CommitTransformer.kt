@@ -52,8 +52,10 @@ class CommitTransformer(private val commitDTO: CommitDTO, private val project: P
         LOG.info("Done creating commit with id: ${commitDTO.id}")
     }
 
-    private fun parseDate(timestamp: String) =
-            ZonedDateTime.parse(timestamp, commitDateTimeFormatter)
+    private fun parseDate(timestamp: String): ZonedDateTime {
+        LOG.debug("Parsing date: $timestamp")
+        return ZonedDateTime.parse(timestamp, commitDateTimeFormatter)
+    }
 
     private fun addChangesToCommit(changes: List<ChangeDTO>, commit: Commit, project: Project) {
         LOG.info("Filtering changes")
