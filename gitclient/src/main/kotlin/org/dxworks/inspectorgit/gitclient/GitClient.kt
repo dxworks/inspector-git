@@ -12,8 +12,9 @@ class GitClient(path: Path) {
     }
 
     private val git = "git"
-        private val renameDetectionThreshold = "-M60%"
-//    private val renameDetectionThreshold = "--no-renames"
+    private val renameDetectionThreshold = "-M60%"
+
+    //    private val renameDetectionThreshold = "--no-renames"
     private val contextThreshold = "-U1"
 
     private val gitLogCommand = "log $renameDetectionThreshold -m $contextThreshold --encoding=UTF-8 --format=\"commit: %H%nparents: %P%nauthor name: %an%nauthor email: %ae%nauthor date: %ad%ncommitter name: %cn%ncommitter email: %ce%ncommitter date: %cd %nmessage:%n%s%n%b\" --reverse"
@@ -22,6 +23,7 @@ class GitClient(path: Path) {
     private val gitCountCommitsCommand = "rev-list HEAD --count"
     private val gitDiffCommand = "diff $renameDetectionThreshold $contextThreshold"
     private val gitDiffFileNamesCommand = "diff $renameDetectionThreshold --name-only"
+    private val setRenameLimitCommand = "config --global diff.renameLimit"
     private val gitBlameCommand = "blame -l"
     private val gitBranchCommand = "branch"
     private val processBuilder = ProcessBuilder()
@@ -36,6 +38,8 @@ class GitClient(path: Path) {
 
 
     fun getCommitCount(): Int = runGitCommand(gitCountCommitsCommand)!!.getOrElse(0) { "0" }.toInt()
+
+    fun setRenameLimit(limit: Int = 5000) = runGitCommand("$setRenameLimitCommand $limit");
 
     fun getCommitLinks(): List<String> = runGitCommand(gitCommitLinksCommand)!!
 

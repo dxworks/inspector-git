@@ -1,6 +1,12 @@
 package org.dxworks.inspectorgit.gitclient
 
-class GitLogPager(private val gitClient: GitClient, var pageSize: Int = 1000) {
+import org.slf4j.LoggerFactory
+
+class GitLogPager(private val gitClient: GitClient, var pageSize: Int = 100) {
+    companion object {
+        private val LOG = LoggerFactory.getLogger(GitLogPager::class.java)
+    }
+
     var commitCount = gitClient.getCommitCount()
         set(value) {
             field = value
@@ -8,6 +14,10 @@ class GitLogPager(private val gitClient: GitClient, var pageSize: Int = 1000) {
         }
     private var pageCount = commitCount / pageSize + 1
     private var counter = 1
+
+    init {
+        gitClient.setRenameLimit()
+    }
 
 
     private fun page(number: Int): List<String> {
@@ -20,6 +30,7 @@ class GitLogPager(private val gitClient: GitClient, var pageSize: Int = 1000) {
         else
             Pair(pageSize, skippedCommits)
 
+        LOG.info("Getting Page $number/$pageCount containing commits $skip-${skip + numberOfCommits} of $commitCount")
         return gitClient.getNCommitLogs(numberOfCommits, skip)
     }
 

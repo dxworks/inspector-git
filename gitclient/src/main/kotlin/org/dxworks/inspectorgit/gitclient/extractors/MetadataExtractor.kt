@@ -13,7 +13,7 @@ import java.nio.file.Paths
 class MetadataExtractor(private val repoPath: Path, extractToPath: Path) {
     private val gitClient = GitClient(repoPath)
 
-    private val gitLogPager = GitLogPager(gitClient)
+    private val gitLogPager = GitLogPager(gitClient, 1000)
 
     private val extractDir = extractToPath.toFile()
 
@@ -24,14 +24,19 @@ class MetadataExtractor(private val repoPath: Path, extractToPath: Path) {
 
     fun extract() {
         val extractFile = extractDir.resolve("${repoPath.fileName}.iglog")
-        extractFile.createNewFile()
+        extractFile.writeText("")
+
+
         while (gitLogPager.hasNext()) {
             val pagedCommits = gitLogPager.next()
-            val gitLogDTO = LogParser(gitClient).parse(pagedCommits)
+            val commitsLines = LogParser.extractCommits(pagedCommits)
+            commitsLines.forEach {
+                val gitLogDTO = LogParser(gitClient).parse(it)
 
-            swapContentWithMetadata(gitLogDTO)
+                swapContentWithMetadata(gitLogDTO)
 
-            extractFile.writeText(toIgLog(gitLogDTO))
+                extractFile.appendText(toIgLog(gitLogDTO))
+            }
         }
     }
 
@@ -54,6 +59,6 @@ class MetadataExtractor(private val repoPath: Path, extractToPath: Path) {
 }
 
 fun main() {
-    val kafkaPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\licenta\\kafka\\kafka")
-    MetadataExtractor(kafkaPath, appFolderPath.resolve("kafkaMetadata")).extract()
+    val kafkaPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\licenta\\linux\\linux")
+    MetadataExtractor(kafkaPath, appFolderPath.resolve("linuxMetadata")).extract()
 }
