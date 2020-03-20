@@ -1,6 +1,6 @@
 package org.dxworks.inspectorgit.gitclient.parsers.impl
 
-import org.dxworks.inspectorgit.gitclient.dto.ChangeDTO
+import org.dxworks.inspectorgit.gitclient.dto.gitlog.ChangeDTO
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
 import org.dxworks.inspectorgit.gitclient.parsers.GitParser
 import org.dxworks.inspectorgit.utils.devNull

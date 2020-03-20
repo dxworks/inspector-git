@@ -2,7 +2,7 @@ package org.dxworks.inspectorgit.transformers
 
 import org.dxworks.inspectorgit.ChangeFactory
 import org.dxworks.inspectorgit.SimpleChangeFactory
-import org.dxworks.inspectorgit.gitclient.dto.GitLogDTO
+import org.dxworks.inspectorgit.gitclient.dto.gitlog.GitLogDTO
 import org.dxworks.inspectorgit.model.Project
 import org.slf4j.LoggerFactory
 

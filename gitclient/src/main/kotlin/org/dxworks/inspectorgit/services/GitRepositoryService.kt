@@ -1,7 +1,7 @@
 package org.dxworks.inspectorgit.services
 
 import org.dxworks.inspectorgit.gitclient.GitClient
-import org.dxworks.inspectorgit.gitclient.dto.GitLogDTO
+import org.dxworks.inspectorgit.gitclient.dto.gitlog.GitLogDTO
 import org.dxworks.inspectorgit.gitclient.parsers.LogParser
 import org.dxworks.inspectorgit.utils.FileSystemUtils
 import org.dxworks.inspectorgit.utils.FileSystemUtils.Companion.getRepoFolderPath

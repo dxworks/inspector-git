@@ -2,20 +2,25 @@ package org.dxworks.inspectorgit.gitclient.extractors
 
 import org.dxworks.inspectorgit.gitclient.GitClient
 import org.dxworks.inspectorgit.gitclient.GitLogPager
-import org.dxworks.inspectorgit.gitclient.dto.GitLogDTO
-import org.dxworks.inspectorgit.gitclient.dto.HunkDTO
-import org.dxworks.inspectorgit.gitclient.iglog.IGLogWriter
+import org.dxworks.inspectorgit.gitclient.dto.gitlog.GitLogDTO
+import org.dxworks.inspectorgit.gitclient.dto.gitlog.HunkDTO
+import org.dxworks.inspectorgit.gitclient.dto.gitlog.LineChangeDTO
+import org.dxworks.inspectorgit.gitclient.enums.LineOperation
+import org.dxworks.inspectorgit.gitclient.extractors.impl.LineOperationsMetaExtractor
+import org.dxworks.inspectorgit.gitclient.iglog.writers.IGLogWriter
 import org.dxworks.inspectorgit.gitclient.parsers.LogParser
 import org.dxworks.inspectorgit.utils.appFolderPath
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class MetadataExtractor(private val repoPath: Path, extractToPath: Path) {
+class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path) {
     private val gitClient = GitClient(repoPath)
 
     private val gitLogPager = GitLogPager(gitClient, 1000)
 
     private val extractDir = extractToPath.toFile()
+
+    private val lineOperationsMetaExtractor = LineOperationsMetaExtractor()
 
     init {
         if (!extractDir.isDirectory && !extractDir.mkdir())
@@ -50,15 +55,19 @@ class MetadataExtractor(private val repoPath: Path, extractToPath: Path) {
     }
 
     private fun swapContentWithMetadata(hunkDTO: HunkDTO) {
-        hunkDTO.lineChanges.forEach { it.content = getMetadata(it.content) }
+        hunkDTO.lineChanges = listOf(
+                ContentOnlyLineChange(lineOperationsMetaExtractor.write(hunkDTO))
+        )
     }
 
     private fun getMetadata(content: String): String {
         return "${content.length} ${content.count { it.isWhitespace() }}"
     }
+
+    private class ContentOnlyLineChange(content: String) : LineChangeDTO(LineOperation.ADD, 0, content)
 }
 
 fun main() {
-    val kafkaPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\licenta\\linux\\linux")
-    MetadataExtractor(kafkaPath, appFolderPath.resolve("linuxMetadata")).extract()
+    val kafkaPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\licenta\\kafka\\kafka")
+    MetadataExtractionManager(kafkaPath, appFolderPath.resolve("kafkaMeta")).extract()
 }

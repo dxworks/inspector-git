@@ -1,7 +1,7 @@
 package org.dxworks.inspectorgit.gitclient.parsers.impl
 
 import org.dxworks.inspectorgit.gitclient.GitClient
-import org.dxworks.inspectorgit.gitclient.dto.CommitDTO
+import org.dxworks.inspectorgit.gitclient.dto.gitlog.CommitDTO
 import org.dxworks.inspectorgit.gitclient.parsers.GitParser
 
 class MergeCommitParser(private val commitsGroup: List<List<String>>, private val gitClient: GitClient) : GitParser<CommitDTO> {

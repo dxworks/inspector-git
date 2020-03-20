@@ -1,7 +1,8 @@
-package org.dxworks.inspectorgit.gitclient.iglog
+package org.dxworks.inspectorgit.gitclient.iglog.writers
 
-import org.dxworks.inspectorgit.gitclient.dto.ChangeDTO
+import org.dxworks.inspectorgit.gitclient.dto.gitlog.ChangeDTO
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
+import org.dxworks.inspectorgit.gitclient.iglog.IGLogConstants
 
 class IGChangeWriter(private val changeDTO: ChangeDTO) : IGWriter() {
     override fun appendLines(responseBuilder: StringBuilder) {

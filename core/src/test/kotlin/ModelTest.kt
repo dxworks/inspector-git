@@ -1,7 +1,7 @@
 import com.google.gson.Gson
 import org.dxworks.inspectorgit.gitclient.GitClient
-import org.dxworks.inspectorgit.gitclient.dto.AnnotatedLineDTO
-import org.dxworks.inspectorgit.gitclient.dto.GitLogDTO
+import org.dxworks.inspectorgit.gitclient.dto.gitlog.AnnotatedLineDTO
+import org.dxworks.inspectorgit.gitclient.dto.gitlog.GitLogDTO
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
 import org.dxworks.inspectorgit.gitclient.parsers.LogParser
 import org.dxworks.inspectorgit.model.AnnotatedLine

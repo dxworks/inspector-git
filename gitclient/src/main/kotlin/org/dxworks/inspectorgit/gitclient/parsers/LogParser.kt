@@ -1,7 +1,7 @@
 package org.dxworks.inspectorgit.gitclient.parsers
 
 import org.dxworks.inspectorgit.gitclient.GitClient
-import org.dxworks.inspectorgit.gitclient.dto.GitLogDTO
+import org.dxworks.inspectorgit.gitclient.dto.gitlog.GitLogDTO
 import org.dxworks.inspectorgit.gitclient.iglog.IGLogConstants
 import org.slf4j.LoggerFactory
 

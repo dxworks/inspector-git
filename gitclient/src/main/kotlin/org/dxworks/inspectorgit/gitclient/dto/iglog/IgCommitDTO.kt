@@ -1,6 +1,8 @@
-package org.dxworks.inspectorgit.gitclient.dto
+package org.dxworks.inspectorgit.gitclient.dto.iglog
 
-class CommitDTO(
+import org.dxworks.inspectorgit.gitclient.dto.CommitInfoDTO
+
+class IgCommitDTO(
         id: String,
         parentIds: List<String>,
         authorName: String,
@@ -10,7 +12,7 @@ class CommitDTO(
         committerEmail: String,
         committerDate: String,
         message: String,
-        var changes: List<ChangeDTO>
+        val changes: List<IgChangeDTO>
 ) : CommitInfoDTO(
         id,
         parentIds,
@@ -21,4 +23,6 @@ class CommitDTO(
         committerEmail,
         committerDate,
         message
-)
+) {
+
+}

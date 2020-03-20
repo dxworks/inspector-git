@@ -1,6 +1,7 @@
-package org.dxworks.inspectorgit.gitclient.iglog
+package org.dxworks.inspectorgit.gitclient.iglog.writers
 
-import org.dxworks.inspectorgit.gitclient.dto.CommitDTO
+import org.dxworks.inspectorgit.gitclient.dto.gitlog.CommitDTO
+import org.dxworks.inspectorgit.gitclient.iglog.IGLogConstants
 
 class IGCommitWriter(private val commitDTO: CommitDTO) : IGWriter() {
     override fun appendLines(responseBuilder: StringBuilder) {

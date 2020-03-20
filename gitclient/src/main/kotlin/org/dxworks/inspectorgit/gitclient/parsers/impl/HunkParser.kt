@@ -1,8 +1,8 @@
 package org.dxworks.inspectorgit.gitclient.parsers.impl
 
-import org.dxworks.inspectorgit.gitclient.dto.HunkDTO
-import org.dxworks.inspectorgit.gitclient.dto.HunkType
-import org.dxworks.inspectorgit.gitclient.dto.LineChangeDTO
+import org.dxworks.inspectorgit.gitclient.dto.gitlog.HunkDTO
+import org.dxworks.inspectorgit.gitclient.dto.gitlog.HunkType
+import org.dxworks.inspectorgit.gitclient.dto.gitlog.LineChangeDTO
 import org.dxworks.inspectorgit.gitclient.enums.LineOperation
 import org.dxworks.inspectorgit.gitclient.parsers.GitParser
 
@@ -14,7 +14,7 @@ class HunkParser : GitParser<HunkDTO> {
             lineChanges.all { it.operation == LineOperation.DELETE } -> HunkType.DELETE
             else -> HunkType.MODIFY
         }
-        return HunkDTO(lineChanges, type)
+        return HunkDTO(lineChanges)
     }
 
     private fun extractLineChanges(lines: List<String>): List<LineChangeDTO> {

@@ -1,6 +1,6 @@
-package org.dxworks.inspectorgit.gitclient.iglog
+package org.dxworks.inspectorgit.gitclient.iglog.writers
 
-import org.dxworks.inspectorgit.gitclient.dto.GitLogDTO
+import org.dxworks.inspectorgit.gitclient.dto.gitlog.GitLogDTO
 
 class IGLogWriter(private val gitLogDTO: GitLogDTO) : IGWriter() {
     override fun appendLines(responseBuilder: StringBuilder) {

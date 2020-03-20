@@ -5,6 +5,7 @@ class IGLogConstants {
         const val commitIdPrefix = "ig#"
 
         const val messagePrefix = "$"
+        
 
         const val changePrefix = "#"
 

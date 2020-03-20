@@ -1,7 +1,7 @@
 package org.dxworks.inspectorgit.gitclient.parsers.abstracts
 
-import org.dxworks.inspectorgit.gitclient.dto.ChangeDTO
-import org.dxworks.inspectorgit.gitclient.dto.CommitDTO
+import org.dxworks.inspectorgit.gitclient.dto.gitlog.ChangeDTO
+import org.dxworks.inspectorgit.gitclient.dto.gitlog.CommitDTO
 import org.dxworks.inspectorgit.gitclient.iglog.IGLogConstants
 import org.dxworks.inspectorgit.gitclient.parsers.GitParser
 import org.slf4j.LoggerFactory

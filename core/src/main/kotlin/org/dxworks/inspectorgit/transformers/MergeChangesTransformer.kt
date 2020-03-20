@@ -1,7 +1,7 @@
 package org.dxworks.inspectorgit.transformers
 
 import org.dxworks.inspectorgit.ChangeFactory
-import org.dxworks.inspectorgit.gitclient.dto.ChangeDTO
+import org.dxworks.inspectorgit.gitclient.dto.gitlog.ChangeDTO
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
 import org.dxworks.inspectorgit.model.Change
 import org.dxworks.inspectorgit.model.Commit

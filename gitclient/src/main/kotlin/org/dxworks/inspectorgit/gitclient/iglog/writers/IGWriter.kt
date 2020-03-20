@@ -1,4 +1,4 @@
-package org.dxworks.inspectorgit.gitclient.iglog
+package org.dxworks.inspectorgit.gitclient.iglog.writers
 
 abstract class IGWriter {
     fun write(): String {
