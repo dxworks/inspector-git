@@ -13,6 +13,7 @@ import org.dxworks.inspectorgit.gitclient.parsers.LogParser
 import org.dxworks.inspectorgit.utils.appFolderPath
 import java.nio.file.Path
 import java.nio.file.Paths
+import kotlin.system.measureTimeMillis
 
 class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path) {
     private val gitClient = GitClient(repoPath)
@@ -50,8 +51,8 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
     private fun toIgLog(gitLogDTO: GitLogDTO) = IGLogWriter(gitLogDTO).write()
 
     private fun swapContentWithMetadata(gitLogDTO: GitLogDTO) {
-        gitLogDTO.commits.forEach { commitDTO ->
-            commitDTO.changes
+        gitLogDTO.commits.parallelStream().forEach { commitDTO ->
+            commitDTO.changes.parallelStream()
                     .forEach { changeDTO -> changeDTO.hunks.forEach { swapContentWithMetadata(it) } }
         }
     }
@@ -72,5 +73,5 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
 
 fun main() {
     val kafkaPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\licenta\\kafka\\kafka")
-    MetadataExtractionManager(kafkaPath, appFolderPath.resolve("kafkaMeta")).extract()
+    println("Time in millis: " + measureTimeMillis { MetadataExtractionManager(kafkaPath, appFolderPath.resolve("kafkaMeta")).extract() })
 }

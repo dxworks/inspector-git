@@ -38,7 +38,9 @@ class ChangeParser(private val parentCommitId: String) : GitParser<ChangeDTO> {
                     hunks.add(currentHunkLines)
                 }
                 if (!it.startsWith("\\"))
-                    currentHunkLines.add(it)
+                    currentHunkLines.add("$it\n")
+                else
+                    currentHunkLines.add(currentHunkLines.removeAt(currentHunkLines.size - 1).dropLast(1))
             }
             LOG.info("Found ${hunks.size} hunks")
             hunks
@@ -55,8 +57,8 @@ class ChangeParser(private val parentCommitId: String) : GitParser<ChangeDTO> {
     }
 
     private fun extractFileNames(lines: List<String>, type: ChangeType): Pair<String, String> {
-        val oldFilePrefix = if(type == ChangeType.RENAME) "rename from " else "--- a/"
-        val newFilePrefix = if(type == ChangeType.RENAME) "rename to " else "+++ b/"
+        val oldFilePrefix = if (type == ChangeType.RENAME) "rename from " else "--- a/"
+        val newFilePrefix = if (type == ChangeType.RENAME) "rename to " else "+++ b/"
 
         val oldFileName = if (type == ChangeType.ADD) devNull else {
             extractFileName(lines, oldFilePrefix)

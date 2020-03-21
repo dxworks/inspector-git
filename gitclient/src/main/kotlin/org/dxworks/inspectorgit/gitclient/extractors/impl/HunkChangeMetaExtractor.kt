@@ -3,6 +3,7 @@ package org.dxworks.inspectorgit.gitclient.extractors.impl
 import com.github.difflib.DiffUtils
 import com.github.difflib.patch.Chunk
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.HunkDTO
+import org.dxworks.inspectorgit.gitclient.dto.gitlog.HunkType
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.LineChangeDTO
 import org.dxworks.inspectorgit.gitclient.dto.iglog.ContentMeta
 import org.dxworks.inspectorgit.gitclient.dto.iglog.HunkChangeMeta
@@ -15,12 +16,27 @@ class HunkChangeMetaExtractor : MetaExtractor<HunkChangeMeta>() {
         get() = "~>"
 
     override fun extract(hunkDTO: HunkDTO): String {
-        val patch = DiffUtils.diff(getTextAsList(hunkDTO.deletedLineChanges), getTextAsList(hunkDTO.addedLineChanges))
-        val (deleteContentMeta, addContentMeta) = patch.deltas.map { Pair(getContentMeta(it.source), getContentMeta(it.target)) }
-                .reduce { acc, pair -> Pair(acc.first + pair.first, acc.second + pair.second) }
+        val (addContentMeta, deleteContentMeta) = if (hunkDTO.type == HunkType.MODIFY) {
+            val patch = DiffUtils.diff(getTextAsList(hunkDTO.deletedLineChanges), getTextAsList(hunkDTO.addedLineChanges))
+            if (patch.deltas.isEmpty())
+                Pair(ContentMeta(0, 0), ContentMeta(0, 0))
+            else
+                patch.deltas.map { Pair(getContentMeta(it.target), getContentMeta(it.source)) }
+                        .reduce { acc, pair -> Pair(acc.first + pair.first, acc.second + pair.second) }
+        } else {
+            getAddAndDeleteContentMeta(hunkDTO)
+        }
         val unmodifiedContentMeta = getUnmodifiedContentMeta(deleteContentMeta, addContentMeta, hunkDTO)
 
         return getFormattedLine(HunkChangeMeta(deleteContentMeta, addContentMeta, unmodifiedContentMeta))
+    }
+
+    private fun getAddAndDeleteContentMeta(hunkDTO: HunkDTO): Pair<ContentMeta, ContentMeta> {
+        return Pair(getContentMetaFromLineChange(hunkDTO.addedLineChanges), getContentMetaFromLineChange(hunkDTO.deletedLineChanges))
+    }
+
+    private fun getContentMetaFromLineChange(lineChanges: List<LineChangeDTO>): ContentMeta {
+        return getContentMeta(getTextAsList(lineChanges))
     }
 
     private fun getUnmodifiedContentMeta(deleteContentMeta: ContentMeta, addContentMeta: ContentMeta, hunkDTO: HunkDTO): ContentMeta {
@@ -40,7 +56,7 @@ class HunkChangeMetaExtractor : MetaExtractor<HunkChangeMeta>() {
 
 
     private fun getTextAsList(lineChanges: List<LineChangeDTO>) =
-            lineChanges.joinToString("\n") { it.content }.toList()
+            lineChanges.joinToString { it.content }.toList()
 
 
     private fun getFormattedLine(hunkChangeMeta: HunkChangeMeta): String {
