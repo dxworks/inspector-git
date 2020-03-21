@@ -6,6 +6,7 @@ import org.dxworks.inspectorgit.gitclient.dto.gitlog.GitLogDTO
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.HunkDTO
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.LineChangeDTO
 import org.dxworks.inspectorgit.gitclient.enums.LineOperation
+import org.dxworks.inspectorgit.gitclient.extractors.impl.HunkChangeMetaExtractor
 import org.dxworks.inspectorgit.gitclient.extractors.impl.LineOperationsMetaExtractor
 import org.dxworks.inspectorgit.gitclient.iglog.writers.IGLogWriter
 import org.dxworks.inspectorgit.gitclient.parsers.LogParser
@@ -21,6 +22,7 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
     private val extractDir = extractToPath.toFile()
 
     private val lineOperationsMetaExtractor = LineOperationsMetaExtractor()
+    private val hunkChangeMetaExtractor = HunkChangeMetaExtractor()
 
     init {
         if (!extractDir.isDirectory && !extractDir.mkdir())
@@ -56,7 +58,8 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
 
     private fun swapContentWithMetadata(hunkDTO: HunkDTO) {
         hunkDTO.lineChanges = listOf(
-                ContentOnlyLineChange(lineOperationsMetaExtractor.write(hunkDTO))
+                ContentOnlyLineChange(lineOperationsMetaExtractor.write(hunkDTO)),
+                ContentOnlyLineChange(hunkChangeMetaExtractor.write(hunkDTO))
         )
     }
 
