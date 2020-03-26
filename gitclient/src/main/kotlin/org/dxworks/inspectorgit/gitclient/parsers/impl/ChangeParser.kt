@@ -70,11 +70,8 @@ class ChangeParser(private val parentCommitId: String) : GitParser<ChangeDTO> {
     }
 
     private fun extractFileName(lines: List<String>, fileNamePrefix: String): String {
-        return try {
-            lines.find { it.startsWith(fileNamePrefix) }!!.removePrefix(fileNamePrefix)
-        } catch (e: NullPointerException) {
-            extractFileName(lines[0])
-        }
+        val nameLine = lines.find { it.startsWith(fileNamePrefix) }
+        return nameLine?.removePrefix(fileNamePrefix) ?: extractFileName(lines[0])
     }
 
     private fun extractFileName(diffLine: String): String {

@@ -1,7 +1,7 @@
 package org.dxworks.inspectorgit.gitclient.extractors
 
 import org.dxworks.inspectorgit.gitclient.GitClient
-import org.dxworks.inspectorgit.gitclient.GitLogPager
+import org.dxworks.inspectorgit.gitclient.GitCommitIterator
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.GitLogDTO
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.HunkDTO
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.LineChangeDTO
@@ -18,7 +18,7 @@ import kotlin.system.measureTimeMillis
 class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path) {
     private val gitClient = GitClient(repoPath)
 
-    private val gitLogPager = GitLogPager(gitClient, 1000)
+    private val commitIterator = GitCommitIterator(gitClient, 4000)
 
     private val extractDir = extractToPath.toFile()
 
@@ -35,16 +35,12 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
         extractFile.writeText("")
 
 
-        while (gitLogPager.hasNext()) {
-            val pagedCommits = gitLogPager.next()
-            val commitsLines = LogParser.extractCommits(pagedCommits)
-            commitsLines.forEach {
-                val gitLogDTO = LogParser(gitClient).parse(it)
+        while (commitIterator.hasNext()) {
+            val commit = commitIterator.next()
+            val gitLogDTO = LogParser(gitClient).parse(commit)
 
-                swapContentWithMetadata(gitLogDTO)
-
-                extractFile.appendText(toIgLog(gitLogDTO))
-            }
+            swapContentWithMetadata(gitLogDTO)
+            extractFile.appendText(toIgLog(gitLogDTO))
         }
     }
 
@@ -52,8 +48,7 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
 
     private fun swapContentWithMetadata(gitLogDTO: GitLogDTO) {
         gitLogDTO.commits.parallelStream().forEach { commitDTO ->
-            commitDTO.changes.parallelStream()
-                    .forEach { changeDTO -> changeDTO.hunks.forEach { swapContentWithMetadata(it) } }
+                commitDTO.changes.forEach { changeDTO -> changeDTO.hunks.forEach { swapContentWithMetadata(it) } }
         }
     }
 
@@ -72,6 +67,6 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
 }
 
 fun main() {
-    val kafkaPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\licenta\\kafka\\kafka")
-    println("Time in millis: " + measureTimeMillis { MetadataExtractionManager(kafkaPath, appFolderPath.resolve("kafkaMeta")).extract() })
+    val kafkaPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\licenta\\spring-boot\\spring-boot")
+    println("Time in millis: " + measureTimeMillis { MetadataExtractionManager(kafkaPath, appFolderPath.resolve("spring-boot-meta")).extract() })
 }

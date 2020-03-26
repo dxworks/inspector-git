@@ -10,7 +10,7 @@ class IGChangeWriter(private val changeDTO: ChangeDTO) : IGWriter() {
         responseBuilder.appendln(changeDTO.parentCommitId)
         responseBuilder.appendln(getFileNames())
 
-        changeDTO.hunks.forEach { responseBuilder.appendln(IGHunkWriter(it).write()) }
+        changeDTO.hunks.forEach { responseBuilder.append(IGHunkWriter(it).write()) }
     }
 
     private fun getFileNames() = when (changeDTO.type) {

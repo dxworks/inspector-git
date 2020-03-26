@@ -4,6 +4,6 @@ import org.dxworks.inspectorgit.gitclient.dto.gitlog.GitLogDTO
 
 class IGLogWriter(private val gitLogDTO: GitLogDTO) : IGWriter() {
     override fun appendLines(responseBuilder: StringBuilder) {
-        gitLogDTO.commits.forEach { responseBuilder.appendln(IGCommitWriter(it).write()) }
+        gitLogDTO.commits.forEach { responseBuilder.append(IGCommitWriter(it).write()) }
     }
 }

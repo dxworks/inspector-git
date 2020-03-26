@@ -46,6 +46,8 @@ class GitClient(path: Path) {
 
     fun getNCommitLogs(n: Int, skip: Int = 0): List<String> = runGitCommand("$gitLogCommand --max-count=$n --skip=$skip")!!
 
+    fun getNCommitLogsInputStream(n: Int, skip: Int = 0): InputStream = getProcessForCommand("$gitLogCommand --max-count=$n --skip=$skip").inputStream
+
     fun diff(parent: String, revision: String, file: String): List<String> = runGitCommand("$gitDiffCommand $parent $revision -- $file")!!
 
     fun diffFileNames(parent: String, revision: String): List<String> = runGitCommand("$gitDiffFileNamesCommand $revision..$parent")
@@ -56,11 +58,7 @@ class GitClient(path: Path) {
     fun affectedFiles(revision: String): List<String> = runGitCommand("$gitAffectedFilesCommand $revision")!!
 
     fun runGitCommand(args: String): List<String>? {
-        val command = "$git $args"
-        LOG.info("Running command: $command")
-
-        processBuilder.command(OsUtils.commandInterpreterPrefix, OsUtils.interpreterArg, command)
-        val process = processBuilder.start()
+        val process = getProcessForCommand(args)
         val lines = getLines(process.inputStream)
 
         return if (process.waitFor() == 0) {
@@ -70,6 +68,14 @@ class GitClient(path: Path) {
             LOG.error("Command completed with errors:\n ${getLines(process.errorStream).joinToString("\n")}")
             null
         }
+    }
+
+    private fun getProcessForCommand(args: String): Process {
+        val command = "$git $args"
+        LOG.info("Running command: $command")
+
+        processBuilder.command(OsUtils.commandInterpreterPrefix, OsUtils.interpreterArg, command)
+        return processBuilder.start()
     }
 
     private fun getLines(inputStream: InputStream): List<String> {

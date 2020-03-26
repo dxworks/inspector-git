@@ -17,7 +17,7 @@ class IGCommitWriter(private val commitDTO: CommitDTO) : IGWriter() {
         }
         responseBuilder.appendln(getMessageLine())
 
-        commitDTO.changes.forEach { responseBuilder.appendln(IGChangeWriter(it).write()) }
+        commitDTO.changes.forEach { responseBuilder.append(IGChangeWriter(it).write()) }
     }
 
     private fun getMessageLine() = "${IGLogConstants.messagePrefix}${commitDTO.message}"

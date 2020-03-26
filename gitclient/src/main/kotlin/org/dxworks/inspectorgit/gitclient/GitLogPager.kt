@@ -1,8 +1,9 @@
 package org.dxworks.inspectorgit.gitclient
 
 import org.slf4j.LoggerFactory
+import java.io.InputStream
 
-class GitLogPager(private val gitClient: GitClient, var pageSize: Int = 100) {
+class GitLogPager(private val gitClient: GitClient, var pageSize: Int = 2000) {
     companion object {
         private val LOG = LoggerFactory.getLogger(GitLogPager::class.java)
     }
@@ -13,14 +14,15 @@ class GitLogPager(private val gitClient: GitClient, var pageSize: Int = 100) {
             pageCount = value / pageSize + 1
         }
     private var pageCount = commitCount / pageSize + 1
-    private var counter = 1
+    var counter = 0
+        private set
 
     init {
         gitClient.setRenameLimit()
     }
 
 
-    private fun page(number: Int): List<String> {
+    fun page(number: Int): InputStream {
         if (number > pageCount) throw IllegalArgumentException("Page number: $number exceeds page count: $pageCount")
         if (number < 1) throw IllegalArgumentException("Page number must be positive! Received $number")
 
@@ -31,12 +33,12 @@ class GitLogPager(private val gitClient: GitClient, var pageSize: Int = 100) {
             Pair(pageSize, skippedCommits)
 
         LOG.info("Getting Page $number/$pageCount containing commits $skip-${skip + numberOfCommits} of $commitCount")
-        return gitClient.getNCommitLogs(numberOfCommits, skip)
+        return gitClient.getNCommitLogsInputStream(numberOfCommits, skip)
     }
 
-    fun hasNext() = counter <= pageCount
+    fun hasNext() = counter < pageCount
 
-    fun next() = page(counter++)
+    fun next() = page(++counter)
 
     fun reset() {
         counter = 1

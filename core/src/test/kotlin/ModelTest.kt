@@ -7,6 +7,7 @@ import org.dxworks.inspectorgit.gitclient.parsers.LogParser
 import org.dxworks.inspectorgit.model.AnnotatedLine
 import org.dxworks.inspectorgit.model.Project
 import org.dxworks.inspectorgit.transformers.ProjectTransformer
+import org.dxworks.inspectorgit.utils.tmpFolder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
@@ -24,8 +25,6 @@ internal class ModelTest {
         private val LOG = LoggerFactory.getLogger(ModelTest::class.java)
         private val kafkaPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\licenta\\kafka\\kafka")
         private val dxPlatformPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\dx\\dx-platform")
-
-        private val tmpFolder = Paths.get(System.getProperty("java.io.tmpdir")).resolve("inspectorGitTest")
 
         private var lines = 0.0
         private var linesWithDifferentCommit = 0.0
