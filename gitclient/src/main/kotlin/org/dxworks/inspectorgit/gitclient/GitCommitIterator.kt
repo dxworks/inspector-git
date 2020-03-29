@@ -20,7 +20,6 @@ class GitCommitIterator(gitClient: GitClient, pageSize: Int = 2000, private val 
     private var index: Int = 0
     private var currentPage: Int = 0
     private var cachingIndex: Int = 0
-    private var waitFor = 0
 
     private val gitLogPager = GitLogPager(gitClient, pageSize)
     private val tempDir = tmpFolder.resolve("commits").toFile()
@@ -32,7 +31,7 @@ class GitCommitIterator(gitClient: GitClient, pageSize: Int = 2000, private val 
 
     fun hasNext(): Boolean {
         val files = tempDir.list()
-        return gitLogPager.hasNext() || (files != null && files.isNotEmpty())
+        return gitLogPager.hasNext() || (files != null && files.isNotEmpty()) || cachingInProgress
     }
 
     fun next(): List<String> {

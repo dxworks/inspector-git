@@ -54,8 +54,8 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
 
     private fun swapContentWithMetadata(hunkDTO: HunkDTO) {
         hunkDTO.lineChanges = listOf(
-                ContentOnlyLineChange(lineOperationsMetaExtractor.write(hunkDTO)),
-                ContentOnlyLineChange(hunkChangeMetaExtractor.write(hunkDTO))
+                ContentOnlyLineChange(lineOperationsMetaExtractor.write(hunkDTO))
+//                ContentOnlyLineChange(hunkChangeMetaExtractor.write(hunkDTO))
         )
     }
 
@@ -67,6 +67,6 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
 }
 
 fun main() {
-    val kafkaPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\licenta\\spring-boot\\spring-boot")
-    println("Time in millis: " + measureTimeMillis { MetadataExtractionManager(kafkaPath, appFolderPath.resolve("spring-boot-meta")).extract() })
+    val kafkaPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\licenta\\kafka\\kafka")
+    println("Time in millis: " + measureTimeMillis { MetadataExtractionManager(kafkaPath, appFolderPath.resolve("kafkaMeta")).extract() })
 }
