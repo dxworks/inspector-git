@@ -14,7 +14,9 @@ const val csvHeader = "file, NC, NAC, NAB"
 
 fun main(args: Array<String>) {
     if (args.isEmpty()) {
-        println("Please provide repository path or a projectName.json file")
+        println("Usage: java -jar git-extractor.jar <repository path or cached json file path> <[optional] output directory> <[optional] -cache>")
+        println("The program wil output a file called fileAuthors.csv in the output directory(defaults to .).")
+        println("Also the program can cache its project data as json at ~/.inspectorgit")
         return
     }
     val resultPath = Paths.get(if (args.size > 1) args[1] else ".")
@@ -48,6 +50,8 @@ fun main(args: Array<String>) {
 
         builder.append("${it.id}, ${it.changes.size}, $numberOfAllAuthorsForFile, $numberOfAuthorsOfCurrentCodeInFile\n")
     }
+    println()
+    println("Your file is ready at ${file.absolutePath}")
     file.writeText(builder.toString())
 }
 
