@@ -54,8 +54,8 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
 
     private fun swapContentWithMetadata(hunkDTO: HunkDTO) {
         hunkDTO.lineChanges = listOf(
-                ContentOnlyLineChange(lineOperationsMetaExtractor.write(hunkDTO)),
-                ContentOnlyLineChange(hunkChangeMetaExtractor.write(hunkDTO))
+                ContentOnlyLineChange(lineOperationsMetaExtractor.write(hunkDTO))
+//                ContentOnlyLineChange(hunkChangeMetaExtractor.write(hunkDTO))
         )
     }
 

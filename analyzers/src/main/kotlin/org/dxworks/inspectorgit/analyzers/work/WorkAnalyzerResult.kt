@@ -1,6 +1,6 @@
 package org.dxworks.inspectorgit.analyzers.work
 
-import org.dxworks.inspectorgit.gitclient.dto.AnnotatedLineDTO
+import org.dxworks.inspectorgit.gitclient.dto.gitlog.AnnotatedLineDTO
 import org.dxworks.inspectorgit.model.AnnotatedLine
 import org.dxworks.inspectorgit.model.AuthorId
 import org.dxworks.inspectorgit.model.Commit
