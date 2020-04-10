@@ -9,6 +9,7 @@ import org.dxworks.inspectorgit.gitclient.enums.LineOperation
 import org.dxworks.inspectorgit.gitclient.extractors.impl.HunkChangeMetaExtractor
 import org.dxworks.inspectorgit.gitclient.extractors.impl.LineOperationsMetaExtractor
 import org.dxworks.inspectorgit.gitclient.iglog.writers.IGLogWriter
+import org.dxworks.inspectorgit.gitclient.parsers.CommitParserFactory
 import org.dxworks.inspectorgit.gitclient.parsers.LogParser
 import org.dxworks.inspectorgit.utils.appFolderPath
 import java.nio.file.Path
@@ -32,15 +33,37 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
 
     fun extract() {
         val extractFile = extractDir.resolve("${repoPath.fileName}.iglog")
-        extractFile.writeText("")
+        extractFile.writeText("Version\n")
 
 
-        while (commitIterator.hasNext()) {
-            val commit = commitIterator.next()
-            val gitLogDTO = LogParser(gitClient).parse(commit)
+        var currentCommit = if (commitIterator.hasNext()) commitIterator.next() else null
+
+        while (currentCommit != null) {
+            val commit = currentCommit
+            currentCommit = null
+            val numberOfParents = CommitParserFactory.getNumberOfParents(commit)
+            val commits = if (numberOfParents > 1) {
+                val nextCommits: MutableList<String> = ArrayList()
+                for (i in 1 until numberOfParents) {
+                    if (commitIterator.hasNext()) {
+                        val next = commitIterator.next()
+                        if (next.first() == commit.first())
+                            nextCommits += next
+                        else {
+                            currentCommit = next
+                            break
+                        }
+                    } else break
+                }
+                commit + nextCommits
+            } else {
+                commit
+            }
+            val gitLogDTO = LogParser(gitClient).parse(commits)
 
             swapContentWithMetadata(gitLogDTO)
             extractFile.appendText(toIgLog(gitLogDTO))
+            currentCommit = currentCommit ?: if (commitIterator.hasNext()) commitIterator.next() else null
         }
     }
 
@@ -48,7 +71,7 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
 
     private fun swapContentWithMetadata(gitLogDTO: GitLogDTO) {
         gitLogDTO.commits.parallelStream().forEach { commitDTO ->
-                commitDTO.changes.forEach { changeDTO -> changeDTO.hunks.forEach { swapContentWithMetadata(it) } }
+            commitDTO.changes.forEach { changeDTO -> changeDTO.hunks.forEach { swapContentWithMetadata(it) } }
         }
     }
 
@@ -68,5 +91,7 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
 
 fun main() {
     val kafkaPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\licenta\\kafka\\kafka")
-    println("Time in millis: " + measureTimeMillis { MetadataExtractionManager(kafkaPath, appFolderPath.resolve("kafkaMeta")).extract() })
+    val dxPlatformPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\dx\\dx-platform")
+    val repoPath = dxPlatformPath
+    println("Time in millis: " + measureTimeMillis { MetadataExtractionManager(repoPath, appFolderPath.resolve("${repoPath.fileName}")).extract() })
 }

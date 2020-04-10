@@ -9,6 +9,6 @@ class IGLogConstants {
 
         const val changePrefix = "#"
 
-        const val hunkPrefixLine = "@@"
+        const val hunkPrefixLine = "@"
     }
 }

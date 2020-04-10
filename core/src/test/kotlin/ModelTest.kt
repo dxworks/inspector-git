@@ -3,23 +3,26 @@ import org.dxworks.inspectorgit.gitclient.GitClient
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.AnnotatedLineDTO
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.GitLogDTO
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
+import org.dxworks.inspectorgit.gitclient.extractors.MetadataExtractionManager
+import org.dxworks.inspectorgit.gitclient.iglog.readers.IGLogReader
 import org.dxworks.inspectorgit.gitclient.parsers.LogParser
 import org.dxworks.inspectorgit.model.AnnotatedLine
 import org.dxworks.inspectorgit.model.Project
 import org.dxworks.inspectorgit.transformers.ProjectTransformer
+import org.dxworks.inspectorgit.utils.appFolderPath
 import org.dxworks.inspectorgit.utils.tmpFolder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
+import java.io.File
 import java.nio.file.Paths
 
 internal class ModelTest {
 
     companion object {
         private lateinit var gitClient: GitClient
-        private lateinit var gitLogDTO: GitLogDTO
         private lateinit var project: Project
 
         private val LOG = LoggerFactory.getLogger(ModelTest::class.java)
@@ -38,17 +41,15 @@ internal class ModelTest {
             val repoPath = kafkaPath
 
             val repoName = repoPath.fileName.toString()
-            val repoCache = tmpFolder.resolve("$repoName.json").toFile()
+            val repoCache = tmpFolder.resolve("$repoName.iglog").toFile()
             gitClient = GitClient(repoPath)
-            if (repoCache.exists())
-                gitLogDTO = Gson().fromJson(repoCache.readText(), GitLogDTO::class.java)
-            else {
-                gitLogDTO = LogParser(gitClient).parse(gitClient.getLogs())
-                repoCache.createNewFile()
-                repoCache.writeText(Gson().toJson(gitLogDTO))
+            if (!repoCache.exists()) {
+                MetadataExtractionManager(repoPath, tmpFolder).extract()
             }
+            val gitLogDTO = IGLogReader().read(repoCache.inputStream())
 //            project = ProjectTransformer(gitLogDTO, repoName, org.dxworks.inspectorgit.TestChangeFactory(gitClient)).transform()
             project = ProjectTransformer(gitLogDTO, repoName).transform()
+            println("done")
         }
     }
 
@@ -83,9 +84,9 @@ internal class ModelTest {
                     }
         }
 
-        assertTrue { ok }
-        LOG.info("Test passed with ${(lines - linesWithDifferentCommit) / lines * 100}% line owner accuracy(against git).")
+        LOG.info("Test ended with ${(lines - linesWithDifferentCommit) / lines * 100}% line owner accuracy(against git).")
         LOG.info("$linesWithDifferentCommit / $lines")
+        assertTrue { ok }
     }
 
     private fun blameAndFileContentAreTheSame(blame: List<String>, annotatedLines: List<AnnotatedLine>, fileName: String, commitId: String): Boolean {
@@ -108,7 +109,7 @@ internal class ModelTest {
     private fun linesAreTheSame(annotatedLineDTO: AnnotatedLineDTO, annotatedLine: AnnotatedLine, fileName: String, commitId: String): Boolean {
         lines++
         val numberAndContentAreTheSame = annotatedLineDTO.number == annotatedLine.number &&
-                annotatedLineDTO.content == annotatedLine.content.content
+                (annotatedLine.content.content == null || annotatedLineDTO.content == annotatedLine.content.content)
         if (project.commitRegistry.getById(annotatedLineDTO.commitId) != annotatedLine.content.commit) {
             LOG.warn("In $fileName at $commitId at line ${annotatedLineDTO.number} commits differ blame: ${annotatedLineDTO.commitId}, IG: ${annotatedLine.content.commit.id}")
             linesWithDifferentCommit++

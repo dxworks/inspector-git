@@ -4,6 +4,7 @@ import org.dxworks.inspectorgit.ChangeFactory
 import org.dxworks.inspectorgit.SimpleChangeFactory
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.ChangeDTO
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.CommitDTO
+import org.dxworks.inspectorgit.gitclient.enums.ChangeType
 import org.dxworks.inspectorgit.model.Author
 import org.dxworks.inspectorgit.model.AuthorId
 import org.dxworks.inspectorgit.model.Commit
@@ -26,13 +27,16 @@ class CommitTransformer(private val commitDTO: CommitDTO, private val project: P
         val author = getAuthor(commitDTO, project)
         LOG.info("Parsed author ${author.id}")
 
-        val committer = getCommitter(commitDTO, project)
+        val committer = if (commitDTO.committerName.isEmpty()) author else getCommitter(commitDTO, project)
         LOG.info("Parsed committer ${author.id}")
 
+
+        val authorDate = parseDate(commitDTO.authorDate)
+        val committerDate = if (commitDTO.committerDate.isEmpty()) authorDate else parseDate(commitDTO.committerDate)
         val commit = Commit(id = commitDTO.id,
                 message = commitDTO.message,
-                authorDate = parseDate(commitDTO.authorDate),
-                committerDate = parseDate(commitDTO.committerDate),
+                authorDate = authorDate,
+                committerDate = committerDate,
                 author = author,
                 committer = committer,
                 parents = parents,
@@ -60,8 +64,10 @@ class CommitTransformer(private val commitDTO: CommitDTO, private val project: P
     private fun addChangesToCommit(changes: List<ChangeDTO>, commit: Commit, project: Project) {
         LOG.info("Filtering changes")
         if (commit.isMergeCommit) {
-//            val fixedChanges = RenameChangesDetector(changes, project).detectAndReplace()
-            val changesByFile = changes.groupBy { it.newFileName }
+            val changesByFile = changes.groupBy {
+                if (it.type == ChangeType.DELETE) it.oldFileName
+                else it.newFileName
+            }
             commit.changes = changesByFile.mapNotNull { MergeChangesTransformer(it.value, commit, project, changeFactory).transform() }.flatten()
         } else {
             commit.changes = changes.mapNotNull { ChangeTransformer(it, commit, project, changeFactory).transform() }

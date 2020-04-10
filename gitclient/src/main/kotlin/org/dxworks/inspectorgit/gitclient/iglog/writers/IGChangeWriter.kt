@@ -20,7 +20,9 @@ class IGChangeWriter(private val changeDTO: ChangeDTO) : IGWriter() {
         ChangeType.MODIFY -> changeDTO.newFileName
     }
 
-    private fun getTypeLine() = "${IGLogConstants.changePrefix}${getTypeLetter()}"
+    private fun getTypeLine() = "${IGLogConstants.changePrefix}${getTypeLetter()}${isBinary()}"
+
+    private fun isBinary(): String = if(changeDTO.isBinary) "b" else ""
 
     private fun getTypeLetter() = when (changeDTO.type) {
         ChangeType.ADD -> "A"

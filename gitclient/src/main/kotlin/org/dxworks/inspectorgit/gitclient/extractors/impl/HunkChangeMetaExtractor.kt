@@ -56,7 +56,7 @@ class HunkChangeMetaExtractor : MetaExtractor<HunkChangeMeta>() {
 
 
     private fun getTextAsList(lineChanges: List<LineChangeDTO>) =
-            lineChanges.joinToString { it.content }.toList()
+            lineChanges.joinToString { it.content ?: "" }.toList()
 
 
     private fun getFormattedLine(hunkChangeMeta: HunkChangeMeta): String {

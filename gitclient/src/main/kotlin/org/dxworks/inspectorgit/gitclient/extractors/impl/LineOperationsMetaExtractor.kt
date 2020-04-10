@@ -12,7 +12,7 @@ class LineOperationsMetaExtractor : MetaExtractor<LineOperationsMeta>() {
     private val pairZero = Pair(0, 0)
 
     override val linePrefix: String
-        get() = "+/-"
+        get() = "="
 
     override fun extract(hunkDTO: HunkDTO): String {
         val deletedLines = hunkDTO.deletedLineChanges

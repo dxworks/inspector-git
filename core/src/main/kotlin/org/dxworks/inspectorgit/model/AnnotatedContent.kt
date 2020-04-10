@@ -1,6 +1,6 @@
 package org.dxworks.inspectorgit.model
 
-data class AnnotatedContent(val commit: Commit, val content: String) {
+data class AnnotatedContent(val commit: Commit, val content: String?) {
 
     companion object {
         private var counter: Int = 0

@@ -72,7 +72,8 @@ class GitCommitIterator(gitClient: GitClient, pageSize: Int = 2000, private val 
         val reader = pageInputStream.reader()
         reader.forEachLine {
             if (it.startsWith(IGLogConstants.commitIdPrefix)) {
-                currentCommitLines = cacheCommit(currentCommitLines)
+                cacheCommit(currentCommitLines)
+                currentCommitLines = ArrayList()
             }
             currentCommitLines.add(it)
         }
@@ -80,19 +81,16 @@ class GitCommitIterator(gitClient: GitClient, pageSize: Int = 2000, private val 
         cachingInProgress = false
     }
 
-    private fun cacheCommit(commitLines: MutableList<String>): MutableList<String> {
-        var currentCommitLines = commitLines
+    private fun cacheCommit(commitLines: MutableList<String>) {
         lock.withLock {
             if (cachingIndex != 0) {
                 LOG.info("Caching commit: $cachingIndex of page: ${gitLogPager.counter}")
 
-                tempDir.resolve(cachingIndex.toString()).writeText(currentCommitLines.joinToString("\n"))
+                tempDir.resolve(cachingIndex.toString()).writeText(commitLines.joinToString("\n"))
 
                 if (index <= cachingIndex) condition.signal()
             }
-            currentCommitLines = ArrayList()
             cachingIndex++
         }
-        return currentCommitLines
     }
 }
