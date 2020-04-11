@@ -67,10 +67,10 @@ internal class ModelTest {
         LOG.debug("Number of changes: ${project.commitRegistry.all.map { it.changes.size }.sum()}")
         var i = 0
         var j = 0
-        project.commitRegistry.all.forEach { commit ->
+        project.commitRegistry.all.parallelStream().forEach { commit ->
             LOG.debug("$i) test for commit: ${commit.id}")
             i++
-            commit.changes.filter { it.type != ChangeType.DELETE && !it.file.isBinary }
+            commit.changes.parallelStream().filter { it.type != ChangeType.DELETE && !it.file.isBinary }
                     .forEach { change ->
                         val fileName = change.newFileName
                         LOG.debug("$j) test change for $fileName in ${commit.id}")
