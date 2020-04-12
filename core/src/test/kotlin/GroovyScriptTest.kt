@@ -21,7 +21,7 @@ class GroovyScriptTest {
         binding.setVariable("log", stringWriter)
         val shell = GroovyShell(binding)
 
-        shell.evaluate("log.println('Hello World!')");
+        shell.evaluate("log.println('Hello World!')")
 
         assertEquals("Hello World!", stringWriter.toString().trim())
     }
