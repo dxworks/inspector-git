@@ -2,19 +2,15 @@ package org.dxworks.inspectorgit.model
 
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
 import org.slf4j.LoggerFactory
+import java.util.*
+import kotlin.collections.ArrayList
 
 data class File(val isBinary: Boolean, val project: Project, var changes: MutableList<Change> = ArrayList()) {
 
-    val id: Int
+    val id: UUID = UUID.randomUUID()
 
     companion object {
-        var idCounter = 0
         private val LOG = LoggerFactory.getLogger(File::class.java)
-    }
-
-    init {
-        idCounter++
-        id = idCounter
     }
 
     fun isAlive(commit: Commit?): Boolean {
@@ -64,8 +60,7 @@ data class File(val isBinary: Boolean, val project: Project, var changes: Mutabl
 
     override fun hashCode(): Int {
         var result = isBinary.hashCode()
-        result += project.name.hashCode()
-        result += id
+        result = 31 * result + id.hashCode()
         return result
     }
 }
