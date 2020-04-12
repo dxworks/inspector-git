@@ -64,6 +64,7 @@ data class File(val isBinary: Boolean, val project: Project, var changes: Mutabl
 
     override fun hashCode(): Int {
         var result = isBinary.hashCode()
+        result += project.name.hashCode()
         result += id
         return result
     }
