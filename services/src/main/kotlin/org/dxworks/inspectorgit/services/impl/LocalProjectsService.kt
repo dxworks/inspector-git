@@ -35,7 +35,7 @@ class LocalProjectsService(private val loadedSystem: LoadedSystem,
 
         val projects = transformProjects(allIglogs)
 
-        iglogs.forEach { it.copyTo(systemFolder.resolve(it.toPath().fileName.toString())) }
+        iglogs.forEach { it.copyTo(systemFolder.resolve(it.name)) }
 
         loadedSystem.set(localProjectDTO.id, localProjectDTO.name, projects)
 
@@ -49,7 +49,7 @@ class LocalProjectsService(private val loadedSystem: LoadedSystem,
             localSystemRepository.deleteBySystemId(id)
             throw FileNotFoundException("Project with id $id does not exist")
         }
-        val iglogs = systemFolder.list()?.map { systemFolder.resolve(it) } ?: emptyList<File>()
+        val iglogs = systemFolder.list()?.map { systemFolder.resolve(it) } ?: emptyList()
 
         val name = localSystemRepository.findBySystemId(id).name
 
@@ -61,7 +61,7 @@ class LocalProjectsService(private val loadedSystem: LoadedSystem,
     private fun transformProjects(allIglogs: List<File>): List<Project> {
         return allIglogs.parallelStream().map {
             val gitLogDTO = IGLogReader().read(it.inputStream())
-            ProjectTransformer(gitLogDTO, it.toPath().fileName.toString()).transform()
+            ProjectTransformer(gitLogDTO, it.nameWithoutExtension).transform()
         }.collect(Collectors.toList())
     }
 }

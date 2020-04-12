@@ -22,7 +22,7 @@ data class File(val isBinary: Boolean, val project: Project, var changes: Mutabl
         return getLastChange(commit)?.annotatedLines ?: emptyList()
     }
 
-    fun fullPath(commit: Commit?) = getLastChange(commit)?.newFileName?.let { project.name + it }
+    fun fullPath(commit: Commit?) = getLastChange(commit)?.newFileName?.let { "${project.name}/$it" }
 
     fun fileName(commit: Commit?) = relativePath(commit)?.let { it.substring(it.lastIndexOf("/")) }
 
