@@ -50,7 +50,7 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
     private fun getFileForChange(change: ChangeDTO, project: Project, lastChange: Change?): File {
         LOG.info("Getting file")
         return if (change.type == ChangeType.ADD) {
-            val newFile = File(change.isBinary)
+            val newFile = File(change.isBinary, project)
             project.fileRegistry.add(newFile)
             newFile
 

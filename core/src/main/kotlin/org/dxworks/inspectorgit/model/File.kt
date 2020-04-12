@@ -3,7 +3,7 @@ package org.dxworks.inspectorgit.model
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
 import org.slf4j.LoggerFactory
 
-data class File(val isBinary: Boolean, var changes: MutableList<Change> = ArrayList()) {
+data class File(val isBinary: Boolean, val project: Project, var changes: MutableList<Change> = ArrayList()) {
 
     val id: Int
 
@@ -25,6 +25,12 @@ data class File(val isBinary: Boolean, var changes: MutableList<Change> = ArrayL
     fun annotatedLines(commit: Commit?): List<AnnotatedLine> {
         return getLastChange(commit)?.annotatedLines ?: emptyList()
     }
+
+    fun fullPath(commit: Commit?) = getLastChange(commit)?.newFileName?.let { project.name + it }
+
+    fun fileName(commit: Commit?) = relativePath(commit)?.let { it.substring(it.lastIndexOf("/")) }
+
+    fun relativePath(commit: Commit?) = getLastChange(commit)?.newFileName
 
     fun getLastChange(commit: Commit?): Change? {
         return when {

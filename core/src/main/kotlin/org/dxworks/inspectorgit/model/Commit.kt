@@ -3,7 +3,8 @@ package org.dxworks.inspectorgit.model
 import java.time.Period
 import java.time.ZonedDateTime
 
-data class Commit(var id: String,
+data class Commit(var project: Project,
+                  var id: String,
                   var message: String,
                   val authorDate: ZonedDateTime,
                   val committerDate: ZonedDateTime,

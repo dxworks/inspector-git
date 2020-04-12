@@ -33,7 +33,8 @@ class CommitTransformer(private val commitDTO: CommitDTO, private val project: P
 
         val authorDate = parseDate(commitDTO.authorDate)
         val committerDate = if (commitDTO.committerDate.isEmpty()) authorDate else parseDate(commitDTO.committerDate)
-        val commit = Commit(id = commitDTO.id,
+        val commit = Commit(project = project,
+                id = commitDTO.id,
                 message = commitDTO.message,
                 authorDate = authorDate,
                 committerDate = committerDate,
@@ -85,7 +86,7 @@ class CommitTransformer(private val commitDTO: CommitDTO, private val project: P
     private fun getAuthor(project: Project, authorId: AuthorId): Author {
         var author = project.authorRegistry.getById(authorId)
         if (author == null) {
-            author = Author(authorId)
+            author = Author(authorId, project)
             project.authorRegistry.add(author)
         }
         return author
