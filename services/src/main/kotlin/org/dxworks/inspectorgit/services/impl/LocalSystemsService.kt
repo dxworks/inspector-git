@@ -42,8 +42,8 @@ class LocalSystemsService(private val loadedSystem: LoadedSystem,
 
             loadedSystem.set(localSystemDTO.id, localSystemDTO.name, projects)
 
-            localSystemRepository.save(LocalSystemEntity(systemId = localSystemDTO.id,
-                    name = localSystemDTO.name, sorces = projects.map { it.name }))
+            localSystemRepository.save(LocalSystemEntity(localSystemDTO.id,
+                    localSystemDTO.name, projects.map { it.name }))
         } catch (e: Exception) {
             systemFolder.deleteRecursively()
             throw e
@@ -69,7 +69,7 @@ class LocalSystemsService(private val loadedSystem: LoadedSystem,
     }
 
     fun list(): List<LocalSystemDTO> {
-        return localSystemRepository.findAll().map { LocalSystemDTO(it.systemId, it.name, it.sorces) }
+        return localSystemRepository.findAll().map { LocalSystemDTO(it.systemId, it.name, it.sources) }
     }
 
     @Transactional

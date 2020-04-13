@@ -10,18 +10,14 @@ internal class ChangeParserTest {
     @Test
     fun `extract simple file name`() {
         val diffLine = "diff --git a/core/src/main/scala/kafka/admin/TopicCommand.scala b/core/src/main/scala/kafka/admin/TopicCommand.scala"
-        val privateExtractFileNameMethod = ChangeParser::class.java.getDeclaredMethod("extractFileName", String::class.java)
-        privateExtractFileNameMethod.trySetAccessible()
-        val extractedFileName = privateExtractFileNameMethod.invoke(changeParser, diffLine).toString()
+        val extractedFileName = changeParser.extractFileName(diffLine)
         assertEquals("core/src/main/scala/kafka/admin/TopicCommand.scala", extractedFileName)
     }
 
     @Test
     fun `extract file name containing to name prefix`() {
         val diffLine = "diff --git a/core/src/main b/scala/kafka b/admin/TopicCommand.scala b/core/src/main b/scala/kafka b/admin/TopicCommand.scala"
-        val privateExtractFileNameMethod = ChangeParser::class.java.getDeclaredMethod("extractFileName", String::class.java)
-        privateExtractFileNameMethod.trySetAccessible()
-        val extractedFileName = privateExtractFileNameMethod.invoke(changeParser, diffLine).toString()
+        val extractedFileName = changeParser.extractFileName(diffLine)
         assertEquals("core/src/main b/scala/kafka b/admin/TopicCommand.scala", extractedFileName)
     }
 }

@@ -6,14 +6,20 @@ import javax.persistence.*
 
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["systemId"])])
-class LocalSystemEntity(
-        @Column
-        var systemId: String,
+class LocalSystemEntity() : BaseEntity<UUID>(UUID.randomUUID()) {
 
-        @Column(unique = true)
-        var name: String,
+    @Column
+    lateinit var systemId: String
 
-        @ElementCollection(targetClass = String::class)
-        var sorces: List<String>
-) : BaseEntity<UUID>(UUID.randomUUID()) {
+    @Column(unique = true)
+    lateinit var name: String
+
+    @ElementCollection(targetClass = String::class)
+    lateinit var sources: List<String>
+
+    constructor(systemId: String, name: String, sources: List<String>) : this() {
+        this.systemId = systemId
+        this.name = name
+        this.sources = sources
+    }
 }

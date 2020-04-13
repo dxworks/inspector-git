@@ -1,3 +1,4 @@
+
 package org.dxworks.inspectorgit.services.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper

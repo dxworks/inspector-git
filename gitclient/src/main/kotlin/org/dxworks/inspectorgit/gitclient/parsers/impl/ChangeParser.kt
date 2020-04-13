@@ -74,7 +74,7 @@ class ChangeParser(private val parentCommitId: String) : GitParser<ChangeDTO> {
         return nameLine?.removePrefix(fileNamePrefix) ?: extractFileName(lines[0])
     }
 
-    private fun extractFileName(diffLine: String): String {
+    fun extractFileName(diffLine: String): String {
         val namesStartIndex = diffLine.indexOf(" a/") + 3
         val names = diffLine.substring(namesStartIndex)
         val namesParts = names.split(" b/")
