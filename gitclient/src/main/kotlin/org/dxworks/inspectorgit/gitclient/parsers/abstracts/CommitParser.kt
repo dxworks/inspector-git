@@ -12,9 +12,6 @@ abstract class CommitParser : GitParser<CommitDTO> {
         private val LOG = LoggerFactory.getLogger(CommitParser::class.java)
     }
 
-    private val author = "author"
-    private val committer = "committer"
-
     override fun parse(lines: List<String>): CommitDTO {
         val mutableLines = lines.toMutableList()
         val commitId = extractCommitId(mutableLines)
@@ -58,7 +55,6 @@ abstract class CommitParser : GitParser<CommitDTO> {
 
 
     private fun extractMessage(lines: MutableList<String>): String {
-        lines.removeAt(0)
         var message = ""
         while (lines.isNotEmpty() && !lines[0].startsWith("diff ")) {
             message = "$message\n${lines.removeAt(0)}"
