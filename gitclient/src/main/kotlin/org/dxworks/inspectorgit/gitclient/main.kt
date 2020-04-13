@@ -15,6 +15,7 @@ fun main(args: Array<String>) {
 
     val lines = configFile.readLines()
     val outputPath = Paths.get(lines[0])
+    outputPath.toFile().mkdirs()
 
     lines.drop(1).parallelStream().forEach { MetadataExtractionManager(Paths.get(it), outputPath).extract() }
 }
