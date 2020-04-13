@@ -46,6 +46,7 @@ class LocalSystemsService(private val loadedSystem: LoadedSystem,
                     name = localSystemDTO.name, sorces = projects.map { it.name }))
         } catch (e: Exception) {
             systemFolder.deleteRecursively()
+            throw e
         }
     }
 

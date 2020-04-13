@@ -8,12 +8,18 @@ import org.springframework.stereotype.Component
 
 @Component
 class LoadedSystem {
-    lateinit var id: String
-    lateinit var name: String
-    lateinit var projects: Map<String, Project>
-    lateinit var authorRegistry: AuthorRegistry
-    lateinit var commitRegistry: CommitRegistry
-    lateinit var fileRegistry: FileRegistry
+    final lateinit var id: String
+        private set
+    final lateinit var name: String
+        private set
+    final lateinit var projects: Map<String, Project>
+        private set
+    final lateinit var authorRegistry: AuthorRegistry
+        private set
+    final lateinit var commitRegistry: CommitRegistry
+        private set
+    final lateinit var fileRegistry: FileRegistry
+        private set
 
     val isSet get() = this::id.isInitialized
 
