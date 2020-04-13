@@ -51,6 +51,9 @@ class LocalSystemsService(private val loadedSystem: LoadedSystem,
     }
 
     fun load(id: String) {
+        if (id == loadedSystem.id)
+            return
+
         val systemFolder = getSystemFolder(id)
         if (!systemFolder.exists()) {
             localSystemRepository.deleteBySystemId(id)

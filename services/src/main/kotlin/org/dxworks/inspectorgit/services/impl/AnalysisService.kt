@@ -41,7 +41,7 @@ class AnalysisService(private val loadedSystem: LoadedSystem) {
                     val folderPath = getScriptResultsPathForSystem(loadedSystem.id)
                     folderPath.toFile().mkdirs()
                     val file = folderPath.resolve("${args[1].toString()}.json").toFile()
-                    objectMapper.writeValue(file, args[0])
+                    objectMapper.writerWithDefaultPrettyPrinter().writeValue(file, args[0])
                     outputFiles.add(file.name)
                 }
             })
