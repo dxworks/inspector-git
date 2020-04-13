@@ -88,10 +88,3 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
 
     private class ContentOnlyLineChange(content: String) : LineChangeDTO(LineOperation.ADD, 0, content)
 }
-
-fun main() {
-    val kafkaPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\licenta\\kafka\\kafka")
-    val dxPlatformPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\dx\\dx-platform")
-    val repoPath = dxPlatformPath
-    println("Time in millis: " + measureTimeMillis { MetadataExtractionManager(repoPath, appFolderPath.resolve("${repoPath.fileName}")).extract() })
-}
