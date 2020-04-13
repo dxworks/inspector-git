@@ -51,7 +51,7 @@ class LocalSystemsService(private val loadedSystem: LoadedSystem,
     }
 
     fun load(id: String) {
-        if (id == loadedSystem.id)
+        if (loadedSystem.isSet && loadedSystem.id == id)
             return
 
         val systemFolder = getSystemFolder(id)
