@@ -11,7 +11,7 @@ data class Author(var id: AuthorId, val project: Project, var commits: MutableLi
         get() = allCommits.flatMap { it.changes }
 
     val allFiles: List<File>
-        get() = allChanges.map { it.file }
+        get() = allChanges.map { it.file }.distinct()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
