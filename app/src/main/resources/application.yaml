@@ -1,2 +1,4 @@
 server:
   port: 6061
+  servlet:
+    context-path: /inspectorgit
