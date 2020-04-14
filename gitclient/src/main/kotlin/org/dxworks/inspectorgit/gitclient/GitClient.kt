@@ -5,6 +5,8 @@ import org.dxworks.inspectorgit.utils.OsUtils
 import org.slf4j.LoggerFactory
 import java.io.BufferedReader
 import java.io.InputStream
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.Path
 
 class GitClient(path: Path) {
@@ -27,20 +29,22 @@ class GitClient(path: Path) {
     private val setRenameLimitCommand = "config --global diff.renameLimit"
     private val gitBlameCommand = "blame -l"
     private val gitBranchCommand = "branch"
+    private val gitCloneCommand = "clone"
+    private val gitCheckoutCommand = "checkout"
     private val processBuilder = ProcessBuilder()
 
     init {
         processBuilder.directory(path.toFile())
     }
 
-    val branch: String? = runGitCommand(gitBranchCommand)!!.find { it.startsWith("* ") }?.removePrefix("* ")
+    val branch: String? by lazy { runGitCommand(gitBranchCommand)!!.find { it.startsWith("* ") }?.removePrefix("* ") }
 
     fun getLogs(): List<String> = runGitCommand(gitLogCommand)!!
 
 
     fun getCommitCount(): Int = runGitCommand(gitCountCommitsCommand)!!.getOrElse(0) { "0" }.toInt()
 
-    fun setRenameLimit(limit: Int = 5000) = runGitCommand("$setRenameLimitCommand $limit");
+    fun setRenameLimit(limit: Int = 5000) = runGitCommand("$setRenameLimitCommand $limit")
 
     fun getCommitLinks(): List<String> = runGitCommand(gitCommitLinksCommand)!!
 
@@ -56,6 +60,13 @@ class GitClient(path: Path) {
     fun blame(revision: String, file: String): List<String>? = runGitCommand("$gitBlameCommand $file $revision")
 
     fun affectedFiles(revision: String): List<String> = runGitCommand("$gitAffectedFilesCommand $revision")!!
+
+    fun clone(repoUrl: String, username: String, password: String): List<String>? =
+            runGitCommand("$gitCloneCommand ${buildAuthenticatedUrl(repoUrl, username, password)}")
+
+    //TODO: write UnitTests!!!
+    private fun buildAuthenticatedUrl(repoUrl: String, username: String, password: String) =
+            repoUrl.replace("//[^@].*@", "//$username:${URLEncoder.encode(password, UTF_8.toString())}@")
 
     fun runGitCommand(args: String): List<String>? {
         val process = getProcessForCommand(args)
@@ -84,4 +95,6 @@ class GitClient(path: Path) {
         reader.forEachLine { lines.add(it) }
         return lines
     }
+
+    fun checkout(branch: String) = runGitCommand("$gitCheckoutCommand $branch")
 }

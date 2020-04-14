@@ -5,28 +5,17 @@ import org.dxworks.inspectorgit.gitclient.dto.gitlog.GitLogDTO
 import org.dxworks.inspectorgit.gitclient.parsers.LogParser
 import org.dxworks.inspectorgit.utils.FileSystemUtils
 import org.dxworks.inspectorgit.utils.FileSystemUtils.Companion.getRepoFolderPath
-import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Service
 
-
-@Service
 class GitRepositoryService {
     companion object {
         private val LOG = LoggerFactory.getLogger(GitRepositoryService::class.java)
     }
 
     fun clone(url: String, path: String, branch: String, username: String, password: String) {
-        LOG.info("Cloning: $url")
-        val cloneCommand = Git.cloneRepository()
-                .setURI(url)
-                .setDirectory(getRepoFolderPath(path).toFile())
-                .setCloneAllBranches(true)
-                .setBranch(branch)
+        GitClient(getRepoFolderPath(path)).clone(url, username, password)?.forEach { LOG.info(it) }
+        GitClient(getRepoFolderPath(path)).checkout(branch)?.forEach { LOG.info(it) }
 
-        cloneCommand.setCredentialsProvider(UsernamePasswordCredentialsProvider(username, password))
-        cloneCommand.call()
         LOG.info("Done cloning: $url")
     }
 

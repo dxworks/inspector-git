@@ -10,8 +10,10 @@ import org.springframework.stereotype.Service
 import javax.transaction.Transactional
 
 @Service
-class ProjectServiceImpl(private val swProjectRepository: SwProjectRepository,
-                         private val gitRepositoryService: GitRepositoryService) : ProjectService {
+class ProjectServiceImpl(private val swProjectRepository: SwProjectRepository) : ProjectService {
+
+    private val gitRepositoryService: GitRepositoryService = GitRepositoryService()
+
     companion object {
         private val LOG = LoggerFactory.getLogger(ProjectService::class.java)
     }

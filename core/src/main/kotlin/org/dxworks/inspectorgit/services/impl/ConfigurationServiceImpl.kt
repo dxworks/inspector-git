@@ -4,10 +4,8 @@ import org.dxworks.inspectorgit.api.configuration.Configurable
 import org.dxworks.inspectorgit.services.ConfigurationService
 import org.dxworks.inspectorgit.utils.propertyFilePath
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Service
 import java.util.*
 
-@Service
 class ConfigurationServiceImpl(private val configurables: List<Configurable>) : ConfigurationService {
     companion object {
         private val LOG = LoggerFactory.getLogger(ConfigurationServiceImpl::class.java)

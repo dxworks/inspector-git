@@ -7,7 +7,6 @@ import org.dxworks.inspectorgit.dto.SystemDTO
 import org.dxworks.inspectorgit.persistence.entities.SystemEntity
 import org.dxworks.inspectorgit.persistence.repositories.SwProjectRepository
 import org.dxworks.inspectorgit.persistence.repositories.SystemRepository
-import org.dxworks.inspectorgit.services.ConfigurationService
 import org.dxworks.inspectorgit.services.SystemService
 import org.dxworks.inspectorgit.transformers.ProjectTransformer
 import org.dxworks.inspectorgit.utils.FileSystemUtils
@@ -19,7 +18,7 @@ import kotlin.streams.toList
 class SystemServiceImpl(private val systemRepository: SystemRepository,
                         private val gitlabIntegrationService: GitlabIntegrationService,
                         private val swProjectRepository: SwProjectRepository,
-                        private val configurationService: ConfigurationService,
+//                        private val configurationService: ConfigurationService,
                         private val workAnalyzer: WorkAnalyzer) : SystemService {
     override fun create(systemDTO: SystemDTO) {
         val projectEntities = systemDTO.projects?.filter { it.platform == "gitlab" }?.let { gitlabIntegrationService.import(it) }
@@ -34,7 +33,7 @@ class SystemServiceImpl(private val systemRepository: SystemRepository,
 
     override fun analyze(systemId: String): Map<String, List<WorkAnalyzerNumbersDTO>>? {
         val systemEntity = this.systemRepository.findBySystemId(systemId)
-        this.configurationService.configureAll()
+//        this.configurationService.configureAll()
         val results = systemEntity.swProjects?.parallelStream()
                 ?.map { SwProjectDTO.fromEntity(it) }
                 ?.map { ProjectTransformer(it.gitLogDTO!!, it.name!!).transform() }
