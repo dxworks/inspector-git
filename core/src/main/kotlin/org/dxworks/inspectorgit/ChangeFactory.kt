@@ -1,10 +1,7 @@
 package org.dxworks.inspectorgit
 
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
-import org.dxworks.inspectorgit.model.Change
-import org.dxworks.inspectorgit.model.Commit
-import org.dxworks.inspectorgit.model.File
-import org.dxworks.inspectorgit.model.LineChange
+import org.dxworks.inspectorgit.model.*
 
 abstract class ChangeFactory {
     abstract fun create(commit: Commit,
@@ -13,6 +10,6 @@ abstract class ChangeFactory {
                         newFileName: String,
                         file: File,
                         parentCommit: Commit?,
-                        lineChanges: MutableList<LineChange>,
+                        hunks: List<Hunk>,
                         parentChange: Change?): Change
 }

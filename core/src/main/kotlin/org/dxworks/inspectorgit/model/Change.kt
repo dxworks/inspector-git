@@ -10,11 +10,14 @@ open class Change(val commit: Commit,
                   val newFileName: String,
                   var file: File,
                   var parentCommit: Commit?,
-                  var lineChanges: List<LineChange>,
+                  var hunks: List<Hunk>,
                   var annotatedLines: List<AnnotatedLine> = emptyList(),
                   protected var parentChange: Change?) {
 
     val id: String get() = "${commit.id}-$oldFileName->$newFileName"
+
+    val lineChanges: List<LineChange>
+        get() = hunks.flatMap { it.lineChanges }
 
     companion object {
         private val LOG = LoggerFactory.getLogger(Change::class.java)

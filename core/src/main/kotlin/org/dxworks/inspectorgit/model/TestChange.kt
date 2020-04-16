@@ -12,7 +12,7 @@ class TestChange(
         newFileName: String,
         file: File,
         parentCommit: Commit?,
-        lineChanges: List<LineChange>,
+        hunks: List<Hunk>,
         parentChange: Change?,
         gitClient: GitClient
 ) : Change(
@@ -22,7 +22,7 @@ class TestChange(
         newFileName = newFileName,
         file = file,
         parentCommit = parentCommit,
-        lineChanges = lineChanges,
+        hunks = hunks,
         parentChange = parentChange
 ) {
     companion object {
