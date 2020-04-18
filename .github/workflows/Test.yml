@@ -29,7 +29,7 @@ jobs:
     - name: Checkout Frontend
       uses: actions/checkout@v2
       with:
-        repository: MarioRivis/inspector-git-frontend
+        repository: nagyDarius/inspectorgit-frontend
         path: frontend
         ref: develop
         token: ${{ secrets.GIT_API_TOKEN }}
