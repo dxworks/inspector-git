@@ -31,7 +31,8 @@ jobs:
       with:
         repository: MarioRivis/inspector-git-frontend
         path: frontend
-        token: ${{ secrets.InspectorGitActions }}
+        ref: develop
+        token: ${{ secrets.GIT_API_TOKEN }}
 
     # Runs a single command using the runners shell
     - name: Run a one-line script
