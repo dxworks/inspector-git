@@ -29,9 +29,8 @@ jobs:
     - name: Checkout Frontend
       uses: actions/checkout@v2
       with:
-        repository: MarioRivis/studentManager
+        repository: MarioRivis/inspector-git-frontend
         path: frontend
-        ref: develop
         token: ${{ secrets.InspectorGitActions }}
 
     # Runs a single command using the runners shell
