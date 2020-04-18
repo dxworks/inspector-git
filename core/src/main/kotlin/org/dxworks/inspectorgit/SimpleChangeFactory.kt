@@ -1,10 +1,7 @@
 package org.dxworks.inspectorgit
 
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
-import org.dxworks.inspectorgit.model.Change
-import org.dxworks.inspectorgit.model.Commit
-import org.dxworks.inspectorgit.model.File
-import org.dxworks.inspectorgit.model.LineChange
+import org.dxworks.inspectorgit.model.*
 
 class SimpleChangeFactory : ChangeFactory() {
     override fun create(commit: Commit,
@@ -13,7 +10,7 @@ class SimpleChangeFactory : ChangeFactory() {
                         newFileName: String,
                         file: File,
                         parentCommit: Commit?,
-                        lineChanges: MutableList<LineChange>,
+                        hunks: List<Hunk>,
                         parentChange: Change?): Change =
             Change(commit = commit,
                     type = type,
@@ -21,6 +18,6 @@ class SimpleChangeFactory : ChangeFactory() {
                     newFileName = newFileName,
                     file = file,
                     parentCommit = parentCommit,
-                    lineChanges = lineChanges,
+                    hunks = hunks,
                     parentChange = parentChange)
 }

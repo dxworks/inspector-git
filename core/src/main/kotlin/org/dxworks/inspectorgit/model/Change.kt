@@ -1,7 +1,6 @@
 package org.dxworks.inspectorgit.model
 
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
-import org.dxworks.inspectorgit.gitclient.enums.LineOperation
 import org.slf4j.LoggerFactory
 
 open class Change(val commit: Commit,
@@ -10,11 +9,20 @@ open class Change(val commit: Commit,
                   val newFileName: String,
                   var file: File,
                   var parentCommit: Commit?,
-                  var lineChanges: List<LineChange>,
+                  var hunks: List<Hunk>,
                   var annotatedLines: List<AnnotatedLine> = emptyList(),
                   protected var parentChange: Change?) {
 
     val id: String get() = "${commit.id}-$oldFileName->$newFileName"
+
+    val lineChanges: List<LineChange>
+        get() = hunks.flatMap { it.lineChanges }
+
+    val deletedLines: List<LineChange>
+        get() = hunks.flatMap { it.deletedLines }
+
+    val addedLines: List<LineChange>
+        get() = hunks.flatMap { it.addedLines }
 
     companion object {
         private val LOG = LoggerFactory.getLogger(Change::class.java)
@@ -29,7 +37,8 @@ open class Change(val commit: Commit,
     private fun applyLineChanges(parentChange: Change?) {
         val newAnnotatedLines = parentChange?.annotatedLines
                 ?.map { AnnotatedLine(it.number, it.content) }?.toMutableList() ?: ArrayList()
-        val (deletes, adds) = lineChanges.partition { it.operation == LineOperation.DELETE }
+        val deletes = deletedLines
+        val adds = addedLines
         deletes.sortedByDescending { it.number }
                 .forEach { newAnnotatedLines.removeAt(it.number - 1) }
 
@@ -62,7 +71,7 @@ open class Change(val commit: Commit,
         result = 31 * result + commit.hashCode()
         result = 31 * result + oldFileName.hashCode()
         result = 31 * result + newFileName.hashCode()
-        result = 31 * result + lineChanges.hashCode()
+        result = 31 * result + hunks.hashCode()
         result = 31 * result + annotatedLines.hashCode()
         return result
     }

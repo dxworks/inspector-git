@@ -30,13 +30,13 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
                 newFileName = changeDTO.newFileName,
                 file = file,
                 parentCommit = parentCommit,
-                lineChanges = getLineChanges(lastChange),
+                hunks = getHunks(lastChange),
                 parentChange = lastChange)
     }
 
-    private fun getLineChanges(lastChange: Change?): MutableList<LineChange> {
+    private fun getHunks(lastChange: Change?): List<Hunk> {
         LOG.info("Calculating line changes")
-        return changeDTO.hunks.flatMap { it.lineChanges }.map { LineChange(it.operation, it.number, getContent(it, lastChange), commit) }.toMutableList()
+        return changeDTO.hunks.map { Hunk(it.lineChanges.map { LineChange(it.operation, it.number, getContent(it, lastChange), commit) })}
     }
 
     private fun getContent(lineChangeDTO: LineChangeDTO, lastChange: Change?): AnnotatedContent {
