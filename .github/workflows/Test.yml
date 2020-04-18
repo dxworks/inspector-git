@@ -40,7 +40,7 @@ jobs:
         pwd
         cd frontend
         pwd
-        mvnw clean install
+        ./mvnw clean install
         ls -al
         
     - name: Build Frontend
@@ -48,7 +48,7 @@ jobs:
         pwd
         cd backend
         pwd
-        mvnw clean install -DskipTests
+        ./mvnw clean install -DskipTests
         ls -al
         cd ..
         pwd
