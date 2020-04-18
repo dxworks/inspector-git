@@ -54,7 +54,7 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: my-artifact
-        path: backend/app/target/app.jar
+        path: backend/app/target/app-1.0-SNAPSHOT.jar
         
         
         
