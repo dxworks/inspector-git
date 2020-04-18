@@ -45,7 +45,7 @@ jobs:
         ls -al frontend
         mvn -f frontend/pom.xml clean install
         
-    - name: Build Frontend
+    - name: Build Backend
       run: |
         ls -al backend
         mvn -f backend/pom.xml clean install -DskipTests
