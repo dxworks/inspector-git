@@ -16,8 +16,8 @@ fun main() {
 
     val configLines = configFile.readLines()
 
-    val repoPath = Paths.get(configLines[0])
-    val taskPrefix = configLines[1]
+    val repoPath = Paths.get(System.getenv("FPPT_IG_REPO_PATH") ?: configLines[0])
+    val taskPrefix = System.getenv("FPPT_IG_TASK_PREFIX") ?: configLines[1]
     val taskRegex = "(\\b|'|\")$taskPrefix-\\d+(\\b|\"|')".toRegex()
 
     val gitClient = GitClient(repoPath)
