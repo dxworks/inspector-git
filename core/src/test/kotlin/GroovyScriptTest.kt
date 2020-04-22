@@ -26,5 +26,12 @@ class GroovyScriptTest {
         assertEquals("Hello World!", stringWriter.toString().trim())
     }
 
+    @Test
+    fun `test regex`() {
+        val taskRegex = "(\\b|'|\")asd-\\d+(\\b|\"|')".toRegex()
+        val toMatch = listOf("asd-23", "asd-23 nkjflds", "ksjalkdj asd-23", "asd- asd-23 asd-jdk", "dsafjaskd 'asd-23'", " nkjansd'asd-123' jdsank jnd asd-34")
 
+        val flatMap = toMatch.flatMap { taskRegex.findAll(it).toList().map { it.value } }
+        assertEquals(7, flatMap.size)
+    }
 }
