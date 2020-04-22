@@ -11,10 +11,7 @@ const val configFilePathString = "igconf"
 
 fun main() {
     val configFile = Paths.get(configFilePathString).toFile()
-    if (!configFile.exists())
-        println("config file not found should be at ${configFile.absolutePath}")
-
-    val configLines = configFile.readLines()
+    val configLines = if (configFile.exists()) configFile.readLines() else emptyList()
 
     val repoPath = Paths.get(System.getenv("FPPT_IG_REPO_PATH") ?: configLines[0])
     val taskPrefix = System.getenv("FPPT_IG_TASK_PREFIX") ?: configLines[1]
