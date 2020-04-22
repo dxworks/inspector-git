@@ -61,7 +61,7 @@ fun main() {
                 val summary = mapOf(
                         "id" to it.id,
                         "message" to it.message,
-                        "authos" to it.author.id.toString(),
+                        "authors" to it.author.id.toString(),
                         "numberOfChanges" to changes.size,
                         "numberOfChangesPerType" to changes.groupingBy { it.type }.eachCount(),
                         "addedLines" to hunks.map { it.addedLines.size }.sum(),
