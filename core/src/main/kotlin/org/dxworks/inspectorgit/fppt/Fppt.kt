@@ -27,10 +27,11 @@ fun main() {
     val project = ProjectTransformer(gitLogDTO, projectName).transform()
 
     val allAuthors = project.authorRegistry.all
-    val allAuthorIds = allAuthors.map { it.id }
     val authorIdToCommitsMap = allAuthors.map { it.id to it.allCommits }.toMap()
 
     val allCommits = project.commitRegistry.all
+    val allAuthorIds = allCommits.map { it.author.id }.distinct()
+
     val allSmartCommits = allCommits.filter { taskRegex.containsMatchIn(it.message) }
     val taskIdToSmartCommitMap = mapOfCommitsByTaskId(allSmartCommits, taskRegex)
 
