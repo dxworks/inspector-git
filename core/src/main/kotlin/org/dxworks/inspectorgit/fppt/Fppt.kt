@@ -62,7 +62,8 @@ fun main() {
                 val summary = mapOf(
                         "id" to it.id,
                         "message" to it.message,
-                        "authors" to it.author.id.toString(),
+                        "author" to it.author.id.toString(),
+                        "date" to it.authorDate.toString(),
                         "numberOfChanges" to changes.size,
                         "numberOfChangesPerType" to changes.groupingBy { it.type }.eachCount(),
                         "addedLines" to hunks.map { it.addedLines.size }.sum(),
@@ -70,7 +71,7 @@ fun main() {
                 )
 
                 it.id to summary
-            }.toMap(),
+            }.toMap().toSortedMap(compareBy { project.commitRegistry.getById(it)!!.authorDate }),
             "tasks" to mapOfTaskDetails.toSortedMap(compareByDescending { mapOfTaskDetails[it]!!["numberOfFilesChanged"] })
     )
 
