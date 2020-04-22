@@ -14,13 +14,13 @@ import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import java.nio.file.Paths
 
-internal class ModelTest {
+internal class ModelTestIT {
 
     companion object {
         private lateinit var gitClient: GitClient
         private lateinit var project: Project
 
-        private val LOG = LoggerFactory.getLogger(ModelTest::class.java)
+        private val LOG = LoggerFactory.getLogger(ModelTestIT::class.java)
         private val kafkaPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\licenta\\kafka\\kafka")
         private val dxPlatformPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\dx\\dx-platform")
 
