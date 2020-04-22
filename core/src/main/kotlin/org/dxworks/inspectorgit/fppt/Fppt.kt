@@ -5,12 +5,15 @@ import org.dxworks.inspectorgit.gitclient.GitClient
 import org.dxworks.inspectorgit.gitclient.parsers.LogParser
 import org.dxworks.inspectorgit.model.Commit
 import org.dxworks.inspectorgit.transformers.ProjectTransformer
+import java.io.File
 import java.nio.file.Paths
 
 const val configFilePathString = "igconf"
-
+val outputFolder: File = Paths.get(System.getProperty("user.home")).resolve("fpptigOutput").toFile()
 fun main() {
     val configFile = Paths.get(configFilePathString).toFile()
+    outputFolder.mkdirs()
+
     val configLines = if (configFile.exists()) configFile.readLines() else emptyList()
 
     val repoPath = Paths.get(System.getenv("FPPT_IG_REPO_PATH") ?: configLines[0])
@@ -70,7 +73,7 @@ fun main() {
             "tasks" to mapOfTaskDetails.toSortedMap(compareByDescending { mapOfTaskDetails[it]!!["numberOfFilesChanged"] })
     )
 
-    jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValue(Paths.get("$projectName.json").toFile(), output)
+    jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValue(outputFolder.resolve("$projectName.json"), output)
 }
 
 private fun mapOfCommitsByTaskId(allSmartCommits: List<Commit>, taskRegex: Regex): Map<String, List<Commit>> {
