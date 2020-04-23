@@ -12,6 +12,7 @@
     <artifactId>core</artifactId>
     <properties>
         <main.class>org.dxworks.inspectorgit.fppt.FpptKt</main.class>
+        <executable.jar.finalName>fpptIg</executable.jar.finalName>
     </properties>
 
     <dependencies>
@@ -42,7 +43,7 @@
         <profile>
             <id>buildFppt</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <build>
                 <plugins>
@@ -51,7 +52,7 @@
                         <artifactId>maven-assembly-plugin</artifactId>
                         <version>2.4.1</version>
                         <configuration>
-                            <finalName>fpptIg</finalName>
+                            <finalName>${executable.jar.finalName}</finalName>
                             <!-- get all project dependencies -->
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
@@ -74,6 +75,28 @@
                                 </goals>
                             </execution>
                         </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.spotify</groupId>
+                        <artifactId>dockerfile-maven-plugin</artifactId>
+                        <version>1.4.13</version>
+                        <executions>
+                            <execution>
+                                <id>default</id>
+                                <goals>
+                                    <goal>build</goal>
+                                    <goal>push</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <repository>mario94/fppt-ig</repository>
+                            <tag>${project.version}</tag>
+                            <buildArgs>
+                                <JAR_FILE>${executable.jar.finalName}.jar</JAR_FILE>
+                            </buildArgs>
+                            <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
