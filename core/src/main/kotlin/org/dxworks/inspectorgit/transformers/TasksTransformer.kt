@@ -8,11 +8,15 @@ import org.dxworks.inspectorgit.model.task.Task
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-class TasksTransformer(private val project: Project, private val taskDTOs: List<TaskDTO>) {
+class TasksTransformer(private val project: Project, private val taskDTOs: List<TaskDTO> = emptyList(), private val taskPrefixes: List<String> = emptyList()) {
     private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("")
 
     fun addToProject() {
-        val taskPrefixes = taskDTOs.map { it.id.substring(0, it.id.indexOf("-")) }
+        val taskPrefixes = (taskDTOs.map { it.id.substring(0, it.id.indexOf("-")) } + this.taskPrefixes).distinct()
+        if (taskPrefixes.isEmpty())
+            return
+
+
         val taskRegexList = taskPrefixes.map { getTaskRegex(it) }
         val smartCommits = project.commitRegistry.all
                 .filter { taskRegexList.any { taskRegex -> taskRegex.containsMatchIn(it.message) } }

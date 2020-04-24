@@ -18,9 +18,9 @@ fun main() {
     outputFolder.mkdirs()
 
     val configLines = if (configFile.exists()) configFile.readLines() else emptyList()
-
     val repoPath = Paths.get(System.getenv("FPPT_IG_REPO_PATH") ?: configLines[0])
-    val tasksFilePath = Paths.get(System.getenv("FPPT_IG_TASKS_PATH") ?: configLines[1])
+    val taskPrefixes = (System.getenv("FPPT_IG_TASK_PREFIX") ?: configLines[1]).split(",").map { it.trim() }
+    val tasksFilePath = Paths.get(System.getenv("FPPT_IG_TASKS_PATH") ?: configLines[2])
 
     val tasks = jacksonObjectMapper().readValue<List<TaskDTO>>(tasksFilePath.toFile())
 
@@ -30,7 +30,7 @@ fun main() {
 
     val projectName = repoPath.fileName.toString()
     val project = ProjectTransformer(gitLogDTO, projectName).transform()
-    TasksTransformer(project, tasks).addToProject()
+    TasksTransformer(project, tasks, taskPrefixes).addToProject()
 
     val allAuthors = project.developerRegistry.all
     val accountIdToCommitsMap = allAuthors.map { it.id to it.commits }.toMap()
