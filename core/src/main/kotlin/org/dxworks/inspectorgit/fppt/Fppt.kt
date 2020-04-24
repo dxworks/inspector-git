@@ -1,13 +1,11 @@
 package org.dxworks.inspectorgit.fppt
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import org.dxworks.inspectorgit.fppt.dtos.task.TaskDTO
+import org.dxworks.inspectorgit.fppt.jira.TaskImporter
 import org.dxworks.inspectorgit.gitclient.GitClient
 import org.dxworks.inspectorgit.gitclient.parsers.LogParser
 import org.dxworks.inspectorgit.model.task.DetailedTask
 import org.dxworks.inspectorgit.transformers.ProjectTransformer
-import org.dxworks.inspectorgit.transformers.TasksTransformer
 import java.io.File
 import java.nio.file.Paths
 
@@ -22,15 +20,13 @@ fun main() {
     val taskPrefixes = (System.getenv("FPPT_IG_TASK_PREFIX") ?: configLines[1]).split(",").map { it.trim() }
     val tasksFilePath = Paths.get(System.getenv("FPPT_IG_TASKS_PATH") ?: configLines[2])
 
-    val tasks = jacksonObjectMapper().readValue<List<TaskDTO>>(tasksFilePath.toFile())
-
 
     val gitClient = GitClient(repoPath)
     val gitLogDTO = LogParser(gitClient).parse(gitClient.getLogs())
 
     val projectName = repoPath.fileName.toString()
     val project = ProjectTransformer(gitLogDTO, projectName).transform()
-    TasksTransformer(project, tasks, taskPrefixes).addToProject()
+    TaskImporter(tasksFilePath).importToProject(project, taskPrefixes)
 
     val allAuthors = project.developerRegistry.all
     val accountIdToCommitsMap = allAuthors.map { it.id to it.commits }.toMap()
