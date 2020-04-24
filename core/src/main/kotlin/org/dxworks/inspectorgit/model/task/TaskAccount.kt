@@ -8,7 +8,7 @@ class TaskAccount(
         name: String,
         val avatarUrl: String,
         project: Project,
-        var tasks: List<Task> = emptyList()
+        var tasks: Set<Task> = emptySet()
 ) : Account(
         name,
         project

@@ -58,6 +58,7 @@ class TasksTransformer(
         })
 
         linkTasksWithTypes()
+        lintTasksWithAuthors()
 
         project.taskRegistry.addAll(taskIdToSmartCommitMap.map { Task(it.key, it.value) })
 
@@ -77,8 +78,16 @@ class TasksTransformer(
         }
     }
 
+    private fun lintTasksWithAuthors() {
+        project.taskRegistry.allDetailedTasks.forEach { task ->
+            task.creator.tasks += task
+            task.reporter?.let { it.tasks += task }
+            task.assignee?.let { it.tasks += task }
+        }
+    }
+
     private fun linkTasksWithTypes() {
-        project.taskRegistry.all.filter { it is DetailedTask }.map { it as DetailedTask }.forEach { task ->
+        project.taskRegistry.allDetailedTasks.forEach { task ->
             task.type?.let { it.tasks += task }
         }
     }
