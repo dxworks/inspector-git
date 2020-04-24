@@ -8,7 +8,7 @@ class TaskAccount(
         name: String,
         val avatarUrl: String,
         project: Project,
-        var tasks: Set<Task> = emptySet()
+        var tasks: Set<Task> = emptySet() //TODO: list of task relation task relation has strength, task and account
 ) : Account(
         name,
         project

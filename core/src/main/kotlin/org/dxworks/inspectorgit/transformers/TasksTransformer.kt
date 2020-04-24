@@ -83,6 +83,11 @@ class TasksTransformer(
             task.creator.tasks += task
             task.reporter?.let { it.tasks += task }
             task.assignee?.let { it.tasks += task }
+            task.changes.forEach { it.account.tasks += task }
+            task.comments.forEach {
+                it.createdBy.tasks += task
+                it.updatedBy?.let { it.tasks += task }
+            }
         }
     }
 
