@@ -1,6 +1,7 @@
-package org.dxworks.inspectorgit.model
+package org.dxworks.inspectorgit.model.git
 
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
+import org.dxworks.inspectorgit.model.Project
 import org.slf4j.LoggerFactory
 import java.util.*
 import kotlin.collections.ArrayList

@@ -1,9 +1,9 @@
 package org.dxworks.inspectorgit.analyzers.work
 
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.AnnotatedLineDTO
-import org.dxworks.inspectorgit.model.AnnotatedLine
-import org.dxworks.inspectorgit.model.AuthorId
-import org.dxworks.inspectorgit.model.Commit
+import org.dxworks.inspectorgit.model.git.AnnotatedLine
+import org.dxworks.inspectorgit.model.git.Commit
+import org.dxworks.inspectorgit.model.git.GitAccountId
 
 data class WorkAnalyzerResult(
         val commit: Commit,
@@ -15,7 +15,7 @@ data class WorkAnalyzerResult(
 
 class WorkAnalyzerNumbersDTO {
     lateinit var commitId: String
-    lateinit var authorId: AuthorId
+    lateinit var gitAccountId: GitAccountId
     var newWork: Int = 0
     var legacyRefactor: Int = 0
     var helpOthers: Int = 0
@@ -25,7 +25,7 @@ class WorkAnalyzerNumbersDTO {
         fun get(result: WorkAnalyzerResult): WorkAnalyzerNumbersDTO {
             val dto = WorkAnalyzerNumbersDTO()
             dto.commitId = result.commit.id
-            dto.authorId = result.commit.author.id
+            dto.gitAccountId = result.commit.author.gitId
             dto.newWork = result.newWork.size
             dto.churn = result.churn.size
             dto.legacyRefactor = result.legacyRefactor.size
@@ -37,7 +37,7 @@ class WorkAnalyzerNumbersDTO {
 
 class WorkAnalyzerResultDTO {
     lateinit var commitId: String
-    lateinit var authorId: AuthorId
+    lateinit var gitAccountId: GitAccountId
     var newWork: List<AnnotatedLineDTO> = emptyList()
     var legacyRefactor: List<CodeChangeDTO> = emptyList()
     var helpOthers: List<CodeChangeDTO> = emptyList()
@@ -47,7 +47,7 @@ class WorkAnalyzerResultDTO {
         fun get(result: WorkAnalyzerResult): WorkAnalyzerResultDTO {
             val dto = WorkAnalyzerResultDTO()
             dto.commitId = result.commit.id
-            dto.authorId = result.commit.author.id
+            dto.gitAccountId = result.commit.author.gitId
             dto.newWork = result.newWork.map { AnnotatedLineDTO(it.content.commit.id, it.number, it.content.content) }
             dto.churn = result.churn.map { AnnotatedLineDTO(it.content.commit.id, it.number, it.content.content) }
             dto.legacyRefactor = result.legacyRefactor.map { CodeChangeDTO.get(it) }

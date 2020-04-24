@@ -1,10 +1,13 @@
 package org.dxworks.inspectorgit.fppt
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import org.dxworks.inspectorgit.fppt.dtos.task.TaskDTO
 import org.dxworks.inspectorgit.gitclient.GitClient
 import org.dxworks.inspectorgit.gitclient.parsers.LogParser
-import org.dxworks.inspectorgit.model.Commit
+import org.dxworks.inspectorgit.model.task.DetailedTask
 import org.dxworks.inspectorgit.transformers.ProjectTransformer
+import org.dxworks.inspectorgit.transformers.TasksTransformer
 import java.io.File
 import java.nio.file.Paths
 
@@ -17,42 +20,51 @@ fun main() {
     val configLines = if (configFile.exists()) configFile.readLines() else emptyList()
 
     val repoPath = Paths.get(System.getenv("FPPT_IG_REPO_PATH") ?: configLines[0])
-    val taskPrefix = System.getenv("FPPT_IG_TASK_PREFIX") ?: configLines[1]
-    val taskRegex = "(\\b|'|\")$taskPrefix-\\d+(\\b|\"|')".toRegex()
+    val tasksFilePath = Paths.get(System.getenv("FPPT_IG_TASKS_PATH") ?: configLines[1])
+
+    val tasks = jacksonObjectMapper().readValue<List<TaskDTO>>(tasksFilePath.toFile())
+
 
     val gitClient = GitClient(repoPath)
     val gitLogDTO = LogParser(gitClient).parse(gitClient.getLogs())
 
     val projectName = repoPath.fileName.toString()
     val project = ProjectTransformer(gitLogDTO, projectName).transform()
+    TasksTransformer(project, tasks).addToProject()
 
-    val allAuthors = project.authorRegistry.all
-    val authorIdToCommitsMap = allAuthors.map { it.id to it.allCommits }.toMap()
+    val allAuthors = project.developerRegistry.all
+    val accountIdToCommitsMap = allAuthors.map { it.id to it.commits }.toMap()
 
     val allCommits = project.commitRegistry.all
     val allAuthorIds = allCommits.map { it.author.id }.distinct()
 
-    val allSmartCommits = allCommits.filter { taskRegex.containsMatchIn(it.message) }
-    val taskIdToSmartCommitMap = mapOfCommitsByTaskId(allSmartCommits, taskRegex)
 
-    val mapOfTaskDetails = taskIdToSmartCommitMap.map {
-        val commits = it.value
-        it.key to mapOf(
-                "numberOfCommits" to commits.size,
-                "numberOfFilesChanged" to commits.flatMap { it.changes.map { it.file } }.distinct().count()
-        )
+    val mapOfTaskDetails = project.taskRegistry.all.map { task ->
+        val numberOfCommits = task.commits.size
+        val numberOfFiles = task.commits.flatMap { commit -> commit.changes.map { it.file } }.distinct().count()
+        if (task is DetailedTask)
+            task.id to TaskDetails(
+                    summary = task.summary,
+                    numberOfCommits = numberOfCommits,
+                    numberOfFilesChanged = numberOfFiles
+            )
+        else
+            task.id to BasicTaskDetails(
+                    numberOfCommits = numberOfCommits,
+                    numberOfFilesChanged = numberOfFiles
+            )
     }.toMap()
     val output = mapOf(
             "numberOfCommitters" to allAuthorIds.size,
             "numberOfCommits" to allCommits.size,
-            "numberOfSmartCommits" to allSmartCommits.size,
+            "numberOfSmartCommits" to project.taskRegistry.all.flatMap { it.commits }.distinct().count(),
             "committers" to allAuthorIds,
             "committerMetrics" to mapOf(
-                    "numberOfCommits" to allAuthorIds.map { it.toString() to authorIdToCommitsMap[it]?.size }.toMap(),
-                    "avgChangesPerCommit" to allAuthorIds.map {
-                        val commits = authorIdToCommitsMap[it]
-                        val avg = (commits?.map { it.changes.size }?.sum() ?: 0) / (commits?.size ?: 1)
-                        it.toString() to avg
+                    "numberOfCommits" to allAuthorIds.map { it to accountIdToCommitsMap[it]?.size }.toMap(),
+                    "avgChangesPerCommit" to allAuthorIds.map { id ->
+                        val commits = accountIdToCommitsMap[id]
+                        val avg = commits?.map { it.changes.size }?.average() ?: 0
+                        id to avg
                     }.toMap()
             ),
             "commits" to allCommits.map {
@@ -62,7 +74,7 @@ fun main() {
                 val summary = mapOf(
                         "id" to it.id,
                         "message" to it.message,
-                        "author" to it.author.id.toString(),
+                        "author" to it.author.id,
                         "date" to it.authorDate.toString(),
                         "numberOfChanges" to changes.size,
                         "numberOfChangesPerType" to changes.groupingBy { it.type }.eachCount(),
@@ -72,14 +84,22 @@ fun main() {
 
                 it.id to summary
             }.toMap().toSortedMap(compareBy { project.commitRegistry.getById(it)!!.authorDate }),
-            "tasks" to mapOfTaskDetails.toSortedMap(compareByDescending { mapOfTaskDetails[it]!!["numberOfFilesChanged"] })
+            "tasks" to mapOfTaskDetails.toSortedMap(compareByDescending { mapOfTaskDetails[it]!!.numberOfFilesChanged })
     )
 
     jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValue(outputFolder.resolve("$projectName.json"), output)
 }
 
-private fun mapOfCommitsByTaskId(allSmartCommits: List<Commit>, taskRegex: Regex): Map<String, List<Commit>> {
+class TaskDetails(
+        val summary: String,
+        numberOfCommits: Int,
+        numberOfFilesChanged: Int
+) : BasicTaskDetails(
+        numberOfCommits,
+        numberOfFilesChanged
+)
 
-    val allTaskIds = allSmartCommits.flatMap { taskRegex.findAll(it.message).toList().map { it.value } }
-    return allTaskIds.map { id -> id to allSmartCommits.filter { it.message.contains(id) } }.toMap()
-}
+open class BasicTaskDetails(
+        val numberOfCommits: Int,
+        val numberOfFilesChanged: Int
+)

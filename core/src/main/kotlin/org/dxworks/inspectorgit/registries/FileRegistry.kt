@@ -1,6 +1,6 @@
 package org.dxworks.inspectorgit.registries
 
-import org.dxworks.inspectorgit.model.File
+import org.dxworks.inspectorgit.model.git.File
 import java.util.*
 
 class FileRegistry : AbstractRegistry<File, UUID>() {

@@ -5,7 +5,8 @@ import org.dxworks.inspectorgit.gitclient.dto.gitlog.ChangeDTO
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.LineChangeDTO
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
 import org.dxworks.inspectorgit.gitclient.enums.LineOperation
-import org.dxworks.inspectorgit.model.*
+import org.dxworks.inspectorgit.model.Project
+import org.dxworks.inspectorgit.model.git.*
 import org.slf4j.LoggerFactory
 
 class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Commit, private val project: Project, private val changeFactory: ChangeFactory) {
@@ -36,7 +37,7 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
 
     private fun getHunks(lastChange: Change?): List<Hunk> {
         LOG.info("Calculating line changes")
-        return changeDTO.hunks.map { Hunk(it.lineChanges.map { LineChange(it.operation, it.number, getContent(it, lastChange), commit) })}
+        return changeDTO.hunks.map { Hunk(it.lineChanges.map { LineChange(it.operation, it.number, getContent(it, lastChange), commit) }) }
     }
 
     private fun getContent(lineChangeDTO: LineChangeDTO, lastChange: Change?): AnnotatedContent {

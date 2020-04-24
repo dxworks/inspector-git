@@ -3,9 +3,9 @@ package org.dxworks.inspectorgit.transformers
 import org.dxworks.inspectorgit.ChangeFactory
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.ChangeDTO
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
-import org.dxworks.inspectorgit.model.Change
-import org.dxworks.inspectorgit.model.Commit
 import org.dxworks.inspectorgit.model.Project
+import org.dxworks.inspectorgit.model.git.Change
+import org.dxworks.inspectorgit.model.git.Commit
 import org.slf4j.LoggerFactory
 
 class MergeChangesTransformer(private val changeDTOs: List<ChangeDTO>, val commit: Commit, val project: Project, private val changeFactory: ChangeFactory) {

@@ -1,5 +1,6 @@
-package org.dxworks.inspectorgit.model
+package org.dxworks.inspectorgit.model.git
 
+import org.dxworks.inspectorgit.model.Project
 import java.time.Period
 import java.time.ZonedDateTime
 
@@ -8,8 +9,8 @@ data class Commit(var project: Project,
                   var message: String,
                   val authorDate: ZonedDateTime,
                   val committerDate: ZonedDateTime,
-                  val author: Author,
-                  val committer: Author,
+                  val author: GitAccount,
+                  val committer: GitAccount,
                   var parents: List<Commit>,
                   var children: List<Commit>,
                   var changes: List<Change>) {
@@ -41,6 +42,7 @@ data class Commit(var project: Project,
         return result
     }
 
+    var taskIds: List<String> = emptyList()
     val isMergeCommit: Boolean
         get() = parents.size > 1
 

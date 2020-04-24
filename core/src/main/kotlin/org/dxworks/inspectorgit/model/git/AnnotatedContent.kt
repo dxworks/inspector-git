@@ -1,4 +1,4 @@
-package org.dxworks.inspectorgit.model
+package org.dxworks.inspectorgit.model.git
 
 data class AnnotatedContent(val commit: Commit, val content: String?) {
 

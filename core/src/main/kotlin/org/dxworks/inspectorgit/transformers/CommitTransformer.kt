@@ -5,10 +5,10 @@ import org.dxworks.inspectorgit.SimpleChangeFactory
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.ChangeDTO
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.CommitDTO
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
-import org.dxworks.inspectorgit.model.Author
-import org.dxworks.inspectorgit.model.AuthorId
-import org.dxworks.inspectorgit.model.Commit
 import org.dxworks.inspectorgit.model.Project
+import org.dxworks.inspectorgit.model.git.Commit
+import org.dxworks.inspectorgit.model.git.GitAccount
+import org.dxworks.inspectorgit.model.git.GitAccountId
 import org.dxworks.inspectorgit.utils.commitDateTimeFormatter
 import org.slf4j.LoggerFactory
 import java.time.ZonedDateTime
@@ -48,9 +48,9 @@ class CommitTransformer(private val commitDTO: CommitDTO, private val project: P
         LOG.info("Adding commit to repository and to authors")
 
         project.commitRegistry.add(commit)
-        author.commits.add(commit)
+        author.commits += commit
         if (committer != author)
-            committer.commits.add(commit)
+            committer.commits += commit
 
         addChangesToCommit(commitDTO.changes, commit, project)
 
@@ -77,19 +77,19 @@ class CommitTransformer(private val commitDTO: CommitDTO, private val project: P
         LOG.info("Transforming changes")
     }
 
-    private fun getAuthor(commitDTO: CommitDTO, project: Project): Author =
-            getAuthor(project, AuthorId(commitDTO.authorEmail, commitDTO.authorName))
+    private fun getAuthor(commitDTO: CommitDTO, project: Project): GitAccount =
+            getAuthor(project, GitAccountId(commitDTO.authorEmail, commitDTO.authorName))
 
-    private fun getCommitter(commitDTO: CommitDTO, project: Project): Author =
-            getAuthor(project, AuthorId(commitDTO.committerEmail, commitDTO.committerName))
+    private fun getCommitter(commitDTO: CommitDTO, project: Project): GitAccount =
+            getAuthor(project, GitAccountId(commitDTO.committerEmail, commitDTO.committerName))
 
-    private fun getAuthor(project: Project, authorId: AuthorId): Author {
-        var author = project.authorRegistry.getById(authorId)
+    private fun getAuthor(project: Project, gitAccountId: GitAccountId): GitAccount {
+        var author = project.accountRegistry.getById(gitAccountId.toString())
         if (author == null) {
-            author = Author(authorId, project)
-            project.authorRegistry.add(author)
+            author = GitAccount(gitAccountId, project)
+            project.accountRegistry.add(author)
         }
-        return author
+        return author as GitAccount
     }
 
     private fun getParentsFromIds(parentIds: List<String>, project: Project): List<Commit> =

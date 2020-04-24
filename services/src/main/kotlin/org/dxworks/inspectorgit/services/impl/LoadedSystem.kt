@@ -1,9 +1,9 @@
 package org.dxworks.inspectorgit.services.impl
 
 import org.dxworks.inspectorgit.model.Project
-import org.dxworks.inspectorgit.registries.AuthorRegistry
 import org.dxworks.inspectorgit.registries.CommitRegistry
 import org.dxworks.inspectorgit.registries.FileRegistry
+import org.dxworks.inspectorgit.registries.GitAccountRegistry
 import org.springframework.stereotype.Component
 
 @Component
@@ -14,7 +14,7 @@ class LoadedSystem {
         private set
     final lateinit var projects: Map<String, Project>
         private set
-    final lateinit var authorRegistry: AuthorRegistry
+    final lateinit var gitAccountRegistry: GitAccountRegistry
         private set
     final lateinit var commitRegistry: CommitRegistry
         private set
@@ -28,8 +28,8 @@ class LoadedSystem {
         this.name = name
         this.projects = projects.map { Pair(it.name, it) }.toMap()
 
-        authorRegistry = AuthorRegistry()
-        authorRegistry.addAll(projects.flatMap { it.authorRegistry.all })
+        gitAccountRegistry = GitAccountRegistry()
+        gitAccountRegistry.addAll(projects.flatMap { it.developerRegistry.all })
 
         commitRegistry = CommitRegistry()
         commitRegistry.addAll(projects.flatMap { it.commitRegistry.all })

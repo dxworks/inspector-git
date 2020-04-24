@@ -1,6 +1,6 @@
 package org.dxworks.inspectorgit.registries
 
-import org.dxworks.inspectorgit.model.Commit
+import org.dxworks.inspectorgit.model.git.Commit
 
 class CommitRegistry : AbstractRegistry<Commit, String>() {
 

@@ -3,6 +3,7 @@ package org.dxworks.inspectorgit.model
 import org.dxworks.inspectorgit.gitclient.GitClient
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.AnnotatedLineDTO
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
+import org.dxworks.inspectorgit.model.git.*
 import org.slf4j.LoggerFactory
 
 class TestChange(

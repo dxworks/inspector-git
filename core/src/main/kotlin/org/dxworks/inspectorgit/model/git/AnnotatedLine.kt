@@ -1,4 +1,4 @@
-package org.dxworks.inspectorgit.model
+package org.dxworks.inspectorgit.model.git
 
 data class AnnotatedLine(var number: Int, var content: AnnotatedContent) {
     override fun toString(): String {

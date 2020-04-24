@@ -1,11 +1,12 @@
 package org.dxworks.inspectorgit.model
 
-import org.dxworks.inspectorgit.registries.AuthorRegistry
-import org.dxworks.inspectorgit.registries.CommitRegistry
-import org.dxworks.inspectorgit.registries.FileRegistry
+import org.dxworks.inspectorgit.registries.*
 
 class Project(val name: String) {
-    val authorRegistry = AuthorRegistry()
+    val accountRegistry = AccountRegistry()
+    val developerRegistry = GitAccountRegistry()
     val commitRegistry = CommitRegistry()
     val fileRegistry = FileRegistry()
+    val taskRegistry = TaskRegistry()
+    val pullRequestRegistry = PullRequestRegistry()
 }
