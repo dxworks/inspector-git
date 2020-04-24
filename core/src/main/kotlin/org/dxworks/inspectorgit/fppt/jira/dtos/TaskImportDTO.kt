@@ -1,7 +1,7 @@
 package org.dxworks.inspectorgit.fppt.jira.dtos
 
 class TaskImportDTO(
-        val issueTypes: Map<String, TaskTypeDTO>,
-        val users: Map<String, TaskAccountDTO>,
+        val issueTypes: List<TaskTypeDTO>,
+        val users: List<TaskAccountDTO>,
         val issues: List<TaskDTO>
 )
