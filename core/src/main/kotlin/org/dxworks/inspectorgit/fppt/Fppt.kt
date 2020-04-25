@@ -3,35 +3,27 @@ package org.dxworks.inspectorgit.fppt
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.dxworks.inspectorgit.AccountMergeTool
+import org.dxworks.inspectorgit.fppt.configuration.FpptConfiguration
+import org.dxworks.inspectorgit.fppt.configuration.FpptConfigurer
 import org.dxworks.inspectorgit.fppt.jira.TaskImporter
 import org.dxworks.inspectorgit.gitclient.GitClient
 import org.dxworks.inspectorgit.gitclient.parsers.LogParser
+import org.dxworks.inspectorgit.model.Project
 import org.dxworks.inspectorgit.model.git.GitAccount
 import org.dxworks.inspectorgit.model.task.DetailedTask
 import org.dxworks.inspectorgit.transformers.ProjectTransformer
 import java.io.File
 import java.nio.file.Paths
 
-const val configFilePathString = "igconf"
-val outputFolder: File = Paths.get(System.getProperty("user.home")).resolve("fpptigOutput").toFile()
+private val outputFolder: File = Paths.get(System.getProperty("user.home")).resolve("fpptigOutput").toFile()
+
 fun main() {
-    val configFile = Paths.get(configFilePathString).toFile()
     outputFolder.mkdirs()
 
-    val configLines = if (configFile.exists()) configFile.readLines() else emptyList()
-    val repoPath = Paths.get(System.getenv("FPPT_IG_REPO_PATH") ?: configLines[0])
-    val taskPrefixes = (System.getenv("FPPT_IG_TASK_PREFIX") ?: configLines[1]).split(",").map { it.trim() }
-    val developerMergesPath = Paths.get(System.getenv("FPPT_IG_DEV_MERGES_PATH") ?: configLines[2])
-    val tasksFilePath = Paths.get(System.getenv("FPPT_IG_TASKS_PATH") ?: configLines[3])
+    val configuration = FpptConfigurer().getConfiguration()
+    val projectName = configuration.repositoryPath.toAbsolutePath().normalize().fileName.toString()
 
-
-    val gitClient = GitClient(repoPath)
-    val gitLogDTO = LogParser(gitClient).parse(gitClient.getLogs())
-
-    val projectName = repoPath.fileName.toString()
-    val project = ProjectTransformer(gitLogDTO, projectName).transform()
-    TaskImporter(tasksFilePath).importToProject(project, taskPrefixes)
-    AccountMergeTool(project).mergeAll(jacksonObjectMapper().readValue(developerMergesPath.toFile()))
+    val project = createProject(configuration, projectName)
 
     val allAuthors = project.accountRegistry.getAll<GitAccount>()
     val accountIdToCommitsMap = allAuthors.map { it.id to it.commits }.toMap()
@@ -89,6 +81,17 @@ fun main() {
     )
 
     jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValue(outputFolder.resolve("$projectName.json"), output)
+}
+
+private fun createProject(configuration: FpptConfiguration, projectName: String): Project {
+    val gitClient = GitClient(configuration.repositoryPath)
+    val gitLogDTO = LogParser(gitClient).parse(gitClient.getLogs())
+
+    val project = ProjectTransformer(gitLogDTO, projectName).transform()
+
+    configuration.tasksFilePath?.let { TaskImporter().importToProject(project, it, configuration.taskPrefixes) }
+    configuration.devMergesFilePath?.let { AccountMergeTool(project).mergeAll(jacksonObjectMapper().readValue(it.toFile())) }
+    return project
 }
 
 class TaskDetails(
