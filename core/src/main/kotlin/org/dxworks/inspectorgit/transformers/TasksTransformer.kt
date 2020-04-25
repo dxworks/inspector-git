@@ -72,7 +72,7 @@ class TasksTransformer(
         taskDTOs.forEach {
             val task = project.taskRegistry.getById(it.key)!!
             if (task is DetailedTask) {
-                it.parentId?.let { parentId -> task.parent = project.taskRegistry.getById(parentId) }
+                it.parent?.let { parentId -> task.parent = project.taskRegistry.getById(parentId) }
                 task.subtasks = it.subTasks.mapNotNull { subtaskId -> project.taskRegistry.getById(subtaskId) }
             }
         }
