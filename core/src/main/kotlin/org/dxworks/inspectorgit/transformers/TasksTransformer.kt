@@ -51,6 +51,7 @@ class TasksTransformer(
                     creator = getTaskAccount(it.creatorId),
                     reporter = it.reporterId?.let { getTaskAccount(it) },
                     assignee = it.assigneeId?.let { getTaskAccount(it) },
+                    priority = it.priority,
                     changes = getChanges(it),
                     comments = getComments(it),
                     commits = taskIdToSmartCommitMap.remove(it.key) ?: emptyList()

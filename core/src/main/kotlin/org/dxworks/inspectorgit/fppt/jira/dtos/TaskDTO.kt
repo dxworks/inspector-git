@@ -14,6 +14,7 @@ class TaskDTO(
         val creatorId: String,
         val reporterId: String?,
         val assigneeId: String?,
+        val priority: String,
         val subTasks: List<String>,
         val changes: List<TaskChangeDTO>,
         val comments: List<TaskCommentDTO>
