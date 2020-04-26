@@ -1,8 +1,8 @@
 package org.dxworks.inspectorgit.web.controllers
 
 import org.dxworks.inspectorgit.analyzers.work.WorkAnalyzerNumbersDTO
-import org.dxworks.inspectorgit.dto.SystemDTO
 import org.dxworks.inspectorgit.services.SystemService
+import org.dxworks.inspectorgit.services.dto.SystemDTO
 import org.dxworks.inspectorgit.web.apiPath
 import org.springframework.web.bind.annotation.*
 

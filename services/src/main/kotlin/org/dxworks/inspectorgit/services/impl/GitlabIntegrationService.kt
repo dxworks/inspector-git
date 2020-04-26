@@ -1,10 +1,10 @@
 package org.dxworks.inspectorgit.services.impl
 
-import org.dxworks.inspectorgit.dto.GitlabSimpleProjectResponseDTO
-import org.dxworks.inspectorgit.dto.SwProjectDTO
 import org.dxworks.inspectorgit.persistence.entities.SwProjectEntity
 import org.dxworks.inspectorgit.services.IntegrationService
 import org.dxworks.inspectorgit.services.ProjectService
+import org.dxworks.inspectorgit.services.dto.GitlabSimpleProjectResponseDTO
+import org.dxworks.inspectorgit.services.dto.SwProjectDTO
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod

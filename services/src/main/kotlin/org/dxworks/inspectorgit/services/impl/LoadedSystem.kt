@@ -1,9 +1,9 @@
 package org.dxworks.inspectorgit.services.impl
 
-import org.dxworks.inspectorgit.model.Project
-import org.dxworks.inspectorgit.registries.AuthorRegistry
-import org.dxworks.inspectorgit.registries.CommitRegistry
-import org.dxworks.inspectorgit.registries.FileRegistry
+import org.dxworks.inspectorgit.core.model.Project
+import org.dxworks.inspectorgit.core.registries.AuthorRegistry
+import org.dxworks.inspectorgit.core.registries.CommitRegistry
+import org.dxworks.inspectorgit.core.registries.FileRegistry
 import org.springframework.stereotype.Component
 
 @Component

@@ -1,11 +1,11 @@
+import org.dxworks.inspectorgit.core.model.AnnotatedLine
+import org.dxworks.inspectorgit.core.model.Project
+import org.dxworks.inspectorgit.core.transformers.ProjectTransformer
 import org.dxworks.inspectorgit.gitclient.GitClient
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.AnnotatedLineDTO
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
 import org.dxworks.inspectorgit.gitclient.extractors.MetadataExtractionManager
 import org.dxworks.inspectorgit.gitclient.iglog.readers.IGLogReader
-import org.dxworks.inspectorgit.model.AnnotatedLine
-import org.dxworks.inspectorgit.model.Project
-import org.dxworks.inspectorgit.transformers.ProjectTransformer
 import org.dxworks.inspectorgit.utils.tmpFolder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue

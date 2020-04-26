@@ -1,6 +1,6 @@
 package org.dxworks.inspectorgit.services
 
-import org.dxworks.inspectorgit.dto.IntegrationDTO
+import org.dxworks.inspectorgit.services.dto.IntegrationDTO
 
 interface IntegrationService {
     fun getByPlatform(platform: String): Any

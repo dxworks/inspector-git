@@ -1,9 +1,9 @@
 package org.dxworks.inspectorgit.analyzers.work
 
+import org.dxworks.inspectorgit.core.model.AnnotatedLine
+import org.dxworks.inspectorgit.core.model.AuthorId
+import org.dxworks.inspectorgit.core.model.Commit
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.AnnotatedLineDTO
-import org.dxworks.inspectorgit.model.AnnotatedLine
-import org.dxworks.inspectorgit.model.AuthorId
-import org.dxworks.inspectorgit.model.Commit
 
 data class WorkAnalyzerResult(
         val commit: Commit,

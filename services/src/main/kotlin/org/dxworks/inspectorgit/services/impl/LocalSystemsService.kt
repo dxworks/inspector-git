@@ -1,12 +1,12 @@
 package org.dxworks.inspectorgit.services.impl
 
-import org.dxworks.inspectorgit.dto.localProjects.LocalSystemDTO
+import org.dxworks.inspectorgit.core.model.Project
+import org.dxworks.inspectorgit.core.transformers.ProjectTransformer
 import org.dxworks.inspectorgit.gitclient.extractors.MetadataExtractionManager
 import org.dxworks.inspectorgit.gitclient.iglog.readers.IGLogReader
-import org.dxworks.inspectorgit.model.Project
 import org.dxworks.inspectorgit.persistence.entities.LocalSystemEntity
 import org.dxworks.inspectorgit.persistence.repositories.LocalSystemRepository
-import org.dxworks.inspectorgit.transformers.ProjectTransformer
+import org.dxworks.inspectorgit.services.dto.localProjects.LocalSystemDTO
 import org.dxworks.inspectorgit.utils.appFolderPath
 import org.springframework.stereotype.Service
 import java.io.File

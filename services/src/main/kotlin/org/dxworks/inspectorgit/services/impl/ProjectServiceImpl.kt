@@ -1,10 +1,10 @@
 package org.dxworks.inspectorgit.services.impl
 
-import org.dxworks.inspectorgit.dto.SwProjectDTO
+import org.dxworks.inspectorgit.gitclient.services.GitRepositoryService
 import org.dxworks.inspectorgit.persistence.entities.SwProjectEntity
 import org.dxworks.inspectorgit.persistence.repositories.SwProjectRepository
-import org.dxworks.inspectorgit.services.GitRepositoryService
 import org.dxworks.inspectorgit.services.ProjectService
+import org.dxworks.inspectorgit.services.dto.SwProjectDTO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional

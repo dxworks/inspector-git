@@ -1,8 +1,8 @@
 package org.dxworks.inspectorgit.services.impl
 
-import org.dxworks.inspectorgit.dto.IntegrationDTO
 import org.dxworks.inspectorgit.persistence.repositories.IntegrationRepository
 import org.dxworks.inspectorgit.services.IntegrationService
+import org.dxworks.inspectorgit.services.dto.IntegrationDTO
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
 

@@ -1,7 +1,7 @@
 package org.dxworks.inspectorgit.web.controllers
 
-import org.dxworks.inspectorgit.dto.IntegrationDTO
 import org.dxworks.inspectorgit.services.IntegrationService
+import org.dxworks.inspectorgit.services.dto.IntegrationDTO
 import org.dxworks.inspectorgit.web.apiPath
 import org.springframework.web.bind.annotation.*
 

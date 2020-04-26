@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.lang.Binding
 import groovy.lang.Closure
 import groovy.lang.GroovyShell
-import org.dxworks.inspectorgit.dto.GroovyScriptDTO
-import org.dxworks.inspectorgit.dto.ScriptResult
-import org.dxworks.inspectorgit.dto.localProjects.LocalSystemDTO
+import org.dxworks.inspectorgit.services.dto.GroovyScriptDTO
+import org.dxworks.inspectorgit.services.dto.ScriptResult
+import org.dxworks.inspectorgit.services.dto.localProjects.LocalSystemDTO
 import org.dxworks.inspectorgit.utils.FileSystemUtils.Companion.getScriptResultsPathForSystem
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

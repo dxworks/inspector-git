@@ -1,7 +1,7 @@
 package org.dxworks.inspectorgit.services
 
-import org.dxworks.inspectorgit.dto.SwProjectDTO
 import org.dxworks.inspectorgit.persistence.entities.SwProjectEntity
+import org.dxworks.inspectorgit.services.dto.SwProjectDTO
 
 interface ProjectService {
     fun findAllSwProjects(): Collection<SwProjectDTO>

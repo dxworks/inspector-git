@@ -2,13 +2,13 @@ package org.dxworks.inspectorgit.services.impl
 
 import org.dxworks.inspectorgit.analyzers.work.WorkAnalyzer
 import org.dxworks.inspectorgit.analyzers.work.WorkAnalyzerNumbersDTO
-import org.dxworks.inspectorgit.dto.SwProjectDTO
-import org.dxworks.inspectorgit.dto.SystemDTO
+import org.dxworks.inspectorgit.core.transformers.ProjectTransformer
 import org.dxworks.inspectorgit.persistence.entities.SystemEntity
 import org.dxworks.inspectorgit.persistence.repositories.SwProjectRepository
 import org.dxworks.inspectorgit.persistence.repositories.SystemRepository
 import org.dxworks.inspectorgit.services.SystemService
-import org.dxworks.inspectorgit.transformers.ProjectTransformer
+import org.dxworks.inspectorgit.services.dto.SwProjectDTO
+import org.dxworks.inspectorgit.services.dto.SystemDTO
 import org.dxworks.inspectorgit.utils.FileSystemUtils
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional

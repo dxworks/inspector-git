@@ -1,7 +1,7 @@
 package org.dxworks.inspectorgit.services
 
 import org.dxworks.inspectorgit.analyzers.work.WorkAnalyzerNumbersDTO
-import org.dxworks.inspectorgit.dto.SystemDTO
+import org.dxworks.inspectorgit.services.dto.SystemDTO
 
 interface SystemService {
     fun create(systemDTO: SystemDTO)
