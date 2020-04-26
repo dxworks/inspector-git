@@ -1,6 +1,5 @@
 package org.dxworks.inspectorgit.web.controllers
 
-import org.dxworks.inspectorgit.analyzers.work.WorkAnalyzerNumbersDTO
 import org.dxworks.inspectorgit.services.SystemService
 import org.dxworks.inspectorgit.services.dto.SystemDTO
 import org.dxworks.inspectorgit.web.apiPath
@@ -22,10 +21,5 @@ class SystemController(private val systemService: SystemService) {
     @DeleteMapping
     fun delete(@RequestParam(required = true) systemId: String) {
         this.systemService.delete(systemId)
-    }
-
-    @GetMapping("analyze")
-    fun analyze(@RequestParam(required = true) systemId: String): Map<String, List<WorkAnalyzerNumbersDTO>>? {
-        return this.systemService.analyze(systemId)
     }
 }

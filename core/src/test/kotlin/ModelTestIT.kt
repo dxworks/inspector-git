@@ -33,7 +33,7 @@ internal class ModelTestIT {
             val tmpFolderFile = tmpFolder.toFile()
             tmpFolderFile.mkdirs()
 
-            val repoPath = kafkaPath
+            val repoPath = dxPlatformPath
 
             val repoName = repoPath.fileName.toString()
             val repoCache = tmpFolder.resolve("$repoName.iglog").toFile()
@@ -103,13 +103,12 @@ internal class ModelTestIT {
 
     private fun linesAreTheSame(annotatedLineDTO: AnnotatedLineDTO, annotatedLine: AnnotatedLine, fileName: String, commitId: String): Boolean {
         lines++
-        val numberAndContentAreTheSame = annotatedLineDTO.number == annotatedLine.number &&
-                (annotatedLine.content.content == null || annotatedLineDTO.content == annotatedLine.content.content)
-        if (project.commitRegistry.getById(annotatedLineDTO.commitId) != annotatedLine.content.commit) {
-            LOG.warn("In $fileName at $commitId at line ${annotatedLineDTO.number} commits differ blame: ${annotatedLineDTO.commitId}, IG: ${annotatedLine.content.commit.id}")
+        val numberIsTheSame = annotatedLineDTO.number == annotatedLine.number
+        if (project.commitRegistry.getById(annotatedLineDTO.commitId) != annotatedLine.commit) {
+            LOG.warn("In $fileName at $commitId at line ${annotatedLineDTO.number} commits differ blame: ${annotatedLineDTO.commitId}, IG: ${annotatedLine.commit.id}")
             linesWithDifferentCommit++
         }
-        return numberAndContentAreTheSame
+        return numberIsTheSame
     }
 
     private fun parseAnnotatedLine(it: String): AnnotatedLineDTO {

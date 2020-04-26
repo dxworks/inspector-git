@@ -36,14 +36,14 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
 
     private fun getHunks(lastChange: Change?): List<Hunk> {
         LOG.info("Calculating line changes")
-        return changeDTO.hunks.map { Hunk(it.lineChanges.map { LineChange(it.operation, it.number, getContent(it, lastChange), commit) })}
+        return changeDTO.hunks.map { Hunk(it.lineChanges.map { LineChange(it.operation, getAnnotatedLine(it, lastChange), commit) }) }
     }
 
-    private fun getContent(lineChangeDTO: LineChangeDTO, lastChange: Change?): AnnotatedContent {
+    private fun getAnnotatedLine(lineChangeDTO: LineChangeDTO, lastChange: Change?): AnnotatedLine {
         return if (lineChangeDTO.operation == LineOperation.ADD)
-            AnnotatedContent(commit, lineChangeDTO.content)
+            AnnotatedLine(lineChangeDTO.number, commit)
         else {
-            lastChange!!.annotatedLines[lineChangeDTO.number - 1].content
+            lastChange!!.annotatedLines[lineChangeDTO.number - 1]
         }
     }
 

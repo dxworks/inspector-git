@@ -14,11 +14,6 @@
     <dependencies>
         <dependency>
             <groupId>org.dxworks.inspectorgit</groupId>
-            <artifactId>api</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.dxworks.inspectorgit</groupId>
             <artifactId>utils</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
@@ -58,9 +53,10 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <sourceDirectories>src/main/kotlin/org/dxworks/inspectorgit/core</sourceDirectories>
+                    <sourceDirectories>${project.basedir}/src/main/kotlin/org/dxworks/inspectorgit/core
+                    </sourceDirectories>
                     <outputFormat>javadoc</outputFormat>
-                    <outputDir>src/main/resources/documentation</outputDir>
+                    <outputDir>${project.basedir}/src/main/resources/static/documentation</outputDir>
                 </configuration>
             </plugin>
         </plugins>

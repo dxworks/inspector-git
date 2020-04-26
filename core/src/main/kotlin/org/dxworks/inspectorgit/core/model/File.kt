@@ -28,18 +28,9 @@ data class File(val isBinary: Boolean, val project: Project, var changes: Mutabl
 
     fun relativePath(commit: Commit?) = getLastChange(commit)?.newFileName
 
-    /**
-     * The last change of the file.
-     */
     val lastChange: Change
         get() = getLastChange(null)!!
 
-    /**
-     * Returns the last change before the commit or in the commit provided as parameter
-     *
-     * @param commit The commit used for search starting point. Provide null to get the last change.
-     * @return A change if found, else null
-     */
     fun getLastChange(commit: Commit?): Change? {
         return when {
             changes.isEmpty() -> null

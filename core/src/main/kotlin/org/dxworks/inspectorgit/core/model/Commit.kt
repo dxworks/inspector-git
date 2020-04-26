@@ -1,6 +1,5 @@
 package org.dxworks.inspectorgit.core.model
 
-import java.time.Period
 import java.time.ZonedDateTime
 
 data class Commit(var project: Project,
@@ -13,7 +12,6 @@ data class Commit(var project: Project,
                   var parents: List<Commit>,
                   var children: List<Commit>,
                   var changes: List<Change>) {
-    fun olderThan(age: Period, other: Commit) = committerDate.isBefore(other.committerDate.minus(age))
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

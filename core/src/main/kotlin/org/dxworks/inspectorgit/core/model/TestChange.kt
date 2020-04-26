@@ -60,17 +60,16 @@ class TestChange(
     }
 
     private fun linesAreTheSame(annotatedLineDTO: AnnotatedLineDTO, annotatedLine: AnnotatedLine): Boolean {
-        val numberAndContentAreTheSame = annotatedLineDTO.number == annotatedLine.number &&
-                annotatedLineDTO.content == annotatedLine.content.content
+        val numberIsTheSame = annotatedLineDTO.number == annotatedLine.number
         val lineDTOCommitId = annotatedLineDTO.commitId
-        val lineCommitId = annotatedLine.content.commit.id
+        val lineCommitId = annotatedLine.commit.id
         val commitsAreEqual = if (lineDTOCommitId.startsWith("^"))
             lineCommitId.startsWith(lineDTOCommitId.removePrefix("^"))
         else
             lineCommitId == lineDTOCommitId
         if (!commitsAreEqual)
             LOG.warn("In $newFileName at ${commit.id} at line ${annotatedLineDTO.number} commits differ blame: $lineDTOCommitId, IG: $lineCommitId")
-        return numberAndContentAreTheSame
+        return numberIsTheSame
     }
 
     private fun parseAnnotatedLine(it: String): AnnotatedLineDTO {

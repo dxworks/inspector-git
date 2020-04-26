@@ -1,25 +1,18 @@
 package org.dxworks.inspectorgit.services.impl
 
-import org.dxworks.inspectorgit.analyzers.work.WorkAnalyzer
-import org.dxworks.inspectorgit.analyzers.work.WorkAnalyzerNumbersDTO
-import org.dxworks.inspectorgit.core.transformers.ProjectTransformer
 import org.dxworks.inspectorgit.persistence.entities.SystemEntity
 import org.dxworks.inspectorgit.persistence.repositories.SwProjectRepository
 import org.dxworks.inspectorgit.persistence.repositories.SystemRepository
 import org.dxworks.inspectorgit.services.SystemService
-import org.dxworks.inspectorgit.services.dto.SwProjectDTO
 import org.dxworks.inspectorgit.services.dto.SystemDTO
-import org.dxworks.inspectorgit.utils.FileSystemUtils
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
-import kotlin.streams.toList
 
 @Service
 class SystemServiceImpl(private val systemRepository: SystemRepository,
                         private val gitlabIntegrationService: GitlabIntegrationService,
-                        private val swProjectRepository: SwProjectRepository,
-//                        private val configurationService: ConfigurationService,
-                        private val workAnalyzer: WorkAnalyzer) : SystemService {
+                        private val swProjectRepository: SwProjectRepository
+) : SystemService {
     override fun create(systemDTO: SystemDTO) {
         val projectEntities = systemDTO.projects?.filter { it.platform == "gitlab" }?.let { gitlabIntegrationService.import(it) }
 
@@ -29,19 +22,6 @@ class SystemServiceImpl(private val systemRepository: SystemRepository,
         systemEntity.swProjects = (systemDTO.projects?.mapNotNull { swProjectRepository.findByPath("${it.platform}/${it.path}") }
                 ?: emptyList()).toList() + (projectEntities ?: emptyList())
         systemRepository.save(systemEntity)
-    }
-
-    override fun analyze(systemId: String): Map<String, List<WorkAnalyzerNumbersDTO>>? {
-        val systemEntity = this.systemRepository.findBySystemId(systemId)
-//        this.configurationService.configureAll()
-        val results = systemEntity.swProjects?.parallelStream()
-                ?.map { SwProjectDTO.fromEntity(it) }
-                ?.map { ProjectTransformer(it.gitLogDTO!!, it.name!!).transform() }
-                ?.map { it.name to workAnalyzer.analyze(it).map { result -> WorkAnalyzerNumbersDTO.get(result) } }
-                ?.toList()
-        val map = results?.toMap()
-        FileSystemUtils.writeResults(systemEntity.systemId!!, map)
-        return map
     }
 
     @Transactional

@@ -1,6 +1,9 @@
 package org.dxworks.inspectorgit.core.model
 
-data class Author(var id: AuthorId, val project: Project, var commits: MutableList<Commit> = ArrayList()) {
+data class Author(
+        val id: AuthorId,
+        val project: Project,
+        var commits: MutableList<Commit> = ArrayList()) {
     var parent: Author? = null
     var children: MutableList<Author> = ArrayList()
 
