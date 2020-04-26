@@ -46,7 +46,7 @@
                 <version>0.10.1</version>
                 <executions>
                     <execution>
-                        <phase>pre-site</phase>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>dokka</goal>
                         </goals>
@@ -56,7 +56,7 @@
                     <sourceDirectories>${project.basedir}/src/main/kotlin/org/dxworks/inspectorgit/core
                     </sourceDirectories>
                     <outputFormat>javadoc</outputFormat>
-                    <outputDir>${project.basedir}/src/main/resources/static/documentation</outputDir>
+                    <outputDir>${project.build.directory}/classes/META-INF/resources/documentation</outputDir>
                 </configuration>
             </plugin>
         </plugins>
