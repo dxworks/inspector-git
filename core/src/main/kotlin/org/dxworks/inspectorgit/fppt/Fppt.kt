@@ -89,7 +89,7 @@ private fun createProject(configuration: FpptConfiguration, projectName: String)
 
     val project = ProjectTransformer(gitLogDTO, projectName).transform()
 
-    configuration.tasksFilePath?.let { TaskImporter().importToProject(project, it, configuration.taskPrefixes) }
+    configuration.tasksFilePath?.let { TaskImporter().import(it, configuration.taskPrefixes, project) }
     configuration.devMergesFilePath?.let { AccountMergeTool(project).mergeAll(jacksonObjectMapper().readValue(it.toFile())) }
     return project
 }
