@@ -1,6 +1,6 @@
 package org.dxworks.inspectorgit.model.task
 
-import org.dxworks.inspectorgit.fppt.jira.dtos.TaskChangeItemDTO
+import org.dxworks.inspectorgit.jira.dtos.TaskChangeItemDTO
 import java.time.ZonedDateTime
 
 class TaskChange(

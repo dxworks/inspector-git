@@ -1,13 +1,13 @@
-package org.dxworks.inspectorgit.fppt.jira.dtos
+package org.dxworks.inspectorgit.jira.dtos
 
 class TaskDTO(
         val key: String,
         val self: String,
         val summary: String,
-        val status: String,
+        val status: TaskStatusDTO,
         val typeId: String,
         val type: String,
-        val description: String,
+        val description: String?,
         val parent: String?,
         val created: String, // example 2020-04-07T08:30:48.589+0300
         val updated: String?,

@@ -1,8 +1,9 @@
 package org.dxworks.inspectorgit.transformers
 
-import org.dxworks.inspectorgit.fppt.jira.dtos.TaskAccountDTO
-import org.dxworks.inspectorgit.fppt.jira.dtos.TaskDTO
-import org.dxworks.inspectorgit.fppt.jira.dtos.TaskTypeDTO
+import org.dxworks.inspectorgit.jira.dtos.TaskAccountDTO
+import org.dxworks.inspectorgit.jira.dtos.TaskDTO
+import org.dxworks.inspectorgit.jira.dtos.TaskStatusDTO
+import org.dxworks.inspectorgit.jira.dtos.TaskTypeDTO
 import org.dxworks.inspectorgit.model.Project
 import org.dxworks.inspectorgit.model.git.Commit
 import org.dxworks.inspectorgit.model.task.*
@@ -11,6 +12,7 @@ import java.time.format.DateTimeFormatter
 
 class TasksTransformer(
         private val project: Project,
+        val issueStatuses: List<TaskStatusDTO>,
         val taskTypes: List<TaskTypeDTO>,
         val accounts: List<TaskAccountDTO>,
         private val taskDTOs: List<TaskDTO> = emptyList(),
@@ -27,6 +29,7 @@ class TasksTransformer(
 
         addAccountsToProject()
         addTaskTypesToProject()
+        addTaskStatusesToProject()
 
 
         val taskRegexList = taskPrefixes.map { getTaskRegex(it) }
@@ -45,7 +48,7 @@ class TasksTransformer(
                     description = it.description,
                     type = project.taskTypeRegistry.getById(it.typeId),
                     typeName = it.type,
-                    status = it.status,
+                    status = project.taskStatusRegistry.getById(it.status.id)!!,
                     created = ZonedDateTime.parse(it.created, dateFormatter),
                     updated = it.updated?.let { ZonedDateTime.parse(it, dateFormatter) },
                     creator = getTaskAccount(it.creatorId),
@@ -58,6 +61,7 @@ class TasksTransformer(
             )
         })
 
+        linkTasksWithStatuses()
         linkTasksWithTypes()
         lintTasksWithAuthors()
 
@@ -65,6 +69,7 @@ class TasksTransformer(
 
         linkTasksWithSubtasksAndParents()
     }
+
 
     private fun getTaskAccount(id: String) =
             project.accountRegistry.getById(id) as TaskAccount
@@ -98,6 +103,10 @@ class TasksTransformer(
         }
     }
 
+    private fun linkTasksWithStatuses() {
+        project.taskRegistry.allDetailedTasks.forEach { it.status.tasks += it }
+    }
+
     private fun addAccountsToProject() {
         project.accountRegistry.addAll(accounts.map {
             TaskAccount(
@@ -118,6 +127,13 @@ class TasksTransformer(
                     isSubTask = it.isSubTask
             )
         })
+    }
+
+    private fun addTaskStatusesToProject() {
+        project.taskStatusCategoryRegistry.addAll(issueStatuses.distinctBy { it.statusCategory }
+                .map { it.statusCategory }.map { TaskStatusCategory(it.key, it.name) })
+        project.taskStatusRegistry.addAll(issueStatuses.map { TaskStatus(it.id, it.name, project.taskStatusCategoryRegistry.getById(it.statusCategory.key)!!) })
+        project.taskStatusRegistry.all.forEach { it.category.taskStatuses += it }
     }
 
     private fun getComments(it: TaskDTO) = it.comments.map {

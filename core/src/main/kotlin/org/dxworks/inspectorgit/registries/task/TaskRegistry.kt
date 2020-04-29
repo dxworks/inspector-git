@@ -1,7 +1,8 @@
-package org.dxworks.inspectorgit.registries
+package org.dxworks.inspectorgit.registries.task
 
 import org.dxworks.inspectorgit.model.task.DetailedTask
 import org.dxworks.inspectorgit.model.task.Task
+import org.dxworks.inspectorgit.registries.AbstractRegistry
 
 
 class TaskRegistry : AbstractRegistry<Task, String>() {

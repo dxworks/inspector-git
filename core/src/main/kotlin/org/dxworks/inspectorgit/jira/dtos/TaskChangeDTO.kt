@@ -1,4 +1,4 @@
-package org.dxworks.inspectorgit.fppt.jira.dtos
+package org.dxworks.inspectorgit.jira.dtos
 
 class TaskChangeDTO(
         val id: String,

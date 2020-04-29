@@ -5,9 +5,9 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import org.dxworks.inspectorgit.AccountMergeTool
 import org.dxworks.inspectorgit.fppt.configuration.FpptConfiguration
 import org.dxworks.inspectorgit.fppt.configuration.FpptConfigurer
-import org.dxworks.inspectorgit.fppt.jira.TaskImporter
 import org.dxworks.inspectorgit.gitclient.GitClient
 import org.dxworks.inspectorgit.gitclient.parsers.LogParser
+import org.dxworks.inspectorgit.jira.TaskImporter
 import org.dxworks.inspectorgit.model.Project
 import org.dxworks.inspectorgit.model.git.GitAccount
 import org.dxworks.inspectorgit.model.task.DetailedTask

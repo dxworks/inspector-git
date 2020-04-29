@@ -6,7 +6,7 @@ import org.dxworks.inspectorgit.gitclient.dto.gitlog.GitLogDTO
 import org.dxworks.inspectorgit.model.Project
 import org.slf4j.LoggerFactory
 
-class ProjectTransformer(private val gitLogDTO: GitLogDTO, private val name: String, private val changeFactory: ChangeFactory = SimpleChangeFactory(), private var project: Project? = null) {
+class ProjectTransformer(private val gitLogDTO: GitLogDTO, private val name: String = "Project", private val changeFactory: ChangeFactory = SimpleChangeFactory(), private var project: Project? = null) {
     companion object {
         private val LOG = LoggerFactory.getLogger(ProjectTransformer::class.java)
     }
