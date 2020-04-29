@@ -12,6 +12,7 @@ import java.time.format.DateTimeFormatter
 
 val defaultTasksPair = Pair(Path.of("tasks.json"), Path.of("out/task-metrics.json"))
 val defaultCodePair = Pair(Path.of("repo"), Path.of("out/code-metrics.json"))
+private const val pathsDelimiter = ":"
 
 private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 fun main(args: Array<String>) {
@@ -29,12 +30,13 @@ fun main(args: Array<String>) {
 
 }
 
+
 private fun getPathsPair(argName: String, args: Array<String>): Pair<Path, Path>? {
     val argValue = getArg(argName, args)
     return try {
-        argValue?.split(">")?.let { Pair(Path.of(it[0]), Path.of(it[1])) }
+        argValue?.split(pathsDelimiter)?.let { Pair(Path.of(it[0]), Path.of(it[1])) }
     } catch (e: Exception) {
-        error("Could not parse argument $argName. Format should be: -$argName=path/to/input>path/to/output")
+        error("Could not parse argument $argName. Format should be: -$argName=path/to/input:path/to/output")
     }
 }
 
@@ -53,7 +55,7 @@ private fun getPeriod(args: Array<String>): Period? {
 
 private fun getDates(datesString: String): Pair<LocalDate, LocalDate> {
     try {
-        val datesList = datesString.split(":").map { LocalDate.parse(it, dateFormatter) }
+        val datesList = datesString.split(pathsDelimiter).map { LocalDate.parse(it, dateFormatter) }
         return Pair(datesList[0], datesList[1])
     } catch (e: Exception) {
         error("Wrong period format: $datesString")
