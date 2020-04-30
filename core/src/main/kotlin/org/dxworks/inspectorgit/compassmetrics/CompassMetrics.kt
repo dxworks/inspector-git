@@ -8,6 +8,8 @@ import org.dxworks.inspectorgit.model.Project
 import org.dxworks.inspectorgit.transformers.ProjectTransformer
 import java.nio.file.Path
 import java.time.LocalDate
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 val defaultTasksPair = Pair(Path.of("tasks.json"), Path.of("out/task-metrics.json"))
@@ -53,10 +55,13 @@ private fun getPeriod(args: Array<String>): Period? {
     } else null
 }
 
-private fun getDates(datesString: String): Pair<LocalDate, LocalDate> {
+fun getDates(datesString: String): Pair<ZonedDateTime, ZonedDateTime> {
     try {
         val datesList = datesString.split(pathsDelimiter).map { LocalDate.parse(it, dateFormatter) }
-        return Pair(datesList[0], datesList[1])
+        return Pair(
+                datesList[0].atStartOfDay().atZone(ZoneId.of("Z")),
+                datesList[1].atStartOfDay().atZone(ZoneId.of("Z"))
+        )
     } catch (e: Exception) {
         error("Wrong period format: $datesString")
     }

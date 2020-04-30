@@ -1,6 +1,7 @@
 package org.dxworks.inspectorgit.compassmetrics
 
 import org.dxworks.inspectorgit.model.Project
+import org.dxworks.inspectorgit.model.task.TaskStatusCategory
 import java.time.ZonedDateTime
 
 
@@ -17,9 +18,20 @@ fun analyzeCode(project: Project, period: Period?): Map<String, Double> {
     return mapOf(codeChurn)
 }
 
-private fun periodFilter(period: Period?, date: ZonedDateTime) = period?.contains(date) ?: true
 
 fun analyzeTasks(project: Project, period: Period?): Map<String, Double> {
-//    project.taskRegistry.allDetailedTasks.filter { it.changes.find { it. } }
+    if (project.taskRegistry.isEmpty())
+        return emptyMap()
+
+    val period = period ?: project.taskRegistry.period
+    val allTasks = project.taskRegistry.allDetailedTasks
+    val tasks = allTasks.filter {
+        it.getStatusCategoriesInPeriod(period)
+                .contains(project.taskStatusCategoryRegistry.getById(TaskStatusCategory.indeterminate))
+    }
+
     return emptyMap()
 }
+
+
+private fun periodFilter(period: Period?, date: ZonedDateTime) = period?.contains(date) ?: true

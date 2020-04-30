@@ -42,6 +42,7 @@ class TasksTransformer(
 
         project.taskRegistry.addAll(taskDTOs.map {
             DetailedTask(
+                    project = project,
                     id = it.key,
                     self = it.self,
                     summary = it.summary,
@@ -50,11 +51,13 @@ class TasksTransformer(
                     typeName = it.type,
                     status = project.taskStatusRegistry.getById(it.status.id)!!,
                     created = ZonedDateTime.parse(it.created, dateFormatter),
-                    updated = it.updated?.let { ZonedDateTime.parse(it, dateFormatter) },
+                    updated = ZonedDateTime.parse(it.updated, dateFormatter),
                     creator = getTaskAccount(it.creatorId),
                     reporter = it.reporterId?.let { getTaskAccount(it) },
                     assignee = it.assigneeId?.let { getTaskAccount(it) },
                     priority = it.priority,
+                    timeEstimate = it.timeEstimate,
+                    timeSpent = it.timeSpent,
                     changes = getChanges(it),
                     comments = getComments(it),
                     commits = taskIdToSmartCommitMap.remove(it.key) ?: emptyList()
@@ -65,7 +68,7 @@ class TasksTransformer(
         linkTasksWithTypes()
         lintTasksWithAuthors()
 
-        project.taskRegistry.addAll(taskIdToSmartCommitMap.map { Task(it.key, it.value) })
+        project.taskRegistry.addAll(taskIdToSmartCommitMap.map { Task(it.key, project, it.value) })
 
         linkTasksWithSubtasksAndParents()
     }
@@ -121,6 +124,7 @@ class TasksTransformer(
     private fun addTaskTypesToProject() {
         project.taskTypeRegistry.addAll(taskTypes.map {
             TaskType(
+                    project = project,
                     id = it.id,
                     name = it.name,
                     description = it.description,
@@ -131,13 +135,14 @@ class TasksTransformer(
 
     private fun addTaskStatusesToProject() {
         project.taskStatusCategoryRegistry.addAll(issueStatuses.distinctBy { it.statusCategory }
-                .map { it.statusCategory }.map { TaskStatusCategory(it.key, it.name) })
-        project.taskStatusRegistry.addAll(issueStatuses.map { TaskStatus(it.id, it.name, project.taskStatusCategoryRegistry.getById(it.statusCategory.key)!!) })
+                .map { it.statusCategory }.map { TaskStatusCategory(project, it.key, it.name) })
+        project.taskStatusRegistry.addAll(issueStatuses.map { TaskStatus(project, it.id, it.name, project.taskStatusCategoryRegistry.getById(it.statusCategory.key)!!) })
         project.taskStatusRegistry.all.forEach { it.category.taskStatuses += it }
     }
 
     private fun getComments(it: TaskDTO) = it.comments.map {
         TaskComment(
+                project = project,
                 created = getDate(it.created),
                 createdBy = getTaskAccount(it.userId),
                 updated = it.updated?.let { getDate(it) },
@@ -148,6 +153,7 @@ class TasksTransformer(
 
     private fun getChanges(it: TaskDTO) = it.changes.map {
         TaskChange(
+                project = project,
                 id = it.id,
                 account = project.accountRegistry.getById(it.userId) as TaskAccount,
                 created = getDate(it.created),
