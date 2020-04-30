@@ -8,6 +8,7 @@ import org.dxworks.inspectorgit.model.Project
 import org.dxworks.inspectorgit.transformers.ProjectTransformer
 import java.nio.file.Path
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -59,8 +60,8 @@ fun getDates(datesString: String): Pair<ZonedDateTime, ZonedDateTime> {
     try {
         val datesList = datesString.split(pathsDelimiter).map { LocalDate.parse(it, dateFormatter) }
         return Pair(
-                datesList[0].atStartOfDay().atZone(ZoneId.of("Z")),
-                datesList[1].atStartOfDay().atZone(ZoneId.of("Z"))
+                datesList[0].atTime(LocalTime.MIN).atZone(ZoneId.of("Z")),
+                datesList[1].atTime(LocalTime.MAX).atZone(ZoneId.of("Z"))
         )
     } catch (e: Exception) {
         error("Wrong period format: $datesString")
