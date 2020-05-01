@@ -47,7 +47,7 @@ class TasksTransformer(
                     self = it.self,
                     summary = it.summary,
                     description = it.description,
-                    type = project.taskTypeRegistry.getById(it.typeId),
+                    type = project.taskTypeRegistry.getById(it.typeId)!!,
                     typeName = it.type,
                     status = project.taskStatusRegistry.getById(it.status.id)!!,
                     created = ZonedDateTime.parse(it.created, dateFormatter),

@@ -4,13 +4,14 @@ import org.dxworks.inspectorgit.compassmetrics.Period
 import org.dxworks.inspectorgit.model.Project
 import org.dxworks.inspectorgit.model.git.Commit
 import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 
 class DetailedTask(id: String,
                    project: Project,
                    val self: String,
                    val summary: String,
                    val description: String?,
-                   val type: TaskType?,
+                   val type: TaskType,
                    val typeName: String,
                    val status: TaskStatus,
                    val created: ZonedDateTime,
@@ -21,8 +22,8 @@ class DetailedTask(id: String,
                    val priority: String,
                    val changes: List<TaskChange>,
                    val comments: List<TaskComment>,
-                   val timeEstimate: Long,
-                   val timeSpent: Long,
+                   val timeEstimate: Long?,
+                   val timeSpent: Long?,
                    commits: List<Commit>,
                    var parent: Task? = null,
                    var subtasks: List<Task> = emptyList()
@@ -34,8 +35,7 @@ class DetailedTask(id: String,
     private val statusFieldName = "status"
 
     private fun getStatusesInPeriod(period: Period): List<TaskStatus> {
-        val statusesInPeriod = changes
-                .filter { it.changedField(statusFieldName) }
+        val statusesInPeriod = getStatusChanges()
                 .filter { period.contains(it.created) }
                 .mapNotNull { it.getItemForField(statusFieldName) }
                 .mapNotNull { it.to?.let { project.taskStatusRegistry.getById(it) } }
@@ -45,8 +45,7 @@ class DetailedTask(id: String,
     }
 
     private fun getStatusAt(date: ZonedDateTime): TaskStatus {
-        val statusChanges = changes
-                .filter { it.changedField(statusFieldName) }
+        val statusChanges = getStatusChanges()
         return statusChanges
                 .filter { it.created < date }
                 .maxBy { it.created }
@@ -58,6 +57,35 @@ class DetailedTask(id: String,
                         ?.let { it.from }
                         ?.let { project.taskStatusRegistry.getById(it) }
                 ?: status
+    }
+
+    private fun getStatusChanges() = changes
+            .filter { it.changedField(statusFieldName) }
+
+    fun isReopened() = getStatusChanges()
+            .mapNotNull { it.getItemForField(statusFieldName) }
+            .filter { it.from?.let { project.taskStatusRegistry.isDone(it) } ?: false }
+            .all { it.to?.let { project.taskStatusRegistry.isDone(it) } ?: false }.not()
+
+    fun getTimeToClose(): Long? {
+        val statusChanges = getStatusChanges()
+        val closedDate = statusChanges
+                .filter {
+                    it.getItemForField(statusFieldName)?.to?.let { project.taskStatusRegistry.isDone(it) } ?: false
+                }
+                .minBy { it.created }?.created
+                ?: return null
+        val openedDate = statusChanges
+                .filter {
+                    it.getItemForField(statusFieldName)?.to?.let { project.taskStatusRegistry.isIndeterminate(it) } ?: false
+                            && it.getItemForField(statusFieldName)?.from?.let { project.taskStatusRegistry.isNew(it) } ?: false
+                }.maxBy { it.created }?.created
+                ?: statusChanges.filter {
+                    it.getItemForField(statusFieldName)?.to?.let { !project.taskStatusRegistry.isDone(it) } ?: true
+                }.maxBy { it.created }?.created
+                ?: created
+
+        return ChronoUnit.SECONDS.between(openedDate, closedDate)
     }
 
     val allCommits: List<Commit>

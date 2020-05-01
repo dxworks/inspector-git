@@ -18,6 +18,6 @@ class TaskDTO(
         val subTasks: List<String>,
         val changes: List<TaskChangeDTO>,
         val comments: List<TaskCommentDTO>,
-        val timeSpent: Long,
-        val timeEstimate: Long
+        val timeSpent: Long?,
+        val timeEstimate: Long?
 )
