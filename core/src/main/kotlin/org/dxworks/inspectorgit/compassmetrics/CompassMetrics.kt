@@ -36,11 +36,11 @@ fun main(args: Array<String>) {
 
 
 private fun getPathsPair(argName: String, args: Array<String>): Pair<Path, Path>? {
-    val argValue = getArg(argName, args)
-    return try {
-        argValue?.split(pathsDelimiter)?.let { Paths.get(it[0]) to Paths.get(it[1]) }
-    } catch (e: Exception) {
-        error("Could not parse argument $argName with value $argValue. Format should be: -$argName=path/to/input${pathsDelimiter}path/to/output")
+    val argIn = getArg("${argName}In", args)
+    val argOut = getArg("${argName}Out", args)
+    return argIn?.let { argOut?.let { Paths.get(argIn) to Paths.get(argOut) } } ?: run {
+        println("Args for $argName are not correct. Received $argIn and $argOut")
+        null
     }
 }
 
