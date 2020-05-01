@@ -4,4 +4,6 @@ ARG JAR_FILE
 ADD target/${JAR_FILE} /root/ig/ig.jar
 ADD bin/ig.sh /root/ig/ig.sh
 
+RUN chmod +x /root/ig/ig.sh
+
 WORKDIR /root/ig
