@@ -59,7 +59,7 @@ fun getValueForPriority(properties: Map<String, Long>, priority: String): Long {
 }
 
 fun getSpentTime(tasks: List<DetailedTask>) =
-        tasks.mapNotNull { it.timeSpent ?: it.timeEstimate ?: it.getTimeToClose() }.sum()
+        tasks.mapNotNull { it.timeSpent ?: it.timeEstimate ?: it.getTimeToClose() }.sum() / 60
 
 
 private fun isBugTask(it: DetailedTask) =
