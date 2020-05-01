@@ -90,7 +90,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <repository>dxworks/inpector-git</repository>
+                            <repository>dxworks/inspector-git</repository>
                             <tag>compass-${project.version}</tag>
                             <tag>compass</tag>
                             <buildArgs>
