@@ -3,7 +3,7 @@ package org.dxworks.inspectorgit.compassmetrics
 import org.dxworks.inspectorgit.model.Project
 import org.dxworks.inspectorgit.model.task.DetailedTask
 import org.dxworks.inspectorgit.model.task.TaskStatusCategory
-import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.*
 
 private const val bug = "bug"
@@ -44,7 +44,7 @@ fun analyzeTasks(project: Project, period: Period?): Map<String, Double> {
 
 private fun readPriorityProperties(): Map<String, Long> {
     val properties = Properties()
-    properties.load(Path.of(prioritiesFilePath).toFile().reader())
+    properties.load(Paths.get(prioritiesFilePath).toFile().reader())
     val priorityProperties = properties.map { it.key.toString().toLowerCase() to it.value.toString().toLong() }.toMap();
     return priorityProperties
 }

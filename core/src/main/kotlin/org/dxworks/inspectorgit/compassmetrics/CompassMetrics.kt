@@ -7,14 +7,15 @@ import org.dxworks.inspectorgit.jira.TaskImporter
 import org.dxworks.inspectorgit.model.Project
 import org.dxworks.inspectorgit.transformers.ProjectTransformer
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-val defaultTasksPair = Path.of("tasks.json") to Path.of("out/task-metrics.json")
-val defaultCodePair = Path.of("repo") to Path.of("out/code-metrics.json")
+val defaultTasksPair = Paths.get("tasks.json") to Paths.get("out/task-metrics.json")
+val defaultCodePair = Paths.get("repo") to Paths.get("out/code-metrics.json")
 private const val pathsDelimiter = ">"
 
 private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -37,7 +38,7 @@ fun main(args: Array<String>) {
 private fun getPathsPair(argName: String, args: Array<String>): Pair<Path, Path>? {
     val argValue = getArg(argName, args)
     return try {
-        argValue?.split(pathsDelimiter)?.let { Path.of(it[0]) to Path.of(it[1]) }
+        argValue?.split(pathsDelimiter)?.let { Paths.get(it[0]) to Paths.get(it[1]) }
     } catch (e: Exception) {
         error("Could not parse argument $argName. Format should be: -$argName=path/to/input:path/to/output")
     }

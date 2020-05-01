@@ -11,8 +11,8 @@
 
     <artifactId>core</artifactId>
     <properties>
-        <main.class>org.dxworks.inspectorgit.fppt.FpptKt</main.class>
-        <executable.jar.finalName>fpptIg</executable.jar.finalName>
+        <main.class>org.dxworks.inspectorgit.compassmetrics.CompassMetricsKt</main.class>
+        <executable.jar.finalName>ig</executable.jar.finalName>
     </properties>
 
     <dependencies>
@@ -41,7 +41,7 @@
 
     <profiles>
         <profile>
-            <id>buildFppt</id>
+            <id>compassBuild</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
