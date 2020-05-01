@@ -40,7 +40,7 @@ private fun getPathsPair(argName: String, args: Array<String>): Pair<Path, Path>
     return try {
         argValue?.split(pathsDelimiter)?.let { Paths.get(it[0]) to Paths.get(it[1]) }
     } catch (e: Exception) {
-        error("Could not parse argument $argName. Format should be: -$argName=path/to/input:path/to/output")
+        error("Could not parse argument $argName with value $argValue. Format should be: -$argName=path/to/input${pathsDelimiter}path/to/output")
     }
 }
 
