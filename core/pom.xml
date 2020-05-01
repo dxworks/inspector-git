@@ -90,8 +90,9 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <repository>mario94/fppt-ig</repository>
-                            <tag>${project.version}</tag>
+                            <repository>dxworks/inpector-git</repository>
+                            <tag>compass-${project.version}</tag>
+                            <tag>compass</tag>
                             <buildArgs>
                                 <JAR_FILE>${executable.jar.finalName}.jar</JAR_FILE>
                             </buildArgs>
