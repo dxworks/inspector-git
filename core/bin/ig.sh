@@ -1,1 +1,1 @@
-java -jar ig.jar $*
+java -jar ig.jar "$@"
