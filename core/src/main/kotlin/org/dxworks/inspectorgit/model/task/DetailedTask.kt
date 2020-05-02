@@ -67,7 +67,7 @@ class DetailedTask(id: String,
             .filter { it.from?.let { project.taskStatusRegistry.isDone(it) } ?: false }
             .all { it.to?.let { project.taskStatusRegistry.isDone(it) } ?: false }.not()
 
-    fun getTimeToClose(): Long? {
+    fun getTimeToClose(): Double? {
         val statusChanges = getStatusChanges()
         val closedDate = statusChanges
                 .filter {
@@ -85,8 +85,11 @@ class DetailedTask(id: String,
                 }.maxBy { it.created }?.created
                 ?: created
 
-        return ChronoUnit.SECONDS.between(openedDate, closedDate)
+
+        return asABitLessThen8hPerDay(ChronoUnit.SECONDS.between(openedDate, closedDate))
     }
+
+    private fun asABitLessThen8hPerDay(between: Long) = between / 3.2
 
     val allCommits: List<Commit>
         get() = commits + subtasks.flatMap { it.commits }

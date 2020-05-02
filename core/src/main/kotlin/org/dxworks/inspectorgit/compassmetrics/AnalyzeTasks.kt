@@ -26,10 +26,10 @@ fun analyzeTasks(project: Project, period: Period?): Map<String, Double> {
     val (bugFixes, development) = other
             .filter { it.getStatusCategoriesInPeriod(period).contains(project.taskStatusCategoryRegistry.getById(TaskStatusCategory.done)) }
             .partition { isBugTask(it) }
-    val bugFixingTime = getSpentTime(bugFixes).toDouble()
-    val developmentTime = getSpentTime(development).toDouble()
+    val bugFixingTime = getSpentTime(bugFixes)
+    val developmentTime = getSpentTime(development)
 
-    val defectDensity = "Defect Density" to (bugFixingTime / (bugFixingTime + developmentTime))
+    val defectDensity = "Defect Density" to (bugFixingTime / (bugFixingTime + developmentTime)) * 100
 
     val meanTimeToRepair = "Mean Time To Repair" to bugFixingTime / bugFixes.size
 
@@ -59,7 +59,7 @@ fun getValueForPriority(properties: Map<String, Long>, priority: String): Long {
 }
 
 fun getSpentTime(tasks: List<DetailedTask>) =
-        tasks.mapNotNull { it.timeSpent ?: it.timeEstimate ?: it.getTimeToClose() }.sum() / 60
+        tasks.mapNotNull { it.timeSpent?.toDouble() ?: it.timeEstimate?.toDouble() ?: it.getTimeToClose() }.sum() / 60
 
 
 private fun isBugTask(it: DetailedTask) =
