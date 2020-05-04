@@ -22,6 +22,18 @@ class TasksTransformer(
         val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     }
 
+    init {
+        project.accountRegistry.add(TaskAccount(
+                self = "0",
+                name = "Anonymous",
+                email = null,
+                key = null,
+                accountId = null,
+                avatarUrl = null,
+                project = project
+        ))
+    }
+
     fun addToProject() {
         val taskPrefixes = (taskDTOs.map { it.key.substring(0, it.key.indexOf("-")) } + this.taskPrefixes).distinct()
         if (taskPrefixes.isEmpty())
@@ -74,8 +86,12 @@ class TasksTransformer(
     }
 
 
-    private fun getTaskAccount(id: String) =
-            project.accountRegistry.getById(id) as TaskAccount
+    private fun getTaskAccount(id: String?): TaskAccount {
+        if (id == null) {
+            return project.accountRegistry.getById("0") as TaskAccount
+        }
+        return project.accountRegistry.getById(id) as TaskAccount
+    }
 
     private fun linkTasksWithSubtasksAndParents() {
         taskDTOs.forEach {
@@ -113,7 +129,10 @@ class TasksTransformer(
     private fun addAccountsToProject() {
         project.accountRegistry.addAll(accounts.map {
             TaskAccount(
-                    id = it.id,
+                    self = it.self,
+                    email = it.email,
+                    accountId = it.accountId,
+                    key = it.key,
                     name = it.name,
                     avatarUrl = it.avatarUrl,
                     project = project
@@ -155,7 +174,7 @@ class TasksTransformer(
         TaskChange(
                 project = project,
                 id = it.id,
-                account = project.accountRegistry.getById(it.userId) as TaskAccount,
+                account = getTaskAccount(it.userId),
                 created = getDate(it.created),
                 changedFields = it.changedFields,
                 items = it.items

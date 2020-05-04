@@ -4,12 +4,18 @@ import org.dxworks.inspectorgit.model.Account
 import org.dxworks.inspectorgit.model.Project
 
 class TaskAccount(
-        override val id: String,
+        val self: String,
+        val email: String?,
+        val key: String?,
+        val accountId: String?,
         name: String,
-        val avatarUrl: String,
+        val avatarUrl: String?,
         project: Project,
-        var tasks: Set<Task> = emptySet() //TODO: list of task relation task relation has strength, task and account
+        var tasks: Set<Task> = emptySet()
 ) : Account(
         name,
         project
-)
+) {
+    override val id: String
+        get() = self
+}

@@ -14,17 +14,17 @@ fun analyzeTasks(project: Project, period: Period?): Map<String, Double> {
     if (project.taskRegistry.isEmpty())
         return emptyMap()
 
-    val period = period ?: project.taskRegistry.period
+    val actualPeriod = period ?: project.taskRegistry.period
     val allTasks = project.taskRegistry.allDetailedTasks
-    val tasks = allTasks.filter {
-        it.getStatusCategoriesInPeriod(period)
+    val tasksActiveInPeriod = allTasks.filter {
+        it.getStatusCategoriesInPeriod(actualPeriod)
                 .contains(project.taskStatusCategoryRegistry.getById(TaskStatusCategory.indeterminate))
     }
 
-    val (reopened, other) = tasks.partition { it.isReopened() }
+    val tasks = tasksActiveInPeriod.filterNot { it.isReopened() }
 
-    val (bugFixes, development) = other
-            .filter { it.getStatusCategoriesInPeriod(period).contains(project.taskStatusCategoryRegistry.getById(TaskStatusCategory.done)) }
+    val (bugFixes, development) = tasks
+            .filter { it.getStatusCategoriesInPeriod(actualPeriod).contains(project.taskStatusCategoryRegistry.getById(TaskStatusCategory.done)) }
             .partition { isBugTask(it) }
     val bugFixingTime = getSpentTime(bugFixes)
     val developmentTime = getSpentTime(development)
