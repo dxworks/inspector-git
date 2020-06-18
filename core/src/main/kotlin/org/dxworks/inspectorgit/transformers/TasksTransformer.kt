@@ -12,9 +12,9 @@ import java.time.format.DateTimeFormatter
 
 class TasksTransformer(
         private val project: Project,
-        val issueStatuses: List<TaskStatusDTO>,
-        val taskTypes: List<TaskTypeDTO>,
-        val accounts: List<TaskAccountDTO>,
+        private val issueStatuses: List<TaskStatusDTO>,
+        private val taskTypes: List<TaskTypeDTO>,
+        private val accounts: List<TaskAccountDTO>,
         private val taskDTOs: List<TaskDTO> = emptyList(),
         private val taskPrefixes: List<String> = emptyList()
 ) {
@@ -53,7 +53,7 @@ class TasksTransformer(
         taskIdToSmartCommitMap.forEach { (id, commits) -> commits.forEach { it.taskIds = it.taskIds + id } }
 
         project.taskRegistry.addAll(taskDTOs.map {
-            DetailedTask(
+            val detailedTask = DetailedTask(
                     project = project,
                     id = it.key,
                     self = it.self,
@@ -74,6 +74,8 @@ class TasksTransformer(
                     comments = getComments(it),
                     commits = taskIdToSmartCommitMap.remove(it.key) ?: emptyList()
             )
+            detailedTask.commits.forEach { it.tasks += detailedTask }
+            detailedTask
         })
 
         linkTasksWithStatuses()
@@ -118,7 +120,7 @@ class TasksTransformer(
 
     private fun linkTasksWithTypes() {
         project.taskRegistry.allDetailedTasks.forEach { task ->
-            task.type?.let { it.tasks += task }
+            task.type.let { it.tasks += task }
         }
     }
 

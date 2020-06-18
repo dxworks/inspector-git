@@ -6,11 +6,13 @@ import org.dxworks.inspectorgit.AccountMergeTool
 import org.dxworks.inspectorgit.fppt.configuration.FpptConfiguration
 import org.dxworks.inspectorgit.fppt.configuration.FpptConfigurer
 import org.dxworks.inspectorgit.gitclient.GitClient
+import org.dxworks.inspectorgit.gitclient.iglog.readers.IGLogReader
 import org.dxworks.inspectorgit.gitclient.parsers.LogParser
 import org.dxworks.inspectorgit.jira.TaskImporter
 import org.dxworks.inspectorgit.model.Project
 import org.dxworks.inspectorgit.model.git.GitAccount
 import org.dxworks.inspectorgit.model.task.DetailedTask
+import org.dxworks.inspectorgit.remote.RemoteInfoImporter
 import org.dxworks.inspectorgit.transformers.ProjectTransformer
 import java.io.File
 import java.nio.file.Paths
@@ -21,7 +23,8 @@ fun main() {
     outputFolder.mkdirs()
 
     val configuration = FpptConfigurer().getConfiguration()
-    val projectName = configuration.repositoryPath.toAbsolutePath().normalize().fileName.toString()
+    val projectName = (configuration.iglogPath ?: configuration.repositoryPath)!!
+            .toAbsolutePath().normalize().fileName.toString()
 
     val project = createProject(configuration, projectName)
 
@@ -84,12 +87,19 @@ fun main() {
 }
 
 private fun createProject(configuration: FpptConfiguration, projectName: String): Project {
-    val gitClient = GitClient(configuration.repositoryPath)
-    val gitLogDTO = LogParser(gitClient).parse(gitClient.getLogs())
+    val iglogPath = configuration.iglogPath
+    val gitLogDTO =
+            if (iglogPath != null) {
+                IGLogReader().read(iglogPath.toFile().inputStream())
+            } else {
+                val gitClient = GitClient(configuration.repositoryPath!!)
+                LogParser(gitClient).parse(gitClient.getLogs())
+            }
 
     val project = ProjectTransformer(gitLogDTO, projectName).transform()
 
     configuration.tasksFilePath?.let { TaskImporter().import(it, configuration.taskPrefixes, project) }
+    configuration.remoteInfoPath?.let { RemoteInfoImporter().import(it, project) }
     configuration.devMergesFilePath?.let { AccountMergeTool(project).mergeAll(jacksonObjectMapper().readValue(it.toFile())) }
     return project
 }
