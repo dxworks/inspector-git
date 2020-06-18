@@ -41,9 +41,27 @@
 
     <profiles>
         <profile>
-            <id>compassBuild</id>
+            <id>github-default</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
+            </activation>
+            <distributionManagement>
+                <repository>
+                    <id>github</id>
+                    <name>GitHub dxworks Apache Maven Packages</name>
+                    <url>https://maven.pkg.github.com/dxworks/inspector-git</url>
+                </repository>
+                <snapshotRepository>
+                    <id>github</id>
+                    <name>GitHub dxworks Apache Maven Packages</name>
+                    <url>https://maven.pkg.github.com/dxworks/inspector-git</url>
+                </snapshotRepository>
+            </distributionManagement>
+        </profile>
+        <profile>
+            <id>compassBuild</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <build>
                 <plugins>
