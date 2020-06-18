@@ -13,12 +13,10 @@ class FpptProjectProvider(
         val pathToIssueTrackingInfo: Path? = null,
         val pathToRemoteInfo: Path? = null
 ) {
-    companion object {
-        private var staticProject: Project? = null
-    }
+    private var cachedProject: Project? = null
 
     val project: Project
-        get() = staticProject ?: initializeAndGetProject()
+        get() = cachedProject ?: initializeAndGetProject()
 
 
     private fun initializeAndGetProject(): Project {
@@ -31,7 +29,7 @@ class FpptProjectProvider(
         pathToIssueTrackingInfo?.let { TaskImporter().import(it, project = project) }
         pathToRemoteInfo?.let { RemoteInfoImporter().import(it, project) }
 
-        staticProject = project
+        cachedProject = project
         return project
     }
 }
