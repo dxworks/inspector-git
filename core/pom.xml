@@ -121,12 +121,4 @@
             </build>
         </profile>
     </profiles>
-
-    <repositories>
-        <repository>
-            <id>github</id>
-            <name>GitHub Java Rest Client Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/dxworks/inspector-git-fe</url>
-        </repository>
-    </repositories>
 </project>
