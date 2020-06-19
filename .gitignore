@@ -6,3 +6,4 @@
 classes/
 */target/
 config/
+log-*.txt

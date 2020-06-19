@@ -52,8 +52,10 @@ class PRTransformer(private val project: Project, private val remoteInfoDTO: Rem
             PRReview(getAccount(reviewDTO.user), reviewDTO.state, reviewDTO.body, parseDate(reviewDTO.date))
 
     private fun addPullRequestToCommits(pullRequest: PullRequest) {
-        val allCommits = (pullRequest.commits + pullRequest.base.commit + pullRequest.head.commit).toSet()
-        allCommits.forEach { it.pullRequests += pullRequest }
+        (pullRequest.commits + pullRequest.base.commit + pullRequest.head.commit)
+                .filterNotNull()
+                .distinct()
+                .forEach { it.pullRequests += pullRequest }
     }
 
     private fun addPullRequestToAccounts(pullRequest: PullRequest) {
@@ -79,11 +81,12 @@ class PRTransformer(private val project: Project, private val remoteInfoDTO: Rem
         return LocalDateTime.parse(date, dateFormatter).atZone(ZoneId.of("Z"))
     }
 
-    private fun getCommits(commits: List<String>): List<Commit> = commits.map { getCommit(it) }
+    private fun getCommits(commits: List<String>): List<Commit> = commits.mapNotNull { getCommit(it) }
 
-    private fun getCommit(id: String) = project.commitRegistry.getById(id)!!
+    private fun getCommit(id: String) = project.commitRegistry.getById(id)
 
     private fun getBranch(branch: BranchDTO) = Branch(getCommit(branch.commit),
+            branch.commit,
             branch.label,
             branch.ref,
             getAccount(branch.user),
