@@ -19,5 +19,6 @@ class TaskDTO(
         val changes: List<TaskChangeDTO>,
         val comments: List<TaskCommentDTO>,
         val timeSpent: Long?,
-        val timeEstimate: Long?
+        val timeEstimate: Long?,
+        val customFields: Map<String, Any>
 )

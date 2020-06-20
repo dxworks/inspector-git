@@ -24,6 +24,7 @@ class DetailedTask(id: String,
                    val comments: List<TaskComment>,
                    val timeEstimate: Long?,
                    val timeSpent: Long?,
+                   val customFields: Map<String, Any>,
                    commits: List<Commit>,
                    var parent: Task? = null,
                    var subtasks: List<Task> = emptyList()

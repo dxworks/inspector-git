@@ -72,6 +72,7 @@ class TasksTransformer(
                     timeSpent = it.timeSpent,
                     changes = getChanges(it),
                     comments = getComments(it),
+                    customFields = it.customFields,
                     commits = taskIdToSmartCommitMap.remove(it.key) ?: emptyList()
             )
             detailedTask.commits.forEach { it.tasks += detailedTask }
