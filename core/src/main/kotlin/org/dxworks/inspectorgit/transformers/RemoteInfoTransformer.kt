@@ -9,7 +9,7 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-class PRTransformer(private val project: Project, private val remoteInfoDTO: RemoteInfoDTO) {
+class RemoteInfoTransformer(private val project: Project, private val remoteInfoDTO: RemoteInfoDTO) {
 
     companion object {
         val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
@@ -48,6 +48,10 @@ class PRTransformer(private val project: Project, private val remoteInfoDTO: Rem
                             it.committer?.let { getAccount(it) }
                     )
         }
+
+        project.simpleBranchRegistry.addAll(remoteInfoDTO.branches.map {
+            SimpleBranch(project.commitRegistry.getById(it.commit), it.commit, it.name)
+        })
 
     }
 

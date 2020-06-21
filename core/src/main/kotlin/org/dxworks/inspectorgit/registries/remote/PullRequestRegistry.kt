@@ -1,4 +1,4 @@
-package org.dxworks.inspectorgit.registries.pr
+package org.dxworks.inspectorgit.registries.remote
 
 import org.dxworks.inspectorgit.model.remote.PullRequest
 import org.dxworks.inspectorgit.registries.AbstractRegistry

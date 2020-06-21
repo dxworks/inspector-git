@@ -4,8 +4,9 @@ import org.dxworks.inspectorgit.registries.AccountRegistry
 import org.dxworks.inspectorgit.registries.CommitRegistry
 import org.dxworks.inspectorgit.registries.DeveloperRegistry
 import org.dxworks.inspectorgit.registries.FileRegistry
-import org.dxworks.inspectorgit.registries.pr.PullRequestRegistry
-import org.dxworks.inspectorgit.registries.pr.RemoteRepoRegistry
+import org.dxworks.inspectorgit.registries.remote.PullRequestRegistry
+import org.dxworks.inspectorgit.registries.remote.RemoteRepoRegistry
+import org.dxworks.inspectorgit.registries.remote.SimpleBranchRegistry
 import org.dxworks.inspectorgit.registries.task.TaskRegistry
 import org.dxworks.inspectorgit.registries.task.TaskStatusCategoryRegistry
 import org.dxworks.inspectorgit.registries.task.TaskStatusRegistry
@@ -26,4 +27,5 @@ class Project(val name: String) {
 
     val pullRequestRegistry = PullRequestRegistry()
     val repoRegistry = RemoteRepoRegistry()
+    val simpleBranchRegistry = SimpleBranchRegistry()
 }

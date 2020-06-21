@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.dxworks.inspectorgit.model.Project
 import org.dxworks.inspectorgit.remote.dtos.RemoteInfoDTO
-import org.dxworks.inspectorgit.transformers.PRTransformer
+import org.dxworks.inspectorgit.transformers.RemoteInfoTransformer
 import java.nio.file.Path
 
 class RemoteInfoImporter {
@@ -13,7 +13,7 @@ class RemoteInfoImporter {
         val mapper = jacksonObjectMapper()
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         val importDTO = mapper.readValue<RemoteInfoDTO>(path.toFile())
-        PRTransformer(project, importDTO).addToProject()
+        RemoteInfoTransformer(project, importDTO).addToProject()
         return project
     }
 }
