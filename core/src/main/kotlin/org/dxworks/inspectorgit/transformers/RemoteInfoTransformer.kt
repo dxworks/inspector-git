@@ -34,7 +34,7 @@ class RemoteInfoTransformer(private val project: Project, private val remoteInfo
                     it.mergedBy?.let { getAccount(it) },
                     it.reviews.map { getReview(it) },
                     it.comments,
-                    getLinkedTask(it.title, it.head)
+                    getLinkedTask("${it.title} ${it.head.ref}")
             )
             pullRequest.task?.let { it.pullRequests += pullRequest }
             addPullRequestToAccounts(pullRequest)
@@ -50,14 +50,14 @@ class RemoteInfoTransformer(private val project: Project, private val remoteInfo
         }
 
         project.simpleBranchRegistry.addAll(remoteInfoDTO.branches.map {
-            SimpleBranch(project.commitRegistry.getById(it.commit), it.commit, it.name)
+            SimpleBranch(project.commitRegistry.getById(it.commit), it.commit, it.name, getLinkedTask(it.name))
         })
 
     }
 
-    private fun getLinkedTask(title: String, head: BranchDTO) =
+    private fun getLinkedTask(content: String) =
             project.taskRegistry.allDetailedTasks
-                    .find { "(\b*|\\W*)(${it.id})(\b*|\\W*)".toRegex().containsMatchIn("$title ${head.ref}") }
+                    .find { "(\b*|\\W*)(${it.id})(\b*|\\W*)".toRegex().containsMatchIn(content) }
 
     private fun getReview(reviewDTO: ReviewDTO) =
             PRReview(getAccount(reviewDTO.user), reviewDTO.state, reviewDTO.body, parseDate(reviewDTO.date))
@@ -101,7 +101,8 @@ class RemoteInfoTransformer(private val project: Project, private val remoteInfo
             branch.label,
             branch.ref,
             getAccount(branch.user),
-            getRepo(branch.repo)
+            getRepo(branch.repo),
+            getLinkedTask(branch.ref)
     )
 
     private fun getRepo(remoteRepo: RemoteRepoDTO): RemoteRepo {
