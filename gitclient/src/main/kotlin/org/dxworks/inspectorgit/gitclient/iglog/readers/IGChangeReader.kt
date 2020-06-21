@@ -25,8 +25,8 @@ class IGChangeReader(private val igHunkReader: IgHunkReader = IgHunkReader()) {
             if (currentHunkLines.isNotEmpty()) hunks.add(igHunkReader.read(currentHunkLines))
         }
 
-        return ChangeDTO(oldFileName,
-                newFileName,
+        return ChangeDTO(oldFileName.trim(),
+                newFileName.trim(),
                 type,
                 parentCommitId,
                 isBinary,
