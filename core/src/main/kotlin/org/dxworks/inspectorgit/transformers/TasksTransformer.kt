@@ -187,7 +187,7 @@ class TasksTransformer(
     private fun getDate(dateAsString: String) =
             ZonedDateTime.parse(dateAsString, dateFormatter)
 
-    private fun getTaskRegex(prefix: String) = "(\b|\\W)($prefix-\\d+)(\b|\\W)".toRegex()
+    private fun getTaskRegex(prefix: String) = "(\b*|\\W*)($prefix-\\d+)(\b*|\\W*)".toRegex()
 
     private fun mapOfCommitsByTaskId(allSmartCommits: List<Commit>, taskRegexList: List<Regex>): MutableMap<String, List<Commit>> {
         val allTaskIds = allSmartCommits.flatMap {
@@ -199,6 +199,6 @@ class TasksTransformer(
                                 }
                     }
         }.filter { it.isNotBlank() }.distinct()
-        return allTaskIds.map { id -> id to allSmartCommits.filter { "(\b|\\W)($id)(\b|\\W)".toRegex().containsMatchIn(it.message) } }.toMap().toMutableMap()
+        return allTaskIds.map { id -> id to allSmartCommits.filter { "(\b*|\\W*)($id)(\b*|\\W*)".toRegex().containsMatchIn(it.message) } }.toMap().toMutableMap()
     }
 }
