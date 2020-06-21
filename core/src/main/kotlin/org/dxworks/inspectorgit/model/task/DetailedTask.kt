@@ -3,6 +3,7 @@ package org.dxworks.inspectorgit.model.task
 import org.dxworks.inspectorgit.compassmetrics.Period
 import org.dxworks.inspectorgit.model.Project
 import org.dxworks.inspectorgit.model.git.Commit
+import org.dxworks.inspectorgit.model.remote.PullRequest
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
@@ -27,7 +28,8 @@ class DetailedTask(id: String,
                    val customFields: Map<String, Any>,
                    commits: List<Commit>,
                    var parent: Task? = null,
-                   var subtasks: List<Task> = emptyList()
+                   var subtasks: List<Task> = emptyList(),
+                   var pullRequests: List<PullRequest> = emptyList()
 ) : Task(id, project, commits) {
     fun getStatusCategoriesInPeriod(period: Period): List<TaskStatusCategory> {
         return getStatusesInPeriod(period).map { it.category }.distinct()

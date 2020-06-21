@@ -1,6 +1,7 @@
 package org.dxworks.inspectorgit.model.remote
 
 import org.dxworks.inspectorgit.model.git.Commit
+import org.dxworks.inspectorgit.model.task.DetailedTask
 import org.dxworks.inspectorgit.remote.dtos.PullRequestCommentDTO
 import java.time.ZonedDateTime
 
@@ -19,5 +20,6 @@ class PullRequest(
         val createdBy: RemoteGitAccount,
         val mergedBy: RemoteGitAccount?,
         val reviews: List<PRReview>,
-        val comments: List<PullRequestCommentDTO>
+        val comments: List<PullRequestCommentDTO>,
+        val task: DetailedTask? = null
 )

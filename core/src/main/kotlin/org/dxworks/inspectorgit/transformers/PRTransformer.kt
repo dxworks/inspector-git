@@ -33,8 +33,10 @@ class PRTransformer(private val project: Project, private val remoteInfoDTO: Rem
                     getAccount(it.createdBy),
                     it.mergedBy?.let { getAccount(it) },
                     it.reviews.map { getReview(it) },
-                    it.comments
+                    it.comments,
+                    getLinkedTask(it.title, it.head)
             )
+            pullRequest.task?.let { it.pullRequests += pullRequest }
             addPullRequestToAccounts(pullRequest)
             addPullRequestToCommits(pullRequest)
             project.pullRequestRegistry.add(pullRequest)
@@ -42,11 +44,16 @@ class PRTransformer(private val project: Project, private val remoteInfoDTO: Rem
         remoteInfoDTO.commitInfos.forEach {
             project.commitRegistry.getById(it.id)!!.remoteInfo =
                     CommitRemoteInfo(
-                            getAccount(it.author),
-                            getAccount(it.committer)
+                            it.author?.let { getAccount(it) },
+                            it.committer?.let { getAccount(it) }
                     )
         }
+
     }
+
+    private fun getLinkedTask(title: String, head: BranchDTO) =
+            project.taskRegistry.allDetailedTasks
+                    .find { "(\b*|\\W*)(${it.id})(\b*|\\W*)".toRegex().containsMatchIn("$title ${head.ref}") }
 
     private fun getReview(reviewDTO: ReviewDTO) =
             PRReview(getAccount(reviewDTO.user), reviewDTO.state, reviewDTO.body, parseDate(reviewDTO.date))
