@@ -57,7 +57,7 @@ class RemoteInfoTransformer(private val project: Project, private val remoteInfo
 
     private fun getLinkedTask(content: String) =
             project.taskRegistry.allDetailedTasks
-                    .find { "(\b*|\\W*)(${it.id})(\b*|\\W*)".toRegex().containsMatchIn(content) }
+                    .find { getRegexWithWordBoundaryGroups(it.id).containsMatchIn(content) }
 
     private fun getReview(reviewDTO: ReviewDTO) =
             PRReview(getAccount(reviewDTO.user), reviewDTO.state, reviewDTO.body, parseDate(reviewDTO.date))
