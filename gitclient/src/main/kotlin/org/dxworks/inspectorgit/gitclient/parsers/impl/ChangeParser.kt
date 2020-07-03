@@ -17,8 +17,8 @@ class ChangeParser(private val parentCommitId: String) : GitParser<ChangeDTO> {
         LOG.info("Parsing $type change for $oldFileName -> $newFileName")
         return ChangeDTO(
                 type = type,
-                oldFileName = oldFileName,
-                newFileName = newFileName,
+                oldFileName = oldFileName.trim(),
+                newFileName = newFileName.trim(),
                 parentCommitId = parentCommitId,
                 hunks = extractHunks(lines).map { HunkParser().parse(it) },
                 isBinary = lines.any { it.startsWith("Binary files") })

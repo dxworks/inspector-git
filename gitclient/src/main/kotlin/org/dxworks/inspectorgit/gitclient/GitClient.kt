@@ -85,7 +85,7 @@ class GitClient(path: Path) {
         val command = "$git $args"
         LOG.info("Running command: $command")
 
-        processBuilder.command(OsUtils.commandInterpreterPrefix, OsUtils.interpreterArg, command)
+        processBuilder.command(OsUtils.commandInterpreterName, OsUtils.interpreterArg, command)
         return processBuilder.start()
     }
 
