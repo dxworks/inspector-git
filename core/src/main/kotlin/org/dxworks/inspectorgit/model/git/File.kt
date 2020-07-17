@@ -1,12 +1,11 @@
 package org.dxworks.inspectorgit.model.git
 
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
-import org.dxworks.inspectorgit.model.Project
 import org.slf4j.LoggerFactory
 import java.util.*
 import kotlin.collections.ArrayList
 
-data class File(val isBinary: Boolean, val project: Project, var changes: MutableList<Change> = ArrayList()) {
+data class File(val isBinary: Boolean, val project: GitProject, var changes: MutableList<Change> = ArrayList()) {
 
     val id: UUID = UUID.randomUUID()
 

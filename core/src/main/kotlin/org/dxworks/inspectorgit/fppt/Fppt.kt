@@ -9,11 +9,11 @@ import org.dxworks.inspectorgit.gitclient.GitClient
 import org.dxworks.inspectorgit.gitclient.iglog.readers.IGLogReader
 import org.dxworks.inspectorgit.gitclient.parsers.LogParser
 import org.dxworks.inspectorgit.jira.TaskImporter
-import org.dxworks.inspectorgit.model.Project
+import org.dxworks.inspectorgit.model.ComposedProject
 import org.dxworks.inspectorgit.model.git.GitAccount
-import org.dxworks.inspectorgit.model.task.DetailedTask
+import org.dxworks.inspectorgit.model.issuetracker.DetailedIssue
 import org.dxworks.inspectorgit.remote.RemoteInfoImporter
-import org.dxworks.inspectorgit.transformers.ProjectTransformer
+import org.dxworks.inspectorgit.transformers.git.GitProjectTransformer
 import java.io.File
 import java.nio.file.Paths
 
@@ -35,10 +35,10 @@ fun main() {
     val allAuthorIds = allCommits.map { it.author.id }.distinct()
 
 
-    val mapOfTaskDetails = project.taskRegistry.all.map { task ->
+    val mapOfTaskDetails = project.issueRegistry.all.map { task ->
         val numberOfCommits = task.commits.size
         val numberOfFiles = task.commits.flatMap { commit -> commit.changes.map { it.file } }.distinct().count()
-        if (task is DetailedTask)
+        if (task is DetailedIssue)
             task.id to TaskDetails(
                     summary = task.summary,
                     numberOfCommits = numberOfCommits,
@@ -53,7 +53,7 @@ fun main() {
     val output = mapOf(
             "numberOfCommitters" to allAuthorIds.size,
             "numberOfCommits" to allCommits.size,
-            "numberOfSmartCommits" to project.taskRegistry.all.flatMap { it.commits }.distinct().count(),
+            "numberOfSmartCommits" to project.issueRegistry.all.flatMap { it.commits }.distinct().count(),
             "committers" to allAuthorIds,
             "committerMetrics" to mapOf(
                     "numberOfCommits" to allAuthorIds.map { it to accountIdToCommitsMap[it]?.size }.toMap(),
@@ -86,7 +86,7 @@ fun main() {
     jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValue(outputFolder.resolve("$projectName.json"), output)
 }
 
-private fun createProject(configuration: FpptConfiguration, projectName: String): Project {
+private fun createProject(configuration: FpptConfiguration, projectName: String): ComposedProject {
     val iglogPath = configuration.iglogPath
     val gitLogDTO =
             if (iglogPath != null) {
@@ -96,7 +96,7 @@ private fun createProject(configuration: FpptConfiguration, projectName: String)
                 LogParser(gitClient).parse(gitClient.getLogs())
             }
 
-    val project = ProjectTransformer(gitLogDTO, projectName).transform()
+    val project = GitProjectTransformer(gitLogDTO, projectName).transform()
 
     configuration.tasksFilePath?.let { TaskImporter().import(it, configuration.taskPrefixes, project) }
     configuration.remoteInfoPath?.let { RemoteInfoImporter().import(it, project) }

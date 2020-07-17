@@ -1,8 +1,8 @@
 package org.dxworks.inspectorgit.compassmetrics
 
-import org.dxworks.inspectorgit.model.Project
-import org.dxworks.inspectorgit.model.task.DetailedTask
-import org.dxworks.inspectorgit.model.task.TaskStatusCategory
+import org.dxworks.inspectorgit.model.ComposedProject
+import org.dxworks.inspectorgit.model.issuetracker.DetailedIssue
+import org.dxworks.inspectorgit.model.issuetracker.IssueStatusCategory
 import java.nio.file.Paths
 import java.util.*
 
@@ -10,21 +10,21 @@ private const val bug = "bug"
 
 private const val prioritiesFilePath = "config/jira-priorities.properties"
 
-fun analyzeTasks(project: Project, period: Period?): Map<String, Double> {
-    if (project.taskRegistry.isEmpty())
+fun analyzeTasks(composedProject: ComposedProject, period: Period?): Map<String, Double> {
+    if (composedProject.issueRegistry.isEmpty())
         return emptyMap()
 
-    val actualPeriod = period ?: project.taskRegistry.period
-    val allTasks = project.taskRegistry.allDetailedTasks
+    val actualPeriod = period ?: composedProject.issueRegistry.period
+    val allTasks = composedProject.issueRegistry.allDetailedIssues
     val tasksActiveInPeriod = allTasks.filter {
         it.getStatusCategoriesInPeriod(actualPeriod)
-                .contains(project.taskStatusCategoryRegistry.getById(TaskStatusCategory.indeterminate))
+                .contains(composedProject.issueStatusCategoryRegistry.getById(IssueStatusCategory.indeterminate))
     }
 
     val tasks = tasksActiveInPeriod.filterNot { it.isReopened() }
 
     val (bugFixes, development) = tasks
-            .filter { it.getStatusCategoriesInPeriod(actualPeriod).contains(project.taskStatusCategoryRegistry.getById(TaskStatusCategory.done)) }
+            .filter { it.getStatusCategoriesInPeriod(actualPeriod).contains(composedProject.issueStatusCategoryRegistry.getById(IssueStatusCategory.done)) }
             .partition { isBugTask(it) }
     val bugFixingTime = getSpentTime(bugFixes)
     val developmentTime = getSpentTime(development)
@@ -58,9 +58,9 @@ fun getValueForPriority(properties: Map<String, Long>, priority: String): Long {
             ?: error("No value provided for default")
 }
 
-fun getSpentTime(tasks: List<DetailedTask>) =
-        tasks.mapNotNull { it.timeSpent?.toDouble() ?: it.timeEstimate?.toDouble() ?: it.getTimeToClose() }.sum() / 60
+fun getSpentTime(issues: List<DetailedIssue>) =
+        issues.mapNotNull { it.timeSpent?.toDouble() ?: it.timeEstimate?.toDouble() ?: it.getTimeToClose() }.sum() / 60
 
 
-private fun isBugTask(it: DetailedTask) =
+private fun isBugTask(it: DetailedIssue) =
         it.type.name.contains(bug, true) || it.typeName.contains(bug, true)

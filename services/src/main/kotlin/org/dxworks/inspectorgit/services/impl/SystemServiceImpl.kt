@@ -1,6 +1,5 @@
 package org.dxworks.inspectorgit.services.impl
 
-import org.dxworks.inspectorgit.analyzers.work.WorkAnalyzer
 import org.dxworks.inspectorgit.dto.SystemDTO
 import org.dxworks.inspectorgit.persistence.entities.SystemEntity
 import org.dxworks.inspectorgit.persistence.repositories.SwProjectRepository
@@ -12,9 +11,7 @@ import javax.transaction.Transactional
 @Service
 class SystemServiceImpl(private val systemRepository: SystemRepository,
                         private val gitlabIntegrationService: GitlabIntegrationService,
-                        private val swProjectRepository: SwProjectRepository,
-//                        private val configurationService: ConfigurationService,
-                        private val workAnalyzer: WorkAnalyzer) : SystemService {
+                        private val swProjectRepository: SwProjectRepository) : SystemService {
     override fun create(systemDTO: SystemDTO) {
         val projectEntities = systemDTO.projects?.filter { it.platform == "gitlab" }?.let { gitlabIntegrationService.import(it) }
 

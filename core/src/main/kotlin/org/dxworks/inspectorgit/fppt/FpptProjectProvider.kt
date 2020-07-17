@@ -3,9 +3,9 @@ package org.dxworks.inspectorgit.fppt
 import org.dxworks.inspectorgit.gitclient.GitClient
 import org.dxworks.inspectorgit.gitclient.parsers.LogParser
 import org.dxworks.inspectorgit.jira.TaskImporter
-import org.dxworks.inspectorgit.model.Project
+import org.dxworks.inspectorgit.model.ComposedProject
 import org.dxworks.inspectorgit.remote.RemoteInfoImporter
-import org.dxworks.inspectorgit.transformers.ProjectTransformer
+import org.dxworks.inspectorgit.transformers.git.GitProjectTransformer
 import java.nio.file.Path
 
 class FpptProjectProvider(
@@ -13,23 +13,23 @@ class FpptProjectProvider(
         val pathToIssueTrackingInfo: Path? = null,
         val pathToRemoteInfo: Path? = null
 ) {
-    private var cachedProject: Project? = null
+    private var cachedComposedProject: ComposedProject? = null
 
-    val project: Project
-        get() = cachedProject ?: initializeAndGetProject()
+    val composedProject: ComposedProject
+        get() = cachedComposedProject ?: initializeAndGetProject()
 
 
-    private fun initializeAndGetProject(): Project {
+    private fun initializeAndGetProject(): ComposedProject {
         val gitClient = GitClient(pathToRepo)
         val gitLogDTO = LogParser(gitClient).parse(gitClient.getLogs())
         val projectName = pathToRepo.toAbsolutePath().normalize().fileName.toString()
 
-        val project = ProjectTransformer(gitLogDTO, projectName).transform()
+        val project = GitProjectTransformer(gitLogDTO, projectName).transform()
 
-        pathToIssueTrackingInfo?.let { TaskImporter().import(it, project = project) }
+        pathToIssueTrackingInfo?.let { TaskImporter().import(it, composedProject = project) }
         pathToRemoteInfo?.let { RemoteInfoImporter().import(it, project) }
 
-        cachedProject = project
+        cachedComposedProject = project
         return project
     }
 }

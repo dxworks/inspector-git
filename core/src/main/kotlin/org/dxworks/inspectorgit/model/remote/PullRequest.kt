@@ -1,7 +1,7 @@
 package org.dxworks.inspectorgit.model.remote
 
 import org.dxworks.inspectorgit.model.git.Commit
-import org.dxworks.inspectorgit.model.task.DetailedTask
+import org.dxworks.inspectorgit.model.issuetracker.DetailedIssue
 import org.dxworks.inspectorgit.remote.dtos.PullRequestCommentDTO
 import java.time.ZonedDateTime
 
@@ -11,7 +11,7 @@ class PullRequest(
         val body: String,
         val head: Branch,
         val base: Branch,
-        val commits: List<Commit>,
+        val commitIds: List<String>,
         val createdAt: ZonedDateTime,
         val updatedAt: ZonedDateTime,
         val mergedAt: ZonedDateTime?,
@@ -21,5 +21,7 @@ class PullRequest(
         val mergedBy: RemoteGitAccount?,
         val reviews: List<PRReview>,
         val comments: List<PullRequestCommentDTO>,
-        val task: DetailedTask? = null
+        val project: RemoteGitProject,
+        var commits: List<Commit> = emptyList(),
+        var issue: DetailedIssue? = null
 )

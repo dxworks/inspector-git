@@ -1,13 +1,13 @@
 package org.dxworks.inspectorgit.fppt
 
 import org.dxworks.inspectorgit.model.Account
+import org.dxworks.inspectorgit.model.ComposedProject
 import org.dxworks.inspectorgit.model.Developer
-import org.dxworks.inspectorgit.model.Project
 import org.dxworks.inspectorgit.model.git.GitAccount
 import org.dxworks.inspectorgit.model.remote.RemoteGitAccount
 
-fun fpptDeveloperMetrics(project: Project): Any {
-    val allDevelopers = project.developerRegistry.all
+fun fpptDeveloperMetrics(composedProject: ComposedProject): Any {
+    val allDevelopers = composedProject.developerRegistry.all
     return allDevelopers.map {
         val commits = getTypeAccounts<GitAccount>(it).flatMap { it.commits }
         val changesPerCommit = commits.map { it.changes.size }

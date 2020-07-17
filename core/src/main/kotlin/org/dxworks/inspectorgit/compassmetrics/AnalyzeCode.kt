@@ -1,10 +1,10 @@
 package org.dxworks.inspectorgit.compassmetrics
 
-import org.dxworks.inspectorgit.model.Project
+import org.dxworks.inspectorgit.model.ComposedProject
 import java.time.ZonedDateTime
 
-fun analyzeCode(project: Project, period: Period?): Map<String, Double> {
-    val allCommits = project.commitRegistry.all
+fun analyzeCode(composedProject: ComposedProject, period: Period?): Map<String, Double> {
+    val allCommits = composedProject.commitRegistry.all
     val changes = allCommits.filter { periodFilter(period, it.committerDate) }.flatMap { it.changes }
     val codeChurn = "Code Churn" to changes.flatMap { it.hunks }
             .filter {

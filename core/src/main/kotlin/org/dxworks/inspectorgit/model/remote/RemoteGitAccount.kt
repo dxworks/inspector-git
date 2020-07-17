@@ -1,7 +1,6 @@
 package org.dxworks.inspectorgit.model.remote
 
 import org.dxworks.inspectorgit.model.Account
-import org.dxworks.inspectorgit.model.Project
 
 class RemoteGitAccount(
         val login: String,
@@ -9,7 +8,7 @@ class RemoteGitAccount(
         val email: String?,
         val avatarUrl: String?,
         val userName: String?,
-        project: Project,
+        project: RemoteGitProject,
         var pullRequests: Set<PullRequest> = emptySet(),
         var openedPullRequests: Set<PullRequest> = emptySet()
 ) : Account(login, project) {

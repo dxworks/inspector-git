@@ -3,10 +3,10 @@ package org.dxworks.inspectorgit.services.impl
 import org.dxworks.inspectorgit.dto.localProjects.LocalSystemDTO
 import org.dxworks.inspectorgit.gitclient.extractors.MetadataExtractionManager
 import org.dxworks.inspectorgit.gitclient.iglog.readers.IGLogReader
-import org.dxworks.inspectorgit.model.Project
+import org.dxworks.inspectorgit.model.ComposedProject
 import org.dxworks.inspectorgit.persistence.entities.LocalSystemEntity
 import org.dxworks.inspectorgit.persistence.repositories.LocalSystemRepository
-import org.dxworks.inspectorgit.transformers.ProjectTransformer
+import org.dxworks.inspectorgit.transformers.git.GitProjectTransformer
 import org.dxworks.inspectorgit.utils.appFolderPath
 import org.springframework.stereotype.Service
 import java.io.File
@@ -80,10 +80,10 @@ class LocalSystemsService(private val loadedSystem: LoadedSystem,
 
     private fun getSystemFolder(id: String) = appFolderPath.resolve(id).toFile()
 
-    private fun transformProjects(allIglogs: List<File>): List<Project> {
+    private fun transformProjects(allIglogs: List<File>): List<ComposedProject> {
         return allIglogs.parallelStream().map {
             val gitLogDTO = IGLogReader().read(it.inputStream())
-            ProjectTransformer(gitLogDTO, it.nameWithoutExtension).transform()
+            GitProjectTransformer(gitLogDTO, it.nameWithoutExtension).transform()
         }.collect(Collectors.toList())
     }
 }

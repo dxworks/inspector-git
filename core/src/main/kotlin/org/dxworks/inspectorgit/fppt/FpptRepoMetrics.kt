@@ -1,13 +1,13 @@
 package org.dxworks.inspectorgit.fppt
 
-import org.dxworks.inspectorgit.model.Project
+import org.dxworks.inspectorgit.model.ComposedProject
 
-fun fpptRepoMetrics(project: Project): Map<String, Any?> {
-    val allCommits = project.commitRegistry.all
+fun fpptRepoMetrics(composedProject: ComposedProject): Map<String, Any?> {
+    val allCommits = composedProject.commitRegistry.all
     val changesPerCommit = allCommits.map { it.changes.size }
     return mapOf(
             "commits" to allCommits.size,
-            "pullRequests" to project.pullRequestRegistry.all.size,
+            "pullRequests" to composedProject.pullRequestRegistry.all.size,
             "averageChangesPerCommit" to changesPerCommit.average(),
             "maxChangesPerCommit" to changesPerCommit.max(),
             "minChangesPerCommit" to changesPerCommit.min(),

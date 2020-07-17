@@ -1,15 +1,14 @@
 package org.dxworks.inspectorgit.model.git
 
 import org.dxworks.inspectorgit.model.Account
-import org.dxworks.inspectorgit.model.Project
 
 class GitAccount(
         var gitId: GitAccountId,
-        project: Project,
+        gitProject: GitProject,
         var commits: List<Commit> = emptyList()
 ) : Account(
         gitId.name,
-        project
+        gitProject
 ) {
     override val id: String
         get() = gitId.toString()
