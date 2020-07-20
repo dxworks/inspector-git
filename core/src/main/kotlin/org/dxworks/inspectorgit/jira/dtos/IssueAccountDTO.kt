@@ -1,6 +1,6 @@
 package org.dxworks.inspectorgit.jira.dtos
 
-class TaskAccountDTO(
+class IssueAccountDTO(
         val self: String,
         val name: String,
         val email: String?,

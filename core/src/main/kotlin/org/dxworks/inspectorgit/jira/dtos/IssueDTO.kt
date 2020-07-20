@@ -1,10 +1,10 @@
 package org.dxworks.inspectorgit.jira.dtos
 
-class TaskDTO(
+class IssueDTO(
         val key: String,
         val self: String,
         val summary: String,
-        val status: TaskStatusDTO,
+        val status: IssueStatusDTO,
         val typeId: String,
         val type: String,
         val description: String?,

@@ -4,5 +4,5 @@ import org.dxworks.inspectorgit.model.issuetracker.IssueStatusCategory
 import org.dxworks.inspectorgit.registries.AbstractRegistry
 
 class IssueStatusCategoryRegistry : AbstractRegistry<IssueStatusCategory, String>() {
-    override fun getID(entity: IssueStatusCategory) = entity.key
+    override fun getId(entity: IssueStatusCategory) = entity.key
 }

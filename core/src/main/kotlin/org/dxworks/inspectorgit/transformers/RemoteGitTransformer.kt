@@ -1,7 +1,5 @@
 package org.dxworks.inspectorgit.transformers
 
-import org.dxworks.inspectorgit.model.Project
-import org.dxworks.inspectorgit.model.git.Commit
 import org.dxworks.inspectorgit.model.remote.*
 import org.dxworks.inspectorgit.remote.dtos.*
 import java.time.LocalDateTime
@@ -15,7 +13,7 @@ class RemoteGitTransformer(private val remoteInfoDTO: RemoteInfoDTO, private val
         val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
     }
 
-    fun transform(): Project {
+    fun transform(): RemoteGitProject {
         val project = RemoteGitProject(name)
         val pullRequestDTOs = remoteInfoDTO.pullRequests
         pullRequestDTOs.forEach {
@@ -23,8 +21,8 @@ class RemoteGitTransformer(private val remoteInfoDTO: RemoteInfoDTO, private val
                     id = it.id,
                     title = it.title,
                     body = it.body,
-                    head = getBranch(it.head),
-                    base = getBranch(it.base),
+                    head = getBranch(project, it.head),
+                    base = getBranch(project, it.base),
                     commitIds = it.commits,
                     createdAt = parseDate(it.createdAt),
                     updatedAt = parseDate(it.updatedAt),
@@ -33,31 +31,31 @@ class RemoteGitTransformer(private val remoteInfoDTO: RemoteInfoDTO, private val
                     state = it.state,
                     createdBy = getAccount(project, it.createdBy),
                     mergedBy = it.mergedBy?.let { getAccount(project, it) },
-                    reviews = it.reviews.map { getReview(it) },
+                    reviews = it.reviews.map { getReview(project, it) },
                     comments = it.comments,
                     project = project
             )
             addPullRequestToAccounts(pullRequest)
             project.pullRequestRegistry.add(pullRequest)
         }
-        remoteInfoDTO.commitInfos.forEach {
-            project.commitRegistry.getById(it.id)!!.remoteInfo =
+        project.commitRemoteInfoRegistry.addAll(
+                remoteInfoDTO.commitInfos.map {
                     CommitRemoteInfo(
-                            it.author?.let { getAccount(, it) },
-                            it.committer?.let { getAccount(, it) }
+                            it.id,
+                            it.author?.let { getAccount(project, it) },
+                            it.committer?.let { getAccount(project, it) }
                     )
-        }
+                })
 
         project.simpleBranchRegistry.addAll(remoteInfoDTO.branches.map {
-            SimpleBranch(project.commitRegistry.getById(it.commit), it.commit, it.name, getLinkedIssue(it.name))
+            SimpleBranch(null, it.commit, it.name, null)
         })
-
+        return project
     }
 
 
-    private fun getReview(reviewDTO: ReviewDTO) =
-            PRReview(getAccount(, reviewDTO.user), reviewDTO.state, reviewDTO.body, parseDate(reviewDTO.date))
-
+    private fun getReview(project: RemoteGitProject, reviewDTO: ReviewDTO) =
+            PRReview(getAccount(project, reviewDTO.user), reviewDTO.state, reviewDTO.body, parseDate(reviewDTO.date))
 
 
     private fun addPullRequestToAccounts(pullRequest: PullRequest) {
@@ -83,25 +81,20 @@ class RemoteGitTransformer(private val remoteInfoDTO: RemoteInfoDTO, private val
         return LocalDateTime.parse(date, dateFormatter).atZone(ZoneId.of("Z"))
     }
 
-    private fun getCommits(commits: List<String>): List<Commit> = commits.mapNotNull { getCommit(it) }
-
-    private fun getCommit(id: String) = project.commitRegistry.getById(id)
-
-    private fun getBranch(branch: BranchDTO) = Branch(getCommit(branch.commit),
+    private fun getBranch(project: RemoteGitProject, branch: BranchDTO) = Branch(
             branch.commit,
             branch.label,
             branch.ref,
-            getAccount(, branch.user),
-            getRepo(branch.repo),
-            getLinkedIssue(branch.ref)
+            getAccount(project, branch.user),
+            getRepo(project, branch.repo)
     )
 
-    private fun getRepo(remoteRepo: RemoteRepoDTO): RemoteRepo {
+    private fun getRepo(project: RemoteGitProject, remoteRepo: RemoteRepoDTO): RemoteRepo {
         val byId = project.repoRegistry.getById(remoteRepo.id)
         return if (byId != null)
             byId
         else {
-            val entity = RemoteRepo(remoteRepo.id, remoteRepo.name, remoteRepo.fullName, getAccount(, remoteRepo.owner))
+            val entity = RemoteRepo(remoteRepo.id, remoteRepo.name, remoteRepo.fullName, getAccount(project, remoteRepo.owner))
             project.repoRegistry.add(entity)
             entity
         }

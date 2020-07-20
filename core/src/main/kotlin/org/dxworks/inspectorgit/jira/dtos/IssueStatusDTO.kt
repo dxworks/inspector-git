@@ -1,6 +1,6 @@
 package org.dxworks.inspectorgit.jira.dtos
 
-data class TaskStatusDTO(
+data class IssueStatusDTO(
         val id: String,
         val name: String,
         val statusCategory: TaskStatusCategoryDTO

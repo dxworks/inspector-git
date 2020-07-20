@@ -15,7 +15,7 @@ class CommitRegistry : AbstractRegistry<Commit, String>() {
 
     private fun findByPrefix(prefix: String) = all.find { it.id.startsWith(prefix) }
 
-    override fun getID(entity: Commit): String {
+    override fun getId(entity: Commit): String {
         return entity.id
     }
 }

@@ -1,6 +1,6 @@
 package org.dxworks.inspectorgit.jira.dtos
 
-class TaskTypeDTO(
+class IssueTypeDTO(
         var id: String,
         val name: String,
         val description: String,

@@ -1,31 +1,27 @@
 package org.dxworks.inspectorgit.transformers
 
-import org.dxworks.inspectorgit.jira.dtos.TaskAccountDTO
-import org.dxworks.inspectorgit.jira.dtos.TaskDTO
-import org.dxworks.inspectorgit.jira.dtos.TaskStatusDTO
-import org.dxworks.inspectorgit.jira.dtos.TaskTypeDTO
-import org.dxworks.inspectorgit.model.Project
-import org.dxworks.inspectorgit.model.git.Commit
+import org.dxworks.inspectorgit.jira.dtos.IssueAccountDTO
+import org.dxworks.inspectorgit.jira.dtos.IssueDTO
+import org.dxworks.inspectorgit.jira.dtos.IssueStatusDTO
+import org.dxworks.inspectorgit.jira.dtos.IssueTypeDTO
 import org.dxworks.inspectorgit.model.issuetracker.*
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 class IssueTrackerTransformer(
-        private val issueStatuses: List<TaskStatusDTO>,
-        private val taskTypes: List<TaskTypeDTO>,
-        private val accounts: List<TaskAccountDTO>,
-        private val taskDTOs: List<TaskDTO> = emptyList(),
+        private val issueStatuses: List<IssueStatusDTO>,
+        private val issueTypes: List<IssueTypeDTO>,
+        private val accounts: List<IssueAccountDTO>,
+        private val issueDTOS: List<IssueDTO> = emptyList(),
         private val name: String
 ) {
-    private lateinit var project: IssueTrackerProject
-
     companion object {
         val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     }
 
 
-    fun transform(): Project {
-        project = IssueTrackerProject(name)
+    fun transform(): IssueTrackerProject {
+        val project = IssueTrackerProject(name)
         project.accountRegistry.add(IssueTrackerAccount(
                 self = "0",
                 name = "Anonymous",
@@ -35,22 +31,12 @@ class IssueTrackerTransformer(
                 avatarUrl = null,
                 project = project
         ))
-        val taskPrefixes = taskDTOs.map { it.key.substring(0, it.key.indexOf("-")) }.distinct()
 
         addAccountsToProject()
         addTaskTypesToProject()
         addTaskStatusesToProject()
 
-
-        val taskRegexList = taskPrefixes.map { getTaskRegex(it) }
-//        val smartCommits = project.commitRegistry.all
-//                .filter { taskRegexList.any { taskRegex -> taskRegex.containsMatchIn(it.message) } }
-//        val taskIdToSmartCommitMap = mapOfCommitsByTaskId(smartCommits, taskRegexList)
-
-
-//        taskIdToSmartCommitMap.forEach { (id, commits) -> commits.forEach { it.taskIds = it.taskIds + id } }
-
-        project.issueRegistry.addAll(taskDTOs.map {
+        project.issueRegistry.addAll(issueDTOS.map {
             val detailedTask = DetailedIssue(
                     project = project,
                     id = it.key,
@@ -97,7 +83,7 @@ class IssueTrackerTransformer(
     }
 
     private fun linkTasksWithSubtasksAndParents() {
-        taskDTOs.forEach {
+        issueDTOS.forEach {
             val task = project.issueRegistry.getById(it.key)!!
             if (task is DetailedIssue) {
                 it.parent?.let { parentId -> task.parent = project.issueRegistry.getById(parentId) }
@@ -144,7 +130,7 @@ class IssueTrackerTransformer(
     }
 
     private fun addTaskTypesToProject() {
-        project.issueTypeRegistry.addAll(taskTypes.map {
+        project.issueTypeRegistry.addAll(issueTypes.map {
             IssueType(
                     project = project,
                     id = it.id,
@@ -162,7 +148,7 @@ class IssueTrackerTransformer(
         project.issueStatusRegistry.all.forEach { it.category.issueStatuses += it }
     }
 
-    private fun getComments(it: TaskDTO) = it.comments.map {
+    private fun getComments(it: IssueDTO) = it.comments.map {
         IssueComment(
                 project = project,
                 created = getDate(it.created),
@@ -173,7 +159,7 @@ class IssueTrackerTransformer(
         )
     }
 
-    private fun getChanges(it: TaskDTO) = it.changes.map {
+    private fun getChanges(it: IssueDTO) = it.changes.map {
         IssueChange(
                 project = project,
                 id = it.id,
@@ -186,19 +172,4 @@ class IssueTrackerTransformer(
 
     private fun getDate(dateAsString: String) =
             ZonedDateTime.parse(dateAsString, dateFormatter)
-
-    private fun getTaskRegex(prefix: String) = getRegexWithWordBoundaryGroups("$prefix-\\d+")
-
-    private fun mapOfCommitsByTaskId(allSmartCommits: List<Commit>, taskRegexList: List<Regex>): MutableMap<String, List<Commit>> {
-        val allTaskIds = allSmartCommits.flatMap {
-            taskRegexList
-                    .flatMap { taskRegex ->
-                        taskRegex.findAll(it.message).toList()
-                                .mapNotNull {
-                                    it.groupValues.getOrNull(2)
-                                }
-                    }
-        }.filter { it.isNotBlank() }.distinct()
-        return allTaskIds.map { id -> id to allSmartCommits.filter { getRegexWithWordBoundaryGroups(id).containsMatchIn(it.message) } }.toMap().toMutableMap()
-    }
 }

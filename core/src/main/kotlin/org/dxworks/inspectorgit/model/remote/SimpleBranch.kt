@@ -4,8 +4,8 @@ import org.dxworks.inspectorgit.model.git.Commit
 import org.dxworks.inspectorgit.model.issuetracker.DetailedIssue
 
 open class SimpleBranch(
-        val commit: Commit?,
+        var commit: Commit?,
         val commitId: String,
         val ref: String,
-        val issue: DetailedIssue?
+        var issue: DetailedIssue?
 )

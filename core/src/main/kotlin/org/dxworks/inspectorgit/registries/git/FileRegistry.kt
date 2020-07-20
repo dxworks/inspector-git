@@ -5,5 +5,5 @@ import org.dxworks.inspectorgit.registries.AbstractRegistry
 import java.util.*
 
 class FileRegistry : AbstractRegistry<File, UUID>() {
-    override fun getID(entity: File) = entity.id
+    override fun getId(entity: File) = entity.id
 }

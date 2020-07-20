@@ -13,7 +13,7 @@ class RemoteInfoImporter {
         val mapper = jacksonObjectMapper()
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         val importDTO = mapper.readValue<RemoteInfoDTO>(path.toFile())
-        RemoteGitTransformer(composedProject, importDTO).transform()
+        RemoteGitTransformer(importDTO, "").transform()
         return composedProject
     }
 }

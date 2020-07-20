@@ -8,7 +8,7 @@ import java.time.LocalTime
 
 
 class IssueRegistry : AbstractRegistry<Issue, String>() {
-    override fun getID(entity: Issue) = entity.id
+    override fun getId(entity: Issue) = entity.id
 
     val allDetailedIssues: List<DetailedIssue>
         get() = all.filter { it is DetailedIssue }.map { it as DetailedIssue }

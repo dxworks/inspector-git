@@ -5,6 +5,7 @@ import org.dxworks.inspectorgit.model.git.Commit
 import org.dxworks.inspectorgit.model.git.GitProject
 import org.dxworks.inspectorgit.model.issuetracker.IssueTrackerProject
 import org.dxworks.inspectorgit.registries.AccountRegistry
+import org.dxworks.inspectorgit.registries.remote.CommitRemoteInfoRegistry
 import org.dxworks.inspectorgit.registries.remote.PullRequestRegistry
 import org.dxworks.inspectorgit.registries.remote.RemoteRepoRegistry
 import org.dxworks.inspectorgit.registries.remote.SimpleBranchRegistry
@@ -16,6 +17,7 @@ class RemoteGitProject(override val name: String) : Project {
     val pullRequestRegistry = PullRequestRegistry()
     val repoRegistry = RemoteRepoRegistry()
     val simpleBranchRegistry = SimpleBranchRegistry()
+    val commitRemoteInfoRegistry = CommitRemoteInfoRegistry()
 
     override fun link(projects: List<Project>) {
         val issueTrackerProjects = projects.filterIsInstance<IssueTrackerProject>()
@@ -24,12 +26,24 @@ class RemoteGitProject(override val name: String) : Project {
             it.commits = getCommits(gitProjects, it.commitIds)
             it.issue = getLinkedIssue(issueTrackerProjects, "${it.title} ${it.head.ref}")
             it.issue?.let { issue -> issue.pullRequests += it }
+
+            it.base.commit = getCommit(gitProjects, it.base.commitId)
+            it.base.issue = getLinkedIssue(issueTrackerProjects, it.base.ref)
+
+            it.head.commit = getCommit(gitProjects, it.head.commitId)
+            it.head.issue = getLinkedIssue(issueTrackerProjects, it.head.ref)
+
             addPullRequestToCommits(it)
         }
+        simpleBranchRegistry.all.forEach {
+            it.commit = gitProjects.mapNotNull { project -> project.commitRegistry.getById(it.commitId) }.firstOrNull()
+            it.issue = getLinkedIssue(issueTrackerProjects, it.ref)
+        }
+
     }
 
     private fun getLinkedIssue(projects: List<IssueTrackerProject>, content: String) =
-            projects.map {
+            projects.mapNotNull {
                 it.issueRegistry.allDetailedIssues
                         .find { issue -> getRegexWithWordBoundaryGroups(issue.id).containsMatchIn(content) }
             }.firstOrNull()

@@ -4,5 +4,5 @@ import org.dxworks.inspectorgit.model.remote.RemoteRepo
 import org.dxworks.inspectorgit.registries.AbstractRegistry
 
 class RemoteRepoRegistry : AbstractRegistry<RemoteRepo, Number>() {
-    override fun getID(entity: RemoteRepo) = entity.id
+    override fun getId(entity: RemoteRepo) = entity.id
 }

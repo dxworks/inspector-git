@@ -24,11 +24,11 @@ abstract class AbstractRegistry<TYPE, ID> {
     }
 
     fun add(entity: TYPE): TYPE? {
-        return map.put(getID(entity), entity)
+        return map.put(getId(entity), entity)
     }
 
     fun addAll(entities: Collection<TYPE>) {
-        entities.forEach { map[getID(it)] = it }
+        entities.forEach { map[getId(it)] = it }
     }
 
     fun remove(id: ID): TYPE? {
@@ -36,11 +36,11 @@ abstract class AbstractRegistry<TYPE, ID> {
     }
 
     fun delete(entity: TYPE): TYPE? {
-        return map.remove(getID(entity))
+        return map.remove(getId(entity))
     }
 
     fun isEmpty() = all.isEmpty()
 
 
-    protected abstract fun getID(entity: TYPE): ID
+    protected abstract fun getId(entity: TYPE): ID
 }

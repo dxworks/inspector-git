@@ -6,7 +6,7 @@ import org.dxworks.inspectorgit.registries.AbstractRegistry
 
 
 class IssueStatusRegistry : AbstractRegistry<IssueStatus, String>() {
-    override fun getID(entity: IssueStatus) = entity.id
+    override fun getId(entity: IssueStatus) = entity.id
     fun isNew(id: String) = hasCategory(id, IssueStatusCategory.new)
     fun isIndeterminate(id: String) = hasCategory(id, IssueStatusCategory.indeterminate)
     fun isDone(id: String) = hasCategory(id, IssueStatusCategory.done)
