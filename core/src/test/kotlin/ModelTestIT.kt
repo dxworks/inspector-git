@@ -23,6 +23,7 @@ internal class ModelTestIT {
         private val LOG = LoggerFactory.getLogger(ModelTestIT::class.java)
         private val kafkaPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\licenta\\kafka\\kafka")
         private val dxPlatformPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\dx\\dx-platform")
+        private val seanTest = Paths.get("C:\\Users\\dnagy\\Documents\\Endava\\testProjects\\SeAN")
 
         private var lines = 0.0
         private var linesWithDifferentCommit = 0.0
@@ -33,7 +34,7 @@ internal class ModelTestIT {
             val tmpFolderFile = tmpFolder.toFile()
             tmpFolderFile.mkdirs()
 
-            val repoPath = dxPlatformPath
+            val repoPath = seanTest
 
             val repoName = repoPath.fileName.toString()
             val repoCache = tmpFolder.resolve("$repoName.iglog").toFile()

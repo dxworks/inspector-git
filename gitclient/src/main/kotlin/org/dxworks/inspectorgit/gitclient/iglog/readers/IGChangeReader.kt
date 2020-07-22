@@ -34,11 +34,11 @@ class IGChangeReader(private val igHunkReader: IgHunkReader = IgHunkReader()) {
     }
 
     private fun getFileName(lines: MutableList<String>, type: ChangeType): Pair<String, String> {
-        val fileName = lines.removeAt(0)
+        val fileName = lines.removeAt(0).trim()
         return when (type) {
             ChangeType.ADD -> Pair(devNull, fileName)
             ChangeType.DELETE -> Pair(fileName, devNull)
-            ChangeType.RENAME -> Pair(fileName, lines.removeAt(0))
+            ChangeType.RENAME -> Pair(fileName, lines.removeAt(0).trim())
             ChangeType.MODIFY -> Pair(fileName, fileName)
         }
     }
