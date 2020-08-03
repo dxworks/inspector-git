@@ -3,8 +3,8 @@ import org.dxworks.inspectorgit.gitclient.dto.gitlog.AnnotatedLineDTO
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
 import org.dxworks.inspectorgit.gitclient.extractors.MetadataExtractionManager
 import org.dxworks.inspectorgit.gitclient.iglog.readers.IGLogReader
-import org.dxworks.inspectorgit.model.ComposedProject
 import org.dxworks.inspectorgit.model.git.AnnotatedLine
+import org.dxworks.inspectorgit.model.git.GitProject
 import org.dxworks.inspectorgit.transformers.git.GitProjectTransformer
 import org.dxworks.inspectorgit.utils.tmpFolder
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -18,7 +18,7 @@ internal class ModelTestIT {
 
     companion object {
         private lateinit var gitClient: GitClient
-        private lateinit var composedProject: ComposedProject
+        private lateinit var project: GitProject
 
         private val LOG = LoggerFactory.getLogger(ModelTestIT::class.java)
         private val kafkaPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\licenta\\kafka\\kafka")
@@ -43,7 +43,7 @@ internal class ModelTestIT {
             }
             val gitLogDTO = IGLogReader().read(repoCache.inputStream())
 //            project = ProjectTransformer(gitLogDTO, repoName, org.dxworks.inspectorgit.transformers.git.TestChangeFactory(gitClient)).transform()
-            composedProject = GitProjectTransformer(gitLogDTO, repoName).transform()
+            project = GitProjectTransformer(gitLogDTO, repoName).transform()
             println("done")
         }
     }
@@ -52,17 +52,17 @@ internal class ModelTestIT {
     @Test
     fun `test that all commits exist in the project`() {
         val commitIds = gitClient.runGitCommand("log --format=\"%H\"")
-        assertTrue { commitIds!!.all { composedProject.commitRegistry.contains(it) } }
+        assertTrue { commitIds!!.all { project.commitRegistry.contains(it) } }
     }
 
     @Test
     fun `test blames for all files for all commits`() {
         var ok = true
-        LOG.debug("Number of commits: ${composedProject.commitRegistry.all.size}")
-        LOG.debug("Number of changes: ${composedProject.commitRegistry.all.map { it.changes.size }.sum()}")
+        LOG.debug("Number of commits: ${project.commitRegistry.all.size}")
+        LOG.debug("Number of changes: ${project.commitRegistry.all.map { it.changes.size }.sum()}")
         var i = 0
         var j = 0
-        composedProject.commitRegistry.all.parallelStream().forEach { commit ->
+        project.commitRegistry.all.parallelStream().forEach { commit ->
             LOG.debug("$i) test for commit: ${commit.id}")
             i++
             commit.changes.parallelStream().filter { it.type != ChangeType.DELETE && !it.file.isBinary }
@@ -105,7 +105,7 @@ internal class ModelTestIT {
         lines++
         val numberAndContentAreTheSame = annotatedLineDTO.number == annotatedLine.number &&
                 (annotatedLine.content.content == null || annotatedLineDTO.content == annotatedLine.content.content)
-        if (composedProject.commitRegistry.getById(annotatedLineDTO.commitId) != annotatedLine.content.commit) {
+        if (project.commitRegistry.getById(annotatedLineDTO.commitId) != annotatedLine.content.commit) {
             LOG.warn("In $fileName at $commitId at line ${annotatedLineDTO.number} commits differ blame: ${annotatedLineDTO.commitId}, IG: ${annotatedLine.content.commit.id}")
             linesWithDifferentCommit++
         }

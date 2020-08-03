@@ -19,7 +19,7 @@ class AnalysisController(private val analysisService: AnalysisService) {
     }
 
     @GetMapping("systemDetails")
-    fun getDetails(): LocalSystemDTO {
+    fun getDetails(): LocalSystemDTO? {
         return analysisService.getDetails()
     }
 

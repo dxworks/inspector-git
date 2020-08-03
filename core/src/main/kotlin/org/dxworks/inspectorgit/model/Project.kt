@@ -4,5 +4,4 @@ interface Project {
     val name: String
     fun link(projects: List<Project>)
     fun unlink(projects: List<Project>)
-    var system: System?
 }

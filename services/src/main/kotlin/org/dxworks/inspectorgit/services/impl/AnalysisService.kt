@@ -1,4 +1,3 @@
-
 package org.dxworks.inspectorgit.services.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -57,7 +56,16 @@ class AnalysisService(private val loadedSystem: LoadedSystem) {
         return ScriptResult(stringWriter.toString(), outputFiles)
     }
 
-    fun getDetails(): LocalSystemDTO =
-            LocalSystemDTO(loadedSystem.id, loadedSystem.name, loadedSystem.projects.keys.toList())
+    fun getDetails(): LocalSystemDTO? =
+            if (loadedSystem.isSet)
+                LocalSystemDTO(
+                        loadedSystem.id,
+                        loadedSystem.name,
+                        loadedSystem.gitProjects.keys.toList(),
+                        loadedSystem.issueProjects.keys.toList(),
+                        loadedSystem.remoteProjects.keys.toList()
+                )
+            else
+                null
 
 }

@@ -24,29 +24,28 @@ class RemoteGitProject(override val name: String) : Project {
         val gitProjects = projects.filterIsInstance<GitProject>()
         pullRequestRegistry.all.forEach {
             it.commits = getCommits(gitProjects, it.commitIds)
-            it.issue = getLinkedIssue(issueTrackerProjects, "${it.title} ${it.head.ref}")
-            it.issue?.let { issue -> issue.pullRequests += it }
+            it.issues = getLinkedIssues(issueTrackerProjects, "${it.title} ${it.head.ref} ${it.body}")
+            it.issues.forEach { issue -> issue.pullRequests += it }
 
             it.base.commit = getCommit(gitProjects, it.base.commitId)
-            it.base.issue = getLinkedIssue(issueTrackerProjects, it.base.ref)
+            it.base.issue = getLinkedIssues(issueTrackerProjects, it.base.ref).firstOrNull()
 
             it.head.commit = getCommit(gitProjects, it.head.commitId)
-            it.head.issue = getLinkedIssue(issueTrackerProjects, it.head.ref)
+            it.head.issue = getLinkedIssues(issueTrackerProjects, it.head.ref).firstOrNull()
 
             addPullRequestToCommits(it)
         }
         simpleBranchRegistry.all.forEach {
             it.commit = gitProjects.mapNotNull { project -> project.commitRegistry.getById(it.commitId) }.firstOrNull()
-            it.issue = getLinkedIssue(issueTrackerProjects, it.ref)
+            it.issue = getLinkedIssues(issueTrackerProjects, it.ref).firstOrNull()
         }
 
     }
 
-    private fun getLinkedIssue(projects: List<IssueTrackerProject>, content: String) =
-            projects.mapNotNull {
+    private fun getLinkedIssues(projects: List<IssueTrackerProject>, content: String) =
+            projects.flatMap {
                 it.issueRegistry.allDetailedIssues
-                        .find { issue -> getRegexWithWordBoundaryGroups(issue.id).containsMatchIn(content) }
-            }.firstOrNull()
+            }.filter { issue -> getRegexWithWordBoundaryGroups(issue.id).containsMatchIn(content) }
 
     private fun getCommits(projects: List<GitProject>, commits: List<String>): List<Commit> = commits.mapNotNull { getCommit(projects, it) }
 
@@ -62,6 +61,4 @@ class RemoteGitProject(override val name: String) : Project {
     override fun unlink(projects: List<Project>) {
         TODO("Not yet implemented")
     }
-
-    override var system: System? = null
 }

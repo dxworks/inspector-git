@@ -25,10 +25,10 @@ class DetailedIssue(id: String,
                     val timeEstimate: Long?,
                     val timeSpent: Long?,
                     val customFields: Map<String, Any>,
-                    commits: List<Commit>,
+                    commits: Set<Commit> = emptySet(),
                     var parent: Issue? = null,
                     var subtasks: List<Issue> = emptyList(),
-                    var pullRequests: List<PullRequest> = emptyList()
+                    var pullRequests: Set<PullRequest> = emptySet()
 ) : Issue(id, project, commits) {
     fun getStatusCategoriesInPeriod(period: Period): List<IssueStatusCategory> {
         return getStatusesInPeriod(period).map { it.category }.distinct()
@@ -92,7 +92,4 @@ class DetailedIssue(id: String,
     }
 
     private fun asABitLessThen8hPerDay(between: Long) = between / 3.2
-
-    val allCommits: List<Commit>
-        get() = commits + subtasks.flatMap { it.commits }
 }

@@ -32,6 +32,19 @@ class IssueTrackerProject(override val name: String) : Project {
         val taskIdToSmartCommitMap = mapOfCommitsByTaskId(smartCommits, taskRegexList)
         taskIdToSmartCommitMap.forEach { (id, commits) -> commits.forEach { it.taskIds = it.taskIds + id } }
 
+        remoteGitProjects.flatMap { it.pullRequestRegistry.all }
+                .forEach { pr ->
+                    issueRegistry.allDetailedIssues.forEach {
+                        val taskRegex = getRegexWithWordBoundaryGroups(it.id)
+                        if (taskRegex.containsMatchIn("${pr.title} ${pr.head.ref} ${pr.body}"))
+                            pr.issues += it
+                    }
+                }
+        remoteGitProjects.flatMap { it.simpleBranchRegistry.all }
+                .forEach { branch ->
+                    branch.issue = issueRegistry.allDetailedIssues
+                            .firstOrNull { getRegexWithWordBoundaryGroups(it.id).containsMatchIn(branch.ref) }
+                }
 
     }
 
@@ -53,6 +66,4 @@ class IssueTrackerProject(override val name: String) : Project {
     override fun unlink(projects: List<Project>) {
         TODO("Not yet implemented")
     }
-
-    override var system: System? = null
 }

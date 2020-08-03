@@ -17,9 +17,17 @@ class LocalSystemEntity() : BaseEntity<UUID>(UUID.randomUUID()) {
     @ElementCollection(targetClass = String::class)
     lateinit var sources: List<String>
 
-    constructor(systemId: String, name: String, sources: List<String>) : this() {
+    @ElementCollection(targetClass = String::class)
+    lateinit var issues: List<String>
+
+    @ElementCollection(targetClass = String::class)
+    lateinit var remotes: List<String>
+
+    constructor(systemId: String, name: String, sources: List<String>, issues: List<String>, remotes: List<String>) : this() {
         this.systemId = systemId
         this.name = name
         this.sources = sources
+        this.issues = issues
+        this.remotes = remotes
     }
 }

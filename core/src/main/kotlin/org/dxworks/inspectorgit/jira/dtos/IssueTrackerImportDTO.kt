@@ -1,6 +1,6 @@
 package org.dxworks.inspectorgit.jira.dtos
 
-class TaskImportDTO(
+class IssueTrackerImportDTO(
         val issueTypes: List<IssueTypeDTO>,
         val users: List<IssueAccountDTO>,
         val issues: List<IssueDTO>,

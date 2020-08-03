@@ -12,5 +12,6 @@ const val devNull = "dev/null"
 const val appFolderName = ".inspectorgit"
 val userHomePath: Path = Paths.get(System.getProperty("user.home"))
 val appFolderPath: Path = userHomePath.resolve(appFolderName)
+val systemsFolderPath: Path = userHomePath.resolve(appFolderName).resolve("systems")
 val propertyFilePath: Path = appFolderPath.resolve(Paths.get("inspector.properties"))
 val tmpFolder: Path = Paths.get(System.getProperty("java.io.tmpdir")).resolve("inspectorGit")

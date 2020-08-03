@@ -4,7 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.dxworks.inspectorgit.gitclient.GitClient
 import org.dxworks.inspectorgit.gitclient.parsers.LogParser
 import org.dxworks.inspectorgit.jira.TaskImporter
-import org.dxworks.inspectorgit.model.ComposedProject
+import org.dxworks.inspectorgit.model.git.GitProject
 import org.dxworks.inspectorgit.transformers.git.GitProjectTransformer
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -89,7 +89,7 @@ fun export(results: Any, path: Path) {
     jacksonObjectMapper().writeValue(path.toFile(), results)
 }
 
-private fun getCodeProject(repoPath: Path): ComposedProject {
+private fun getCodeProject(repoPath: Path): GitProject {
     val gitClient = GitClient(repoPath)
     val gitLogDTO = LogParser(gitClient).parse(gitClient.getLogs())
 

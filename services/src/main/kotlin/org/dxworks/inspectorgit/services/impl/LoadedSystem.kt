@@ -1,10 +1,9 @@
 package org.dxworks.inspectorgit.services.impl
 
-import org.dxworks.inspectorgit.model.ComposedProject
-import org.dxworks.inspectorgit.model.git.GitAccount
-import org.dxworks.inspectorgit.registries.AccountRegistry
-import org.dxworks.inspectorgit.registries.git.CommitRegistry
-import org.dxworks.inspectorgit.registries.git.FileRegistry
+import org.dxworks.inspectorgit.model.Project
+import org.dxworks.inspectorgit.model.git.GitProject
+import org.dxworks.inspectorgit.model.issuetracker.IssueTrackerProject
+import org.dxworks.inspectorgit.model.remote.RemoteGitProject
 import org.springframework.stereotype.Component
 
 @Component
@@ -13,29 +12,25 @@ class LoadedSystem {
         private set
     final lateinit var name: String
         private set
-    final lateinit var projects: Map<String, ComposedProject>
+    final lateinit var projects: Map<String, Project>
         private set
-    final lateinit var accountRegistry: AccountRegistry
-        private set
-    final lateinit var commitRegistry: CommitRegistry
-        private set
-    final lateinit var fileRegistry: FileRegistry
-        private set
+
+    val gitProjects: Map<String, GitProject>
+        get() = getProjectsByType()
+    val issueProjects: Map<String, IssueTrackerProject>
+        get() = getProjectsByType()
+    val remoteProjects: Map<String, RemoteGitProject>
+        get() = getProjectsByType()
+
+    private inline fun <reified T : Project> getProjectsByType() =
+            projects.values.filterIsInstance<T>().map { Pair(it.name, it) }.toMap()
+
 
     val isSet get() = this::id.isInitialized
 
-    fun set(id: String, name: String, composedProjects: List<ComposedProject>) {
+    fun set(id: String, name: String, projects: List<Project>) {
         this.id = id
         this.name = name
-        this.projects = composedProjects.map { Pair(it.name, it) }.toMap()
-
-        accountRegistry = AccountRegistry()
-        accountRegistry.addAll(composedProjects.flatMap { it.accountRegistry.getAll<GitAccount>() })
-
-        commitRegistry = CommitRegistry()
-        commitRegistry.addAll(composedProjects.flatMap { it.commitRegistry.all })
-
-        fileRegistry = FileRegistry()
-        fileRegistry.addAll(composedProjects.flatMap { it.fileRegistry.all })
+        this.projects = projects.onEach { it.link(projects) }.map { Pair(it.name, it) }.toMap()
     }
 }

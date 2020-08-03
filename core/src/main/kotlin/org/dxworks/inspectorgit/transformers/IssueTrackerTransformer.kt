@@ -32,9 +32,9 @@ class IssueTrackerTransformer(
                 project = project
         ))
 
-        addAccountsToProject()
-        addTaskTypesToProject()
-        addTaskStatusesToProject()
+        addAccountsToProject(project)
+        addTaskTypesToProject(project)
+        addTaskStatusesToProject(project)
 
         project.issueRegistry.addAll(issueDTOS.map {
             val detailedTask = DetailedIssue(
@@ -48,41 +48,37 @@ class IssueTrackerTransformer(
                     status = project.issueStatusRegistry.getById(it.status.id)!!,
                     created = ZonedDateTime.parse(it.created, dateFormatter),
                     updated = ZonedDateTime.parse(it.updated, dateFormatter),
-                    creator = getTaskAccount(it.creatorId),
-                    reporter = it.reporterId?.let { getTaskAccount(it) },
-                    assignee = it.assigneeId?.let { getTaskAccount(it) },
+                    creator = getTaskAccount(project, it.creatorId),
+                    reporter = it.reporterId?.let { getTaskAccount(project, it) },
+                    assignee = it.assigneeId?.let { getTaskAccount(project, it) },
                     priority = it.priority,
                     timeEstimate = it.timeEstimate,
                     timeSpent = it.timeSpent,
-                    changes = getChanges(it),
-                    comments = getComments(it),
-                    customFields = it.customFields,
-                    commits = taskIdToSmartCommitMap.remove(it.key) ?: emptyList()
+                    changes = getChanges(project, it),
+                    comments = getComments(project, it),
+                    customFields = it.customFields
             )
             detailedTask.commits.forEach { it.issues += detailedTask }
             detailedTask
         })
 
-        linkTasksWithStatuses()
-        linkTasksWithTypes()
-        lintTasksWithAuthors()
-
-        project.issueRegistry.addAll(taskIdToSmartCommitMap.map { Issue(it.key, project, it.value) })
-
-        linkTasksWithSubtasksAndParents()
+        linkTasksWithStatuses(project)
+        linkTasksWithTypes(project)
+        lintTasksWithAuthors(project)
+        linkTasksWithSubtasksAndParents(project)
 
         return project
     }
 
 
-    private fun getTaskAccount(id: String?): IssueTrackerAccount {
+    private fun getTaskAccount(project: IssueTrackerProject, id: String?): IssueTrackerAccount {
         if (id == null) {
             return project.accountRegistry.getById("0") as IssueTrackerAccount
         }
         return project.accountRegistry.getById(id) as IssueTrackerAccount
     }
 
-    private fun linkTasksWithSubtasksAndParents() {
+    private fun linkTasksWithSubtasksAndParents(project: IssueTrackerProject) {
         issueDTOS.forEach {
             val task = project.issueRegistry.getById(it.key)!!
             if (task is DetailedIssue) {
@@ -92,7 +88,7 @@ class IssueTrackerTransformer(
         }
     }
 
-    private fun lintTasksWithAuthors() {
+    private fun lintTasksWithAuthors(project: IssueTrackerProject) {
         project.issueRegistry.allDetailedIssues.forEach { task ->
             task.creator.issues += task
             task.reporter?.let { it.issues += task }
@@ -105,17 +101,17 @@ class IssueTrackerTransformer(
         }
     }
 
-    private fun linkTasksWithTypes() {
+    private fun linkTasksWithTypes(project: IssueTrackerProject) {
         project.issueRegistry.allDetailedIssues.forEach { task ->
             task.type.let { it.issues += task }
         }
     }
 
-    private fun linkTasksWithStatuses() {
+    private fun linkTasksWithStatuses(project: IssueTrackerProject) {
         project.issueRegistry.allDetailedIssues.forEach { it.status.issues += it }
     }
 
-    private fun addAccountsToProject() {
+    private fun addAccountsToProject(project: IssueTrackerProject) {
         project.accountRegistry.addAll(accounts.map {
             IssueTrackerAccount(
                     self = it.self,
@@ -129,7 +125,7 @@ class IssueTrackerTransformer(
         })
     }
 
-    private fun addTaskTypesToProject() {
+    private fun addTaskTypesToProject(project: IssueTrackerProject) {
         project.issueTypeRegistry.addAll(issueTypes.map {
             IssueType(
                     project = project,
@@ -141,29 +137,29 @@ class IssueTrackerTransformer(
         })
     }
 
-    private fun addTaskStatusesToProject() {
+    private fun addTaskStatusesToProject(project: IssueTrackerProject) {
         project.issueStatusCategoryRegistry.addAll(issueStatuses.distinctBy { it.statusCategory }
                 .map { it.statusCategory }.map { IssueStatusCategory(project, it.key, it.name) })
         project.issueStatusRegistry.addAll(issueStatuses.map { IssueStatus(project, it.id, it.name, project.issueStatusCategoryRegistry.getById(it.statusCategory.key)!!) })
         project.issueStatusRegistry.all.forEach { it.category.issueStatuses += it }
     }
 
-    private fun getComments(it: IssueDTO) = it.comments.map {
+    private fun getComments(project: IssueTrackerProject, it: IssueDTO) = it.comments.map {
         IssueComment(
                 project = project,
                 created = getDate(it.created),
-                createdBy = getTaskAccount(it.userId),
+                createdBy = getTaskAccount(project, it.userId),
                 updated = it.updated?.let { getDate(it) },
-                updatedBy = it.updateUserId?.let { getTaskAccount(it) },
+                updatedBy = it.updateUserId?.let { getTaskAccount(project, it) },
                 body = it.body
         )
     }
 
-    private fun getChanges(it: IssueDTO) = it.changes.map {
+    private fun getChanges(project: IssueTrackerProject, it: IssueDTO) = it.changes.map {
         IssueChange(
                 project = project,
                 id = it.id,
-                account = getTaskAccount(it.userId),
+                account = getTaskAccount(project, it.userId),
                 created = getDate(it.created),
                 changedFields = it.changedFields,
                 items = it.items

@@ -1,6 +1,7 @@
 package org.dxworks.inspectorgit.model.git
 
 import org.dxworks.inspectorgit.model.issuetracker.Issue
+import org.dxworks.inspectorgit.model.remote.CommitRemoteInfo
 import org.dxworks.inspectorgit.model.remote.PullRequest
 import java.time.Period
 import java.time.ZonedDateTime
@@ -16,7 +17,8 @@ data class Commit(var project: GitProject,
                   var children: List<Commit>,
                   var changes: List<Change>,
                   var issues: Set<Issue> = emptySet(),
-                  var pullRequests: Set<PullRequest> = emptySet()) {
+                  var pullRequests: Set<PullRequest> = emptySet(),
+                  var remoteInfo: CommitRemoteInfo? = null) {
     fun olderThan(age: Period, other: Commit) = committerDate.isBefore(other.committerDate.minus(age))
 
     override fun equals(other: Any?): Boolean {

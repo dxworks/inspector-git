@@ -23,5 +23,5 @@ class PullRequest(
         val comments: List<PullRequestCommentDTO>,
         val project: RemoteGitProject,
         var commits: List<Commit> = emptyList(),
-        var issue: DetailedIssue? = null
+        var issues: List<DetailedIssue> = emptyList()
 )
