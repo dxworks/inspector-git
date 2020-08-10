@@ -47,6 +47,53 @@
             </activation>
             <build>
                 <plugins>
+
+                    <plugin>
+                        <groupId>org.jetbrains.kotlin</groupId>
+                        <artifactId>kotlin-maven-plugin</artifactId>
+                        <version>${kotlin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>compile</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <sourceDirs>
+                                        <source>${project.basedir}/src/main/kotlin</source>
+                                    </sourceDirs>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>test-compile</id>
+                                <phase>test-compile</phase>
+                                <goals>
+                                    <goal>test-compile</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <jvmTarget>1.8</jvmTarget>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jar-plugin</artifactId>
+                        <version>2.6</version>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <addClasspath>true</addClasspath>
+                                    <mainClass>
+                                        ${main.class}
+                                    </mainClass>
+                                </manifest>
+                            </archive>
+                        </configuration>
+                    </plugin>
+
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
@@ -76,29 +123,6 @@
                             </execution>
                         </executions>
                     </plugin>
-                    <!--                    <plugin>-->
-                    <!--                        <groupId>com.spotify</groupId>-->
-                    <!--                        <artifactId>dockerfile-maven-plugin</artifactId>-->
-                    <!--                        <version>1.4.13</version>-->
-                    <!--                        <executions>-->
-                    <!--                            <execution>-->
-                    <!--                                <id>default</id>-->
-                    <!--                                <goals>-->
-                    <!--                                    <goal>build</goal>-->
-                    <!--                                    <goal>push</goal>-->
-                    <!--                                </goals>-->
-                    <!--                            </execution>-->
-                    <!--                        </executions>-->
-                    <!--                        <configuration>-->
-                    <!--                            <repository>dxworks/inspector-git</repository>-->
-                    <!--                            <tag>compass-${project.version}</tag>-->
-                    <!--                            <tag>compass</tag>-->
-                    <!--                            <buildArgs>-->
-                    <!--                                <JAR_FILE>${executable.jar.finalName}.jar</JAR_FILE>-->
-                    <!--                            </buildArgs>-->
-                    <!--                            <useMavenSettingsForAuth>true</useMavenSettingsForAuth>-->
-                    <!--                        </configuration>-->
-                    <!--                    </plugin>-->
                 </plugins>
             </build>
         </profile>

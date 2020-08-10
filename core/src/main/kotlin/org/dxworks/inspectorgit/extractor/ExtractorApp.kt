@@ -1,4 +1,4 @@
-package org.dxworks.inspectorgit
+package org.dxworks.inspectorgit.extractor
 
 import org.dxworks.inspectorgit.gitclient.extractors.MetadataExtractionManager
 import org.dxworks.inspectorgit.gitclient.iglog.readers.IGLogReader
