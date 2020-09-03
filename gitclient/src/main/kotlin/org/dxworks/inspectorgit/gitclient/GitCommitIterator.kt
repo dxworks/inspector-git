@@ -3,6 +3,8 @@ package org.dxworks.inspectorgit.gitclient
 import org.dxworks.inspectorgit.gitclient.iglog.IGLogConstants
 import org.dxworks.inspectorgit.utils.tmpFolder
 import org.slf4j.LoggerFactory
+import java.io.InputStreamReader
+import java.io.Reader
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.thread
 import kotlin.concurrent.withLock
@@ -70,7 +72,7 @@ class GitCommitIterator(gitClient: GitClient, pageSize: Int = 2000, private val 
         cachingIndex = 0
         var currentCommitLines: MutableList<String> = ArrayList()
         val reader = pageInputStream.reader()
-        reader.forEachLine {
+        forEachLine(reader) {
             if (it.startsWith(IGLogConstants.commitIdPrefix)) {
                 cacheCommit(currentCommitLines)
                 currentCommitLines = ArrayList()
@@ -92,5 +94,26 @@ class GitCommitIterator(gitClient: GitClient, pageSize: Int = 2000, private val 
             }
             cachingIndex++
         }
+    }
+
+    private fun forEachLine(reader: InputStreamReader, function: (String) -> Unit) {
+        do {
+            val readLine = readLine(reader)
+            readLine?.let { function(it) }
+        } while (readLine != null)
+    }
+
+    private fun readLine(reader: Reader): String? {
+        var c = 0
+        var line = ""
+        while (c >= 0) {
+            c = reader.read()
+            if (c.toChar() == '\r')
+                continue
+            else if (c.toChar() == '\n')
+                return line
+            line += c.toChar()
+        }
+        return null
     }
 }

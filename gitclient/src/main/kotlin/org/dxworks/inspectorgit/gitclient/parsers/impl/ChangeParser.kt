@@ -37,10 +37,10 @@ class ChangeParser(private val parentCommitId: String) : GitParser<ChangeDTO> {
                     currentHunkLines = ArrayList()
                     hunks.add(currentHunkLines)
                 }
-                if (!it.startsWith("\\"))
-                    currentHunkLines.add("$it\n")
-                else
+                if (it == ("\\ No newline at end of file"))
                     currentHunkLines.add(currentHunkLines.removeAt(currentHunkLines.size - 1).dropLast(1))
+                else
+                    currentHunkLines.add("$it\n")
             }
             LOG.info("Found ${hunks.size} hunks")
             hunks

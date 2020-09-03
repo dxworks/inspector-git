@@ -36,6 +36,8 @@ class ChangeTransformer(private val changeDTO: ChangeDTO, private val commit: Co
 
     private fun getHunks(lastChange: Change?): List<Hunk> {
         LOG.info("Calculating line changes")
+        if (lastChange != null && lastChange.file.isBinary)
+            return emptyList()
         return changeDTO.hunks.map { Hunk(it.lineChanges.map { LineChange(it.operation, getAnnotatedLine(it, lastChange), commit) }) }
     }
 
