@@ -3,9 +3,7 @@ package org.dxworks.inspectorgit.core.transformers
 import org.dxworks.inspectorgit.core.ChangeFactory
 import org.dxworks.inspectorgit.core.model.*
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.ChangeDTO
-import org.dxworks.inspectorgit.gitclient.dto.gitlog.LineChangeDTO
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
-import org.dxworks.inspectorgit.gitclient.enums.LineOperation
 import org.slf4j.LoggerFactory
 
 class ChangeTransformer {
@@ -40,13 +38,6 @@ class ChangeTransformer {
             return changeDTO.hunks.map { Hunk(it.lineChanges.map { LineChange(it.operation, it.number, commit) }) }
         }
 
-//        private fun getAnnotatedLine(lineChangeDTO: LineChangeDTO, lastChange: Change?, commit: Commit): AnnotatedLine {
-//            return if (lineChangeDTO.operation == LineOperation.ADD)
-//                AnnotatedLine(lineChangeDTO.number, commit)
-//            else {
-//                lastChange!!.annotatedLines[lineChangeDTO.number - 1]
-//            }
-//        }
 
         private fun getFileForChange(change: ChangeDTO, project: Project, lastChange: Change?): File {
             LOG.info("Getting file")

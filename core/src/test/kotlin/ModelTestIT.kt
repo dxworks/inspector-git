@@ -44,8 +44,8 @@ internal class ModelTestIT {
                 MetadataExtractionManager(repoPath, tmpFolder).extract()
             }
             val gitLogDTO = IGLogReader().read(repoCache.inputStream())
-//            project = ProjectTransformer(gitLogDTO, repoName, org.dxworks.inspectorgit.TestChangeFactory(gitClient)).transform()
-            project = ProjectTransformer(gitLogDTO, repoName).transform()
+            project = ProjectTransformer(gitLogDTO, repoName, TestChangeFactory(gitClient)).transform()
+//            project = ProjectTransformer(gitLogDTO, repoName).transform()
             println("done")
         }
     }
