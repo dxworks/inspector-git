@@ -1,4 +1,3 @@
-import org.dxworks.inspectorgit.core.TestChangeFactory
 import org.dxworks.inspectorgit.core.model.Commit
 import org.dxworks.inspectorgit.core.model.Project
 import org.dxworks.inspectorgit.core.transformers.ProjectTransformer
@@ -44,8 +43,8 @@ internal class ModelTestIT {
                 MetadataExtractionManager(repoPath, tmpFolder).extract()
             }
             val gitLogDTO = IGLogReader().read(repoCache.inputStream())
-            project = ProjectTransformer(gitLogDTO, repoName, TestChangeFactory(gitClient)).transform()
-//            project = ProjectTransformer(gitLogDTO, repoName).transform()
+//            project = ProjectTransformer(gitLogDTO, repoName, TestChangeFactory(gitClient)).transform()
+            project = ProjectTransformer(gitLogDTO, repoName).transform()
             println("done")
         }
     }
