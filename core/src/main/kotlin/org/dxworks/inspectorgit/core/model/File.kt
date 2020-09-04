@@ -18,7 +18,7 @@ data class File(val isBinary: Boolean, val project: Project, var changes: Mutabl
         return type != null && type != ChangeType.DELETE
     }
 
-    fun annotatedLines(commit: Commit?): List<AnnotatedLine> {
+    fun annotatedLines(commit: Commit?): List<Commit> {
         return getLastChange(commit)?.annotatedLines ?: emptyList()
     }
 

@@ -37,16 +37,16 @@ class ChangeTransformer {
             LOG.info("Calculating line changes")
             if (lastChange != null && lastChange.file.isBinary)
                 return emptyList()
-            return changeDTO.hunks.map { Hunk(it.lineChanges.map { LineChange(it.operation, getAnnotatedLine(it, lastChange, commit), commit) }) }
+            return changeDTO.hunks.map { Hunk(it.lineChanges.map { LineChange(it.operation, it.number, commit) }) }
         }
 
-        private fun getAnnotatedLine(lineChangeDTO: LineChangeDTO, lastChange: Change?, commit: Commit): AnnotatedLine {
-            return if (lineChangeDTO.operation == LineOperation.ADD)
-                AnnotatedLine(lineChangeDTO.number, commit)
-            else {
-                lastChange!!.annotatedLines[lineChangeDTO.number - 1]
-            }
-        }
+//        private fun getAnnotatedLine(lineChangeDTO: LineChangeDTO, lastChange: Change?, commit: Commit): AnnotatedLine {
+//            return if (lineChangeDTO.operation == LineOperation.ADD)
+//                AnnotatedLine(lineChangeDTO.number, commit)
+//            else {
+//                lastChange!!.annotatedLines[lineChangeDTO.number - 1]
+//            }
+//        }
 
         private fun getFileForChange(change: ChangeDTO, project: Project, lastChange: Change?): File {
             LOG.info("Getting file")

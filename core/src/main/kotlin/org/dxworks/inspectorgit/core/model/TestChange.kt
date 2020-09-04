@@ -50,8 +50,7 @@ class TestChange(
         var ok = true
         for (i in 1 until annotatedLineDTOs.size) {
             val annotatedLineDTO = annotatedLineDTOs[i]
-            val annotatedLine = annotatedLines[i]
-            if (!linesAreTheSame(annotatedLineDTO, annotatedLine)) {
+            if (!linesAreTheSame(annotatedLineDTO, annotatedLines[i])) {
 //                LOG.error("$newFileName is not correct in $commitId because:\n$annotatedLineDTO differs from $annotatedLine")
                 ok = false
             }
@@ -59,17 +58,16 @@ class TestChange(
         return ok
     }
 
-    private fun linesAreTheSame(annotatedLineDTO: AnnotatedLineDTO, annotatedLine: AnnotatedLine): Boolean {
-        val numberIsTheSame = annotatedLineDTO.number == annotatedLine.number
+    private fun linesAreTheSame(annotatedLineDTO: AnnotatedLineDTO, annotatedLine:Commit): Boolean {
         val lineDTOCommitId = annotatedLineDTO.commitId
-        val lineCommitId = annotatedLine.commit.id
+        val lineCommitId = annotatedLine.id
         val commitsAreEqual = if (lineDTOCommitId.startsWith("^"))
             lineCommitId.startsWith(lineDTOCommitId.removePrefix("^"))
         else
             lineCommitId == lineDTOCommitId
         if (!commitsAreEqual)
             LOG.warn("In $newFileName at ${commit.id} at line ${annotatedLineDTO.number} commits differ blame: $lineDTOCommitId, IG: $lineCommitId")
-        return numberIsTheSame
+        return true
     }
 
     private fun parseAnnotatedLine(it: String): AnnotatedLineDTO {
