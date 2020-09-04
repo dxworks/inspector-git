@@ -36,6 +36,6 @@ class ProjectTransformer(private val gitLogDTO: GitLogDTO, private val name: Str
             orderedCommitKeys.addAll(commits.map { it.id })
             commits = commits.flatMap { it.parentIds }.distinct().mapNotNull { commitsMap[it] }
         }
-        return orderedCommitKeys.mapNotNull { commitsMap[it] }.toMutableList()
+        return orderedCommitKeys.mapNotNull { commitsMap[it] }.reversed().toMutableList()
     }
 }
