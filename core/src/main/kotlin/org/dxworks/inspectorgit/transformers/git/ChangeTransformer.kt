@@ -37,14 +37,6 @@ class ChangeTransformer {
             return changeDTO.hunks.map { Hunk(it.lineChanges.map { LineChange(it.operation, it.number, commit) }) }
         }
 
-//        private fun getAnnotatedLine(lineChangeDTO: LineChangeDTO, lastChange: Change?, commit: Commit): AnnotatedLine {
-//            return if (lineChangeDTO.operation == LineOperation.ADD)
-//                AnnotatedLine(lineChangeDTO.number, commit)
-//            else {
-//                lastChange!!.annotatedLines[lineChangeDTO.number - 1]
-//            }
-//        }
-
         private fun getFileForChange(change: ChangeDTO, lastChange: Change?, project: GitProject): File {
             LOG.info("Getting file")
             return if (change.type == ChangeType.ADD) {
