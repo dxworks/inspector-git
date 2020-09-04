@@ -99,21 +99,17 @@ internal class ModelTestIT {
         for (i in 1 until annotatedLineDTOs.size) {
             val annotatedLineDTO = annotatedLineDTOs[i]
             val annotatedLine = annotatedLines[i]
-            if (!linesAreTheSame(annotatedLineDTO, annotatedLine, fileName, commitId)) {
-                LOG.error("$fileName is not correct in $commitId because:\n$annotatedLineDTO differs from $annotatedLine")
-                return false
-            }
+            checkLinesAreTheSame(annotatedLineDTO, annotatedLine, fileName, commitId)
         }
         return true
     }
 
-    private fun linesAreTheSame(annotatedLineDTO: AnnotatedLineDTO, annotatedLine: Commit, fileName: String, commitId: String): Boolean {
+    private fun checkLinesAreTheSame(annotatedLineDTO: AnnotatedLineDTO, commit: Commit, fileName: String, commitId: String) {
         lines++
-        if (project.commitRegistry.getById(annotatedLineDTO.commitId) != annotatedLine) {
-            LOG.warn("In $fileName at $commitId at line ${annotatedLineDTO.number} commits differ blame: ${annotatedLineDTO.commitId}, IG: ${annotatedLine.id}")
+        if (annotatedLineDTO.commitId != commit.id) {
+            LOG.warn("In $fileName at $commitId at line ${annotatedLineDTO.number} commits differ blame: ${annotatedLineDTO.commitId}, IG: ${commit.id}")
             linesWithDifferentCommit++
         }
-        return true
     }
 
     private fun parseBlameLine(it: String): AnnotatedLineDTO {
