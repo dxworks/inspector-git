@@ -15,7 +15,7 @@ class ProjectTransformer(private val gitLogDTO: GitLogDTO, private val name: Str
     fun transform(): Project {
         val project = project ?: Project(name)
         LOG.info("Creating project $name")
-        val commits = getSortedCommits(gitLogDTO.commits)
+        val commits = getSortedCommits(gitLogDTO.commits.toMutableList())
         while (commits.size > 0) {
             commits.removeAt(0).let { CommitTransformer.addToProject(it, project, changeFactory) }
         }
@@ -23,19 +23,31 @@ class ProjectTransformer(private val gitLogDTO: GitLogDTO, private val name: Str
         return project
     }
 
-    private fun getSortedCommits(commits: List<CommitDTO>): MutableList<CommitDTO> {
-        val referencedCommits = commits.flatMap { it.parentIds }.toSet()
-        val commitsMap = commits.map { Pair(it.id, it) }.toMap()
-        val lastCommitKey = (commitsMap.keys - referencedCommits).first()
+    private fun getSortedCommits(commits: MutableList<CommitDTO>): MutableList<CommitDTO> {
+        var done = false
+        do {
+            for (i in commits.indices) {
+                val parentIndexes: MutableList<Int> = ArrayList()
+                val commit = commits[i]
 
-        val lastCommit = commitsMap[lastCommitKey]!!
-        val orderedCommitKeys = LinkedHashSet<String>()
-        var commits = listOf(lastCommit)
+                commits.drop(i + 1).forEachIndexed { index, commitDTO ->
+                    if (commit.parentIds.contains(commitDTO.id)) {
+                        parentIndexes.add(index)
+                    }
+                }
 
-        while (commits.any { it.parentIds.isNotEmpty() }) {
-            orderedCommitKeys.addAll(commits.map { it.id })
-            commits = commits.flatMap { it.parentIds }.distinct().mapNotNull { commitsMap[it] }
-        }
-        return orderedCommitKeys.mapNotNull { commitsMap[it] }.reversed().toMutableList()
+                if (parentIndexes.isNotEmpty()) {
+                    commits.removeAt(i)
+                    commits.add(parentIndexes.max()!! + 1, commit)
+                    break
+                }
+
+                parentIndexes.clear()
+                if (i == commits.size - 1)
+                    done = true
+            }
+        } while (!done)
+
+        return commits
     }
 }
