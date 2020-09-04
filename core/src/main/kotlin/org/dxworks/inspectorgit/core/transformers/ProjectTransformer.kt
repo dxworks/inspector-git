@@ -15,8 +15,7 @@ class ProjectTransformer(private val gitLogDTO: GitLogDTO, private val name: Str
     fun transform(): Project {
         val project = project ?: Project(name)
         LOG.info("Creating project $name")
-        val commits = gitLogDTO.commits.toMutableList()
-        getSortedCommits(gitLogDTO.commits)
+        val commits = getSortedCommits(gitLogDTO.commits)
         while (commits.size > 0) {
             commits.removeAt(0).let { CommitTransformer.addToProject(it, project, changeFactory) }
         }
