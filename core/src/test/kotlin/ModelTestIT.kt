@@ -34,7 +34,7 @@ internal class ModelTestIT {
             val tmpFolderFile = tmpFolder.toFile()
             tmpFolderFile.mkdirs()
 
-            val repoPath = seanTest
+            val repoPath = dxPlatformPath
 
             val repoName = repoPath.fileName.toString()
             val repoCache = tmpFolder.resolve("$repoName.iglog").toFile()
