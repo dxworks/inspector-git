@@ -44,13 +44,8 @@ open class Change(val commit: Commit,
 
         adds.forEach { newAnnotatedLines.add(it.lineNumber - 1, it.commit) }
 
-//        reindex(newAnnotatedLines)
         annotatedLines = newAnnotatedLines
     }
-
-//    private fun reindex(annotatedLines: MutableList<AnnotatedLine>) {
-//        annotatedLines.forEachIndexed { index, annotatedLine -> annotatedLine.number = index + 1 }
-//    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
