@@ -104,15 +104,16 @@ class GitCommitIterator(gitClient: GitClient, pageSize: Int = 2000, private val 
     }
 
     private fun readLine(reader: Reader): String? {
-        var c = 0
-        var line = ""
-        while (c >= 0) {
-            c = reader.read()
-            if (c.toChar() == '\r')
+        var read = 0
+        val sb = StringBuilder("")
+        while (read >= 0) {
+            read = reader.read()
+            val c = read.toChar()
+            if (c == '\r')
                 continue
-            else if (c.toChar() == '\n')
-                return line
-            line += c.toChar()
+            else if (c == '\n')
+                return sb.toString()
+            sb.append(c)
         }
         return null
     }
