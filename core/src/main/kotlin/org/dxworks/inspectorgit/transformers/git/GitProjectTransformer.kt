@@ -13,7 +13,7 @@ class GitProjectTransformer(private val gitLogDTO: GitLogDTO, private val name: 
         val project = GitProject(name)
         LOG.info("Creating project $name")
         gitLogDTO.commits.forEach {
-            CommitTransformer(it, project, changeFactory).addToProject()
+            CommitTransformer.addToProject(it, project, changeFactory)
         }
         LOG.info("Done creating project $name")
         return project

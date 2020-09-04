@@ -7,57 +7,57 @@ import org.dxworks.inspectorgit.model.git.Commit
 import org.dxworks.inspectorgit.model.git.GitProject
 import org.slf4j.LoggerFactory
 
-class MergeChangesTransformer(private val changeDTOs: List<ChangeDTO>, val commit: Commit, val project: GitProject, private val changeFactory: ChangeFactory) {
+class MergeChangesTransformer {
 
     companion object {
         val LOG = LoggerFactory.getLogger(MergeChangesTransformer::class.java)
-    }
 
-    fun transform(): List<Change> {
-        val changes = changeDTOs.mapNotNull { ChangeTransformer(it, commit, project, changeFactory).transform() }
-        return if (changes.isEmpty()) return emptyList() else fixChanges(changes)
-    }
-
-    private fun fixChanges(changes: List<Change>): List<Change> {
-        LOG.info("Merging ${changes.size} changes")
-
-        val missingChange = if (changes.size < commit.parents.size && !changes.all { it.type == ChangeType.DELETE })
-            getMissingChange(changes) else null
-        fixAnnotatedLinesCommits(changes, missingChange)
-        mergeFiles(changes, missingChange)
-
-        LOG.info("Finished merging changes")
-        return changes
-    }
-
-    private fun getMissingChange(changes: List<Change>): Change {
-        val cleanParent = commit.parents.first { changes.none { change -> change.parentCommit == it } }
-        return ChangeTransformer.getLastChange(cleanParent, changes.first().newFileName)
-    }
-
-    private fun mergeFiles(changes: List<Change>, missingChange: Change?) {
-        val files = (changes.map { it.file } + listOf(missingChange?.file)).filterNotNull().distinct()
-        if (files.size > 1) {
-            val allFileChanges = files.flatMap { it.changes }.distinct()
-            val file = files.first()
-            file.changes = allFileChanges.sortedBy { it.commit.committerDate }.toMutableList()
-            changes.forEach { it.file = file }
-
-            files.drop(1).forEach { project.fileRegistry.delete(it) }
+        fun transform(changeDTOs: List<ChangeDTO>, commit: Commit, project: GitProject, changeFactory: ChangeFactory): List<Change> {
+            val changes = changeDTOs.mapNotNull { ChangeTransformer.transform(it, commit, project, changeFactory) }
+            return if (changes.isEmpty()) return emptyList() else fixChanges(changes, commit, project)
         }
-    }
 
-    private fun fixAnnotatedLinesCommits(changes: List<Change>, missingChange: Change?) {
-        missingChange?.let { changes.first().annotatedLines = it.annotatedLines }
+        private fun fixChanges(changes: List<Change>, commit: Commit, project: GitProject): List<Change> {
+            LOG.info("Merging ${changes.size} changes")
 
-        val annotatedFiles = changes.map { it.annotatedLines }
-        for (i in annotatedFiles.first().indices) {
-            val currentAnnotatedLines = annotatedFiles.map { it[i] }
-            val firstAnnotatedLine = currentAnnotatedLines[0]
-            val annotatedLines = currentAnnotatedLines.drop(1)
-            if (firstAnnotatedLine.content.commit == commit)
-                annotatedLines.find { it.content.commit != commit }?.let { firstAnnotatedLine.content = it.content }
+            val missingChange = if (changes.size < commit.parents.size && !changes.all { it.type == ChangeType.DELETE })
+                getMissingChange(changes, commit) else null
+            fixAnnotatedLinesCommits(changes, missingChange, commit)
+            mergeFiles(changes, missingChange, project)
+
+            LOG.info("Finished merging changes")
+            return changes
         }
-        changes.drop(1).forEach { it.annotatedLines = changes.first().annotatedLines }
+
+        private fun getMissingChange(changes: List<Change>, commit: Commit): Change {
+            val cleanParent = commit.parents.first { changes.none { change -> change.parentCommit == it } }
+            return ChangeTransformer.getLastChange(cleanParent, changes.first().newFileName)
+        }
+
+        private fun mergeFiles(changes: List<Change>, missingChange: Change?, project: GitProject) {
+            val files = (changes.map { it.file } + listOf(missingChange?.file)).filterNotNull().distinct()
+            if (files.size > 1) {
+                val allFileChanges = files.flatMap { it.changes }.distinct()
+                val file = files.first()
+                file.changes = allFileChanges.sortedBy { it.commit.committerDate }.toMutableList()
+                changes.forEach { it.file = file }
+
+                files.drop(1).forEach { project.fileRegistry.delete(it) }
+            }
+        }
+
+        private fun fixAnnotatedLinesCommits(changes: List<Change>, missingChange: Change?, commit: Commit) {
+            missingChange?.let { changes.first().annotatedLines = it.annotatedLines }
+
+            val annotatedFiles = changes.map { it.annotatedLines }
+            for (i in annotatedFiles.first().indices) {
+                val currentAnnotatedLines = annotatedFiles.map { it[i] }
+                val firstAnnotatedLine = currentAnnotatedLines[0]
+                val annotatedLines = currentAnnotatedLines.drop(1)
+                if (firstAnnotatedLine.content.commit == commit)
+                    annotatedLines.find { it.content.commit != commit }?.let { firstAnnotatedLine.content = it.content }
+            }
+            changes.drop(1).forEach { it.annotatedLines = changes.first().annotatedLines }
+        }
     }
 }

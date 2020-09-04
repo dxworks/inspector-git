@@ -13,7 +13,7 @@ class IGChangeReader(private val igHunkReader: IgHunkReader = IgHunkReader()) {
         val (oldFileName, newFileName) = getFileName(lines, type)
 
         var currentHunkLines: MutableList<String> = ArrayList()
-        val hunks: MutableList<HunkDTO> = ArrayList();
+        val hunks: MutableList<HunkDTO> = ArrayList()
         if (!isBinary) {
             lines.forEach {
                 if (it.startsWith(IGLogConstants.hunkPrefixLine)) {

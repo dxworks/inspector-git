@@ -24,7 +24,7 @@ data class File(val isBinary: Boolean, val project: GitProject, var changes: Mut
 
     fun fullPath(commit: Commit?) = getLastChange(commit)?.newFileName?.let { "${project.name}/$it" }
 
-    fun fileName(commit: Commit?) = relativePath(commit)?.let { it.substring(it.lastIndexOf("/")) }
+    fun fileName(commit: Commit?) = relativePath(commit)?.let { it.substring(it.lastIndexOf("/") + 1) }
 
     fun relativePath(commit: Commit?) = getLastChange(commit)?.newFileName
 
