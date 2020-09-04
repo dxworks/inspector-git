@@ -10,7 +10,7 @@ open class Change(val commit: Commit,
                   var file: File,
                   var parentCommit: Commit?,
                   var hunks: List<Hunk>,
-                  var annotatedLines: List<AnnotatedLine> = emptyList(),
+                  var annotatedLines: MutableList<Commit> = ArrayList(),
                   protected var parentChange: Change?) {
 
     val id: String get() = "${commit.id}-$oldFileName->$newFileName"
@@ -36,21 +36,21 @@ open class Change(val commit: Commit,
 
     private fun applyLineChanges(parentChange: Change?) {
         val newAnnotatedLines = parentChange?.annotatedLines
-                ?.map { AnnotatedLine(it.number, it.content) }?.toMutableList() ?: ArrayList()
+                ?.toMutableList() ?: ArrayList()
         val deletes = deletedLines
         val adds = addedLines
-        deletes.sortedByDescending { it.number }
-                .forEach { newAnnotatedLines.removeAt(it.number - 1) }
+        deletes.sortedByDescending { it.lineNumber }
+                .forEach { newAnnotatedLines.removeAt(it.lineNumber - 1) }
 
-        adds.forEach { newAnnotatedLines.add(it.number - 1, AnnotatedLine(it.number, it.content)) }
+        adds.forEach { newAnnotatedLines.add(it.lineNumber - 1, it.commit) }
 
-        reindex(newAnnotatedLines)
+//        reindex(newAnnotatedLines)
         annotatedLines = newAnnotatedLines
     }
 
-    private fun reindex(annotatedLines: MutableList<AnnotatedLine>) {
-        annotatedLines.forEachIndexed { index, annotatedLine -> annotatedLine.number = index + 1 }
-    }
+//    private fun reindex(annotatedLines: MutableList<AnnotatedLine>) {
+//        annotatedLines.forEachIndexed { index, annotatedLine -> annotatedLine.number = index + 1 }
+//    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

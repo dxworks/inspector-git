@@ -3,7 +3,6 @@ import org.dxworks.inspectorgit.gitclient.dto.gitlog.AnnotatedLineDTO
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
 import org.dxworks.inspectorgit.gitclient.extractors.MetadataExtractionManager
 import org.dxworks.inspectorgit.gitclient.iglog.readers.IGLogReader
-import org.dxworks.inspectorgit.model.git.AnnotatedLine
 import org.dxworks.inspectorgit.model.git.GitProject
 import org.dxworks.inspectorgit.transformers.git.GitProjectTransformer
 import org.dxworks.inspectorgit.utils.tmpFolder
@@ -22,7 +21,8 @@ internal class ModelTestIT {
 
         private val LOG = LoggerFactory.getLogger(ModelTestIT::class.java)
         private val kafkaPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\licenta\\kafka\\kafka")
-        private val dxPlatformPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\dx\\dx-platform")
+        private val dxPlatformPath = Paths.get("/Users/mario/Dxworks/dx-platform")
+        private val seanTest = Paths.get("C:\\Users\\dnagy\\Documents\\Endava\\testProjects\\SeAN")
 
         private var lines = 0.0
         private var linesWithDifferentCommit = 0.0
@@ -33,7 +33,7 @@ internal class ModelTestIT {
             val tmpFolderFile = tmpFolder.toFile()
             tmpFolderFile.mkdirs()
 
-            val repoPath = kafkaPath
+            val repoPath = dxPlatformPath
 
             val repoName = repoPath.fileName.toString()
             val repoCache = tmpFolder.resolve("$repoName.iglog").toFile()
@@ -52,7 +52,12 @@ internal class ModelTestIT {
     @Test
     fun `test that all commits exist in the project`() {
         val commitIds = gitClient.runGitCommand("log --format=\"%H\"")
-        assertTrue { commitIds!!.all { project.commitRegistry.contains(it) } }
+
+        val missingCommits = commitIds!!.filterNot { project.commitRegistry.contains(it) }
+
+        LOG.error("Missing commit ids: $missingCommits");
+
+        assertTrue(missingCommits.isEmpty())
     }
 
     @Test
@@ -84,12 +89,12 @@ internal class ModelTestIT {
         assertTrue { ok }
     }
 
-    private fun blameAndFileContentAreTheSame(blame: List<String>, annotatedLines: List<AnnotatedLine>, fileName: String, commitId: String): Boolean {
+    private fun blameAndFileContentAreTheSame(blame: List<String>, annotatedLines: List<Commit>, fileName: String, commitId: String): Boolean {
         if (blame.size != annotatedLines.size) {
             LOG.error("$fileName blames have a different number of lines")
             return false
         }
-        val annotatedLineDTOs = blame.map { parseAnnotatedLine(it) }
+        val annotatedLineDTOs = blame.map { parseBlameLine(it) }
         for (i in 1 until annotatedLineDTOs.size) {
             val annotatedLineDTO = annotatedLineDTOs[i]
             val annotatedLine = annotatedLines[i]
@@ -101,18 +106,16 @@ internal class ModelTestIT {
         return true
     }
 
-    private fun linesAreTheSame(annotatedLineDTO: AnnotatedLineDTO, annotatedLine: AnnotatedLine, fileName: String, commitId: String): Boolean {
+    private fun linesAreTheSame(annotatedLineDTO: AnnotatedLineDTO, annotatedLine: Commit, fileName: String, commitId: String): Boolean {
         lines++
-        val numberAndContentAreTheSame = annotatedLineDTO.number == annotatedLine.number &&
-                (annotatedLine.content.content == null || annotatedLineDTO.content == annotatedLine.content.content)
-        if (project.commitRegistry.getById(annotatedLineDTO.commitId) != annotatedLine.content.commit) {
-            LOG.warn("In $fileName at $commitId at line ${annotatedLineDTO.number} commits differ blame: ${annotatedLineDTO.commitId}, IG: ${annotatedLine.content.commit.id}")
+        if (project.commitRegistry.getById(annotatedLineDTO.commitId) != annotatedLine) {
+            LOG.warn("In $fileName at $commitId at line ${annotatedLineDTO.number} commits differ blame: ${annotatedLineDTO.commitId}, IG: ${annotatedLine.id}")
             linesWithDifferentCommit++
         }
-        return numberAndContentAreTheSame
+        return true
     }
 
-    private fun parseAnnotatedLine(it: String): AnnotatedLineDTO {
+    private fun parseBlameLine(it: String): AnnotatedLineDTO {
         val commitDelimiterIndex = it.indexOf(" ")
         val commitId = it.substring(0, commitDelimiterIndex)
         val other = it.substring(commitDelimiterIndex + 1)

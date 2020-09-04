@@ -54,8 +54,8 @@ class MergeChangesTransformer {
                 val currentAnnotatedLines = annotatedFiles.map { it[i] }
                 val firstAnnotatedLine = currentAnnotatedLines[0]
                 val annotatedLines = currentAnnotatedLines.drop(1)
-                if (firstAnnotatedLine.content.commit == commit)
-                    annotatedLines.find { it.content.commit != commit }?.let { firstAnnotatedLine.content = it.content }
+                if (firstAnnotatedLine == commit)
+                    annotatedLines.find { it != commit }?.let { annotatedFiles[0].set(i, it) }
             }
             changes.drop(1).forEach { it.annotatedLines = changes.first().annotatedLines }
         }

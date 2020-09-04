@@ -1,9 +1,7 @@
 package org.dxworks.inspectorgit.transformers.git
 
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.ChangeDTO
-import org.dxworks.inspectorgit.gitclient.dto.gitlog.LineChangeDTO
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
-import org.dxworks.inspectorgit.gitclient.enums.LineOperation
 import org.dxworks.inspectorgit.model.git.*
 import org.slf4j.LoggerFactory
 
@@ -36,16 +34,16 @@ class ChangeTransformer {
             LOG.info("Calculating line changes")
             if (lastChange != null && lastChange.file.isBinary)
                 return emptyList()
-            return changeDTO.hunks.map { Hunk(it.lineChanges.map { LineChange(it.operation, it.number, getContent(it, lastChange, commit), commit) }) }
+            return changeDTO.hunks.map { Hunk(it.lineChanges.map { LineChange(it.operation, it.number, commit) }) }
         }
 
-        private fun getContent(lineChangeDTO: LineChangeDTO, lastChange: Change?, commit: Commit): AnnotatedContent {
-            return if (lineChangeDTO.operation == LineOperation.ADD)
-                AnnotatedContent(commit, lineChangeDTO.content)
-            else {
-                lastChange!!.annotatedLines[lineChangeDTO.number - 1].content
-            }
-        }
+//        private fun getAnnotatedLine(lineChangeDTO: LineChangeDTO, lastChange: Change?, commit: Commit): AnnotatedLine {
+//            return if (lineChangeDTO.operation == LineOperation.ADD)
+//                AnnotatedLine(lineChangeDTO.number, commit)
+//            else {
+//                lastChange!!.annotatedLines[lineChangeDTO.number - 1]
+//            }
+//        }
 
         private fun getFileForChange(change: ChangeDTO, lastChange: Change?, project: GitProject): File {
             LOG.info("Getting file")
