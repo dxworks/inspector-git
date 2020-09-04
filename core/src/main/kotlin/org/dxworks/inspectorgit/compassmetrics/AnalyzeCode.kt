@@ -9,9 +9,9 @@ fun analyzeCode(composedProject: GitProject, period: Period?): Map<String, Doubl
     val codeChurn = "Code Churn" to changes.flatMap { it.hunks }
             .filter {
                 it.addedLines.isNotEmpty() && it.deletedLines
-                        .any { lineChange -> periodFilter(period, lineChange.content.commit.committerDate) }
+                        .any { lineChange -> periodFilter(period, lineChange.commit.committerDate) }
             }
-            .flatMap { it.deletedLines }.count { periodFilter(period, it.content.commit.committerDate) }.toDouble()
+            .flatMap { it.deletedLines }.count { periodFilter(period, it.commit.committerDate) }.toDouble()
 
     val `number of files with changes from at least two developers in this period` =
             changes.groupBy { it.file }

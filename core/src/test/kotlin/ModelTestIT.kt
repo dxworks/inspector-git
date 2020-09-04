@@ -3,6 +3,7 @@ import org.dxworks.inspectorgit.gitclient.dto.gitlog.AnnotatedLineDTO
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
 import org.dxworks.inspectorgit.gitclient.extractors.MetadataExtractionManager
 import org.dxworks.inspectorgit.gitclient.iglog.readers.IGLogReader
+import org.dxworks.inspectorgit.model.git.Commit
 import org.dxworks.inspectorgit.model.git.GitProject
 import org.dxworks.inspectorgit.transformers.git.GitProjectTransformer
 import org.dxworks.inspectorgit.utils.tmpFolder
