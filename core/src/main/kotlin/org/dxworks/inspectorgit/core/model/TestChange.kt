@@ -58,7 +58,7 @@ class TestChange(
         return ok
     }
 
-    private fun linesAreTheSame(annotatedLineDTO: AnnotatedLineDTO, annotatedLine:Commit): Boolean {
+    private fun linesAreTheSame(annotatedLineDTO: AnnotatedLineDTO, annotatedLine: Commit): Boolean {
         val lineDTOCommitId = annotatedLineDTO.commitId
         val lineCommitId = annotatedLine.id
         val commitsAreEqual = if (lineDTOCommitId.startsWith("^"))

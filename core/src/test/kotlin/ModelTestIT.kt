@@ -1,3 +1,4 @@
+import org.dxworks.inspectorgit.core.TestChangeFactory
 import org.dxworks.inspectorgit.core.model.Commit
 import org.dxworks.inspectorgit.core.model.Project
 import org.dxworks.inspectorgit.core.transformers.ProjectTransformer
@@ -22,7 +23,7 @@ internal class ModelTestIT {
 
         private val LOG = LoggerFactory.getLogger(ModelTestIT::class.java)
         private val kafkaPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\licenta\\kafka\\kafka")
-        private val dxPlatformPath = Paths.get("/Users/mario/Dxworks/dx-platform")
+        private val dxPlatformPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\dx\\dx-platform")
         private val seanTest = Paths.get("C:\\Users\\dnagy\\Documents\\Endava\\testProjects\\SeAN")
 
         private var lines = 0.0
@@ -56,7 +57,7 @@ internal class ModelTestIT {
 
         val missingCommits = commitIds!!.filterNot { project.commitRegistry.contains(it) }
 
-        LOG.error("Missing commit ids: $missingCommits");
+        LOG.error("Missing commit ids: $missingCommits")
 
         assertTrue(missingCommits.isEmpty())
     }
