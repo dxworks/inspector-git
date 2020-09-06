@@ -11,10 +11,8 @@ import org.dxworks.inspectorgit.gitclient.extractors.impl.LineOperationsMetaExtr
 import org.dxworks.inspectorgit.gitclient.iglog.writers.IGLogWriter
 import org.dxworks.inspectorgit.gitclient.parsers.CommitParserFactory
 import org.dxworks.inspectorgit.gitclient.parsers.LogParser
-import org.dxworks.inspectorgit.utils.appFolderPath
+import java.io.File
 import java.nio.file.Path
-import java.nio.file.Paths
-import kotlin.system.measureTimeMillis
 
 class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path) {
     private val gitClient = GitClient(repoPath)
@@ -25,6 +23,9 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
 
     private val lineOperationsMetaExtractor = LineOperationsMetaExtractor()
     private val hunkChangeMetaExtractor = HunkChangeMetaExtractor()
+
+    private val writtenCommitIds: MutableSet<String> = HashSet()
+    private val logsOnHold: MutableList<GitLogDTO> = ArrayList()
 
     init {
         if (!extractDir.isDirectory && !extractDir.mkdir())
@@ -60,11 +61,38 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
                 commit
             }
             val gitLogDTO = LogParser(gitClient).parse(commits)
-
             swapContentWithMetadata(gitLogDTO)
-            extractFile.appendText(toIgLog(gitLogDTO))
+
+
+            if (writtenCommitIds.containsAll(gitLogDTO.commits.flatMap { it.parentIds }.distinct())) {
+                writeGitLog(extractFile, gitLogDTO)
+                writeLogsOnHold(extractFile)
+            } else {
+                logsOnHold.add(gitLogDTO)
+            }
+
+
+
             currentCommit = currentCommit ?: if (commitIterator.hasNext()) commitIterator.next() else null
         }
+    }
+
+    private fun writeLogsOnHold(extractFile: File, i: Int = 0) {
+        if (i >= logsOnHold.size) {
+            val parentCommitIds = logsOnHold[i].commits.flatMap { it.parentIds }.distinct()
+            if (writtenCommitIds.containsAll(parentCommitIds)) {
+                writeGitLog(extractFile, logsOnHold[i])
+                logsOnHold.removeAt(i)
+                writeLogsOnHold(extractFile, i)
+            } else {
+                writeLogsOnHold(extractFile, i + 1)
+            }
+        }
+    }
+
+    private fun writeGitLog(extractFile: File, gitLogDTO: GitLogDTO) {
+        extractFile.appendText(toIgLog(gitLogDTO))
+        writtenCommitIds.addAll(gitLogDTO.commits.map { it.id }.distinct())
     }
 
     private fun toIgLog(gitLogDTO: GitLogDTO) = IGLogWriter(gitLogDTO).write()
