@@ -78,7 +78,7 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
     }
 
     private fun writeLogsOnHold(extractFile: File, i: Int = 0) {
-        if (i >= logsOnHold.size) {
+        if (i < logsOnHold.size) {
             val parentCommitIds = logsOnHold[i].commits.flatMap { it.parentIds }.distinct()
             if (writtenCommitIds.containsAll(parentCommitIds)) {
                 writeGitLog(extractFile, logsOnHold[i])
