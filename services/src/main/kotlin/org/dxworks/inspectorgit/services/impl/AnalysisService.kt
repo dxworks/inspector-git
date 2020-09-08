@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.lang.Binding
 import groovy.lang.Closure
 import groovy.lang.GroovyShell
+import org.dxworks.inspectorgit.AccountMerge
 import org.dxworks.inspectorgit.dto.GroovyScriptDTO
 import org.dxworks.inspectorgit.dto.ScriptResult
 import org.dxworks.inspectorgit.dto.localProjects.LocalSystemDTO
@@ -14,7 +15,8 @@ import java.io.PrintWriter
 import java.io.StringWriter
 
 @Service
-class AnalysisService(private val loadedSystem: LoadedSystem) {
+class AnalysisService(private val loadedSystem: LoadedSystem,
+                      private val accountMergeService: AccountMergeService) {
     companion object {
         private val LOG = LoggerFactory.getLogger(AnalysisService::class.java)
     }
@@ -43,6 +45,20 @@ class AnalysisService(private val loadedSystem: LoadedSystem) {
                     val file = folderPath.resolve("${args[1].toString()}.json").toFile()
                     objectMapper.writerWithDefaultPrettyPrinter().writeValue(file, args[0])
                     outputFiles.add(file.name)
+                }
+            })
+
+            binding.setVariable("mergeAccounts", object : Closure<Unit>(null) {
+                override fun call(vararg args: Any?) {
+                    val name = args[0].toString()
+                    accountMergeService.mergeAccounts(AccountMerge(name, args.drop(1).mapNotNull { it?.toString() }))
+                }
+            })
+
+            binding.setVariable("mergeDevelopers", object : Closure<Unit>(null) {
+                override fun call(vararg args: Any?) {
+                    val name = args[0].toString()
+                    accountMergeService.mergeDevelopers(AccountMerge(name, args.drop(1).mapNotNull { it?.toString() }))
                 }
             })
 

@@ -18,7 +18,7 @@ class AccountMergeService(private val system: LoadedSystem) {
         }
     }
 
-    private fun mergeAccounts(accountMerge: AccountMerge) {
+    fun mergeAccounts(accountMerge: AccountMerge) {
         val name = accountMerge.name
         if (system.developerRegistry.contains(name)) {
             LOG.warn("Could not create developer $name. Already exists")
@@ -53,10 +53,6 @@ class AccountMergeService(private val system: LoadedSystem) {
 
     fun mergeDevelopers(devMerge: AccountMerge) {
         val name = devMerge.name
-        if (system.developerRegistry.contains(name)) {
-            LOG.warn("Could not create developer $name. Already exists")
-            return
-        }
 
         val devs = devMerge.idsToMerge.mapNotNull {
             val dev = system.developerRegistry.getById(it)
@@ -72,6 +68,12 @@ class AccountMergeService(private val system: LoadedSystem) {
 
         val accounts = devs.flatMap { it.accounts }
         devs.forEach { system.developerRegistry.remove(it.name) }
+
+        if (system.developerRegistry.contains(name)) {
+            LOG.warn("Could not create developer $name. Already exists")
+            return
+        }
+
         createAndLinkDeveloper(name, accounts)
     }
 
