@@ -13,7 +13,7 @@ import org.dxworks.inspectorgit.transformers.getRegexWithWordBoundaryGroups
 
 class IssueTrackerProject(override val name: String) : Project {
 
-    val accountRegistry = AccountRegistry()
+    override val accountRegistry = AccountRegistry()
     val issueRegistry = IssueRegistry()
     val issueTypeRegistry = IssueTypeRegistry()
     val issueStatusRegistry = IssueStatusRegistry()

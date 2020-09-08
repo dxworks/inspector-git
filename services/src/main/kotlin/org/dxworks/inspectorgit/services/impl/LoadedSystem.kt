@@ -4,6 +4,7 @@ import org.dxworks.inspectorgit.model.Project
 import org.dxworks.inspectorgit.model.git.GitProject
 import org.dxworks.inspectorgit.model.issuetracker.IssueTrackerProject
 import org.dxworks.inspectorgit.model.remote.RemoteGitProject
+import org.dxworks.inspectorgit.registries.DeveloperRegistry
 import org.springframework.stereotype.Component
 
 @Component
@@ -21,6 +22,8 @@ class LoadedSystem {
         get() = getProjectsByType()
     val remoteProjects: Map<String, RemoteGitProject>
         get() = getProjectsByType()
+
+    val developerRegistry = DeveloperRegistry()
 
     private inline fun <reified T : Project> getProjectsByType() =
             projects.values.filterIsInstance<T>().map { Pair(it.name, it) }.toMap()

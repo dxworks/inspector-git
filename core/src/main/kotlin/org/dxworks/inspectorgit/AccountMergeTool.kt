@@ -7,7 +7,7 @@ class AccountMergeTool(private val composedProject: ComposedProject) {
     fun mergeAll(accountMerges: List<AccountMerge>) = accountMerges.forEach { merge(it) }
 
     fun merge(accountMerge: AccountMerge) {
-        val developer = Developer(accountMerge.name, accountMerge.accountIds.mapNotNull { composedProject.accountRegistry.getById(it) })
+        val developer = Developer(accountMerge.name, accountMerge.idsToMerge.mapNotNull { composedProject.accountRegistry.getById(it) })
         developer.accounts.forEach { it.developer = developer }
         composedProject.developerRegistry.add(developer)
     }

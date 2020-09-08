@@ -13,7 +13,7 @@ import org.dxworks.inspectorgit.transformers.getRegexWithWordBoundaryGroups
 
 class RemoteGitProject(override val name: String) : Project {
 
-    val accountRegistry = AccountRegistry()
+    override val accountRegistry = AccountRegistry()
     val pullRequestRegistry = PullRequestRegistry()
     val repoRegistry = RemoteRepoRegistry()
     val simpleBranchRegistry = SimpleBranchRegistry()

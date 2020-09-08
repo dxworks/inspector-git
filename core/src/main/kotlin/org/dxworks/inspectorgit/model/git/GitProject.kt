@@ -9,7 +9,7 @@ import org.dxworks.inspectorgit.registries.git.FileRegistry
 import org.dxworks.inspectorgit.transformers.getRegexWithWordBoundaryGroups
 
 class GitProject(override val name: String) : Project {
-    val accountRegistry = AccountRegistry()
+    override val accountRegistry = AccountRegistry()
     val commitRegistry = CommitRegistry()
     val fileRegistry = FileRegistry()
 
