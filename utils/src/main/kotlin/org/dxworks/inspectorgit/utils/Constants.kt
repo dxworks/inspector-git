@@ -15,3 +15,5 @@ val appFolderPath: Path = userHomePath.resolve(appFolderName)
 val systemsFolderPath: Path = userHomePath.resolve(appFolderName).resolve("systems")
 val propertyFilePath: Path = appFolderPath.resolve(Paths.get("inspector.properties"))
 val tmpFolder: Path = Paths.get(System.getProperty("java.io.tmpdir")).resolve("inspectorGit")
+
+val chronosSettingsFileName = "chronos-settings.json"

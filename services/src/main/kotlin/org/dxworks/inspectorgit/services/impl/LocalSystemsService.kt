@@ -11,7 +11,9 @@ import org.dxworks.inspectorgit.jira.dtos.IssueTrackerImportDTO
 import org.dxworks.inspectorgit.persistence.entities.LocalSystemEntity
 import org.dxworks.inspectorgit.persistence.repositories.LocalSystemRepository
 import org.dxworks.inspectorgit.remote.dtos.RemoteInfoDTO
-import org.dxworks.inspectorgit.utils.systemsFolderPath
+import org.dxworks.inspectorgit.services.impl.chronos.ChronosSettingsService
+import org.dxworks.inspectorgit.utils.FileSystemUtils.Companion.getSystemFolder
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.io.File
 import java.io.FileNotFoundException
@@ -21,7 +23,13 @@ import javax.transaction.Transactional
 
 @Service
 class LocalSystemsService(private val loadedSystem: LoadedSystem,
-                          private val localSystemRepository: LocalSystemRepository) {
+                          private val localSystemRepository: LocalSystemRepository,
+                          private val chronosSettingsService: ChronosSettingsService) {
+
+    companion object {
+        private val LOG = LoggerFactory.getLogger(LocalSystemsService::class.java)
+    }
+
     private val mapper = jacksonObjectMapper()
 
     init {
@@ -73,6 +81,15 @@ class LocalSystemsService(private val loadedSystem: LoadedSystem,
                 .parallelStream().map { ProjectFactories.create(it.first, it.second) }.collect(Collectors.toList())
 
         loadedSystem.set(localSystemDTO.id, localSystemDTO.name, projects)
+        applyChronosMergesIfPossible()
+    }
+
+    private fun applyChronosMergesIfPossible() {
+        try {
+            chronosSettingsService.applyMerges()
+        } catch (e: Exception) {
+            LOG.warn("Could not apply Chronos merges: ${e.message}")
+        }
     }
 
     private fun getSystemFiles(systemId: String, fileNames: List<String>): List<String> {
@@ -110,7 +127,4 @@ class LocalSystemsService(private val loadedSystem: LoadedSystem,
         getSystemFolder(id).deleteRecursively()
         localSystemRepository.deleteBySystemId(id)
     }
-
-    private fun getSystemFolder(id: String) = systemsFolderPath.resolve(id).toFile()
-
 }

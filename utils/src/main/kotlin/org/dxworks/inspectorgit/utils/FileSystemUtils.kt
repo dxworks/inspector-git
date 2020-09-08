@@ -43,5 +43,7 @@ class FileSystemUtils {
                 }
             }
         }
+
+        fun getSystemFolder(id: String) = systemsFolderPath.resolve(id).toFile()
     }
 }
