@@ -48,14 +48,6 @@
         </dependency>
     </dependencies>
 
-    <repositories>
-        <repository>
-            <id>github</id>
-            <name>GitHub IG Frontend Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/dxworks/inspector-git-fe</url>
-        </repository>
-    </repositories>
-
     <build>
         <plugins>
             <plugin>

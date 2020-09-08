@@ -1,8 +1,8 @@
 package org.dxworks.inspectorgit.web.controllers
 
 import org.dxworks.inspectorgit.AccountMerge
-import org.dxworks.inspectorgit.services.impl.AccountMergeService
-import org.dxworks.inspectorgit.services.impl.chronos.ChronosSettingsService
+import org.dxworks.inspectorgit.services.AccountMergeService
+import org.dxworks.inspectorgit.services.chronos.ChronosSettingsService
 import org.dxworks.inspectorgit.web.apiPath
 import org.springframework.web.bind.annotation.*
 

@@ -1,9 +1,0 @@
-data class IssueFields(
-        var parent: Issue?,
-        var issuetype: IssueType?,
-        var status: IssueStatus?,
-        var components: List<JiraComponent>?,
-        var summary: String?,
-        var description: String?,
-        var created: String?,
-        var updated: String?)

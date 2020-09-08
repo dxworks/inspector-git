@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>client</artifactId>
+    <artifactId>gitclient</artifactId>
 
     <properties>
         <main.class>org.dxworks.inspectorgit.gitclient.MainKt</main.class>
@@ -17,11 +17,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.dxworks.inspectorgit</groupId>
-            <artifactId>api</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
         <dependency>
             <groupId>org.dxworks.inspectorgit</groupId>
             <artifactId>utils</artifactId>

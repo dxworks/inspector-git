@@ -1,9 +1,9 @@
 package org.dxworks.inspectorgit.web.controllers
 
-import org.dxworks.inspectorgit.dto.GroovyScriptDTO
-import org.dxworks.inspectorgit.dto.ScriptResult
-import org.dxworks.inspectorgit.dto.localProjects.LocalSystemDTO
-import org.dxworks.inspectorgit.services.impl.AnalysisService
+import org.dxworks.inspectorgit.services.AnalysisService
+import org.dxworks.inspectorgit.services.dto.GroovyScriptDTO
+import org.dxworks.inspectorgit.services.dto.LocalSystemDTO
+import org.dxworks.inspectorgit.services.dto.ScriptResult
 import org.dxworks.inspectorgit.utils.FileSystemUtils.Companion.getScriptResult
 import org.dxworks.inspectorgit.utils.FileSystemUtils.Companion.openFile
 import org.dxworks.inspectorgit.web.apiPath
