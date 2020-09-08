@@ -1,8 +1,8 @@
 package org.dxworks.inspectorgit.registries.issuetracker
 
-import org.dxworks.inspectorgit.compassmetrics.Period
 import org.dxworks.inspectorgit.model.issuetracker.DetailedIssue
 import org.dxworks.inspectorgit.model.issuetracker.Issue
+import org.dxworks.inspectorgit.model.issuetracker.Period
 import org.dxworks.inspectorgit.registries.AbstractRegistry
 import java.time.LocalTime
 

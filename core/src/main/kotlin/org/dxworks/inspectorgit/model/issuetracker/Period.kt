@@ -1,4 +1,4 @@
-package org.dxworks.inspectorgit.compassmetrics
+package org.dxworks.inspectorgit.model.issuetracker
 
 import java.time.ZonedDateTime
 

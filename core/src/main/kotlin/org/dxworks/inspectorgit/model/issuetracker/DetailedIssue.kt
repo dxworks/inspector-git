@@ -1,6 +1,5 @@
 package org.dxworks.inspectorgit.model.issuetracker
 
-import org.dxworks.inspectorgit.compassmetrics.Period
 import org.dxworks.inspectorgit.model.git.Commit
 import org.dxworks.inspectorgit.model.remote.PullRequest
 import java.time.ZonedDateTime
