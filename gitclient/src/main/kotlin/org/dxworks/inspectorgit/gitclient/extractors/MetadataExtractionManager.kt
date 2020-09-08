@@ -83,7 +83,7 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
             if (writtenCommitIds.containsAll(parentCommitIds)) {
                 writeGitLog(extractFile, logsOnHold[i])
                 logsOnHold.removeAt(i)
-                writeLogsOnHold(extractFile, i)
+                writeLogsOnHold(extractFile)
             } else {
                 writeLogsOnHold(extractFile, i + 1)
             }
