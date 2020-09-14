@@ -1,6 +1,9 @@
 package org.dxworks.inspectorgit.services
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.dataformat.csv.CsvMapper
+import com.fasterxml.jackson.dataformat.csv.CsvSchema
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import groovy.lang.Binding
 import groovy.lang.Closure
 import groovy.lang.GroovyShell
@@ -24,8 +27,6 @@ class AnalysisService(private val loadedSystem: LoadedSystem,
     fun runGroovyScript(groovyScriptDTO: GroovyScriptDTO): ScriptResult {
         val stringWriter = StringWriter()
 
-        val objectMapper = ObjectMapper()
-
         val outputFiles: MutableList<String> = ArrayList()
 
         try {
@@ -33,43 +34,74 @@ class AnalysisService(private val loadedSystem: LoadedSystem,
                 throw IllegalStateException("There is no loaded system")
             }
 
-            val binding = Binding()
-
-            binding.setVariable("log", stringWriter)
-            binding.setVariable("system", loadedSystem)
-            binding.setVariable("export", object : Closure<Unit>(null) {
-
-                override fun call(vararg args: Any?) {
-                    val folderPath = getScriptResultsPathForSystem(loadedSystem.id)
-                    folderPath.toFile().mkdirs()
-                    val file = folderPath.resolve("${args[1].toString()}.json").toFile()
-                    objectMapper.writerWithDefaultPrettyPrinter().writeValue(file, args[0])
-                    outputFiles.add(file.name)
-                }
-            })
-
-            binding.setVariable("mergeAccounts", object : Closure<Unit>(null) {
-                override fun call(vararg args: Any?) {
-                    val name = args[0].toString()
-                    accountMergeService.mergeAccounts(AccountMerge(name, args.drop(1).mapNotNull { it?.toString() }))
-                }
-            })
-
-            binding.setVariable("mergeDevelopers", object : Closure<Unit>(null) {
-                override fun call(vararg args: Any?) {
-                    val name = args[0].toString()
-                    accountMergeService.mergeDevelopers(AccountMerge(name, args.drop(1).mapNotNull { it?.toString() }))
-                }
-            })
+            val binding = getBindings(stringWriter, outputFiles)
 
             val shell = GroovyShell(binding)
-            shell.evaluate(groovyScriptDTO.script)
+            shell.evaluate(prepareScript(groovyScriptDTO.script))
 
         } catch (e: Exception) {
             e.printStackTrace(PrintWriter(stringWriter))
             LOG.error("Exception executing groovy script", e)
         }
         return ScriptResult(stringWriter.toString(), outputFiles)
+    }
+
+    private fun prepareScript(script: String) =
+            script.lines().filterNot { it.matches(Regex(".*import\\s+static\\s+org\\.dxworks\\.inspectorgit\\.services\\.ScriptUtilsKt.*")) }.joinToString(separator = "\n")
+
+    private fun getBindings(stringWriter: StringWriter, outputFiles: MutableList<String>): Binding {
+        val binding = Binding()
+        val jsonMapper = jacksonObjectMapper()
+        val csvMapper = CsvMapper().registerModule(KotlinModule())
+
+        binding.setVariable("log", stringWriter)
+        binding.setVariable("system", loadedSystem)
+        binding.setVariable("exportJson", object : Closure<Unit>(null) {
+
+            override fun call(vararg args: Any?) {
+                val folderPath = getScriptResultsPathForSystem(loadedSystem.id)
+                folderPath.toFile().mkdirs()
+                val file = folderPath.resolve("${args[1].toString()}.json").toFile()
+                jsonMapper.writerWithDefaultPrettyPrinter().writeValue(file, args[0])
+                outputFiles.add(file.name)
+            }
+        })
+
+        binding.setVariable("exportCsv", object : Closure<Unit>(null) {
+
+            override fun call(vararg args: Any?) {
+                if (args[0] is List<*>) {
+                    if ((args[0] as List<*>).size > 0) {
+                        val list = args[0] as List<Map<String, Any>>
+
+                        val builder = CsvSchema.builder()
+                        list[0].keys.forEach { builder.addColumn(it) }
+                        val csvSchema = builder.build().withHeader()
+                        val folderPath = getScriptResultsPathForSystem(loadedSystem.id)
+                        folderPath.toFile().mkdirs()
+                        val file = folderPath.resolve("${args[1].toString()}.csv").toFile()
+                        csvMapper.writer(csvSchema).writeValue(file, args[0])
+                        outputFiles.add(file.name)
+                    }
+                }
+            }
+        })
+
+        binding.setVariable("mergeAccounts", object : Closure<Unit>(null) {
+            override fun call(vararg args: Any?) {
+                val name = args[0].toString()
+                accountMergeService.mergeAccounts(AccountMerge(name, args.drop(1).mapNotNull { it?.toString() }))
+            }
+        })
+
+        binding.setVariable("mergeDevelopers", object : Closure<Unit>(null) {
+            override fun call(vararg args: Any?) {
+                val name = args[0].toString()
+                accountMergeService.mergeDevelopers(AccountMerge(name, args.drop(1).mapNotNull { it?.toString() }))
+            }
+        })
+
+        return binding
     }
 
     fun getDetails(): LocalSystemDTO? =
