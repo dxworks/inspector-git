@@ -3,7 +3,7 @@ package org.dxworks.inspectorgit.registries
 import java.util.*
 
 abstract class AbstractRegistry<TYPE, ID> {
-    private val map: MutableMap<ID, TYPE> = HashMap()
+    private val map: MutableMap<ID, TYPE> = LinkedHashMap()
 
     val all: Collection<TYPE>
         get() = map.values

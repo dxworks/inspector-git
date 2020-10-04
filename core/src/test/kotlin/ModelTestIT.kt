@@ -5,7 +5,7 @@ import org.dxworks.inspectorgit.gitclient.extractors.MetadataExtractionManager
 import org.dxworks.inspectorgit.gitclient.iglog.readers.IGLogReader
 import org.dxworks.inspectorgit.model.git.Commit
 import org.dxworks.inspectorgit.model.git.GitProject
-import org.dxworks.inspectorgit.transformers.git.GitProjectTransformer
+import org.dxworks.inspectorgit.transformers.GitProjectTransformer
 import org.dxworks.inspectorgit.utils.tmpFolder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
