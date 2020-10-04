@@ -15,7 +15,7 @@ class ChangeTransformer {
 
         fun transform(changeDTO: ChangeDTO, commit: Commit, project: GitProject, changeFactory: ChangeFactory): Change? {
             val parentCommit = if (changeDTO.parentCommitId.isEmpty()) null else commit.parents.find { it.id == changeDTO.parentCommitId }!!
-            val lastChange = if (changeDTO.type == ChangeType.ADD) null else getLastChange(parentCommit!!, changeDTO.oldFileName)
+            val lastChange = if (changeDTO.type == org.dxworks.inspectorgit.gitclient.enums.ChangeType.ADD) null else getLastChange(parentCommit!!, changeDTO.oldFileName)
             LOG.info("Creating ${changeDTO.type} change for file: ${changeDTO.oldFileName} -> ${changeDTO.newFileName}")
             val file = getFileForChange(changeDTO, lastChange, project)
             return changeFactory.create(
