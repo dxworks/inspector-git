@@ -19,7 +19,8 @@ import java.io.StringWriter
 
 @Service
 class AnalysisService(private val loadedSystem: LoadedSystem,
-                      private val accountMergeService: AccountMergeService) {
+                      private val accountMergeService: AccountMergeService,
+                      private val messageClassifierService: MessageClassifierService) {
     companion object {
         private val LOG = LoggerFactory.getLogger(AnalysisService::class.java)
     }
@@ -56,6 +57,7 @@ class AnalysisService(private val loadedSystem: LoadedSystem,
 
         binding.setVariable("log", stringWriter)
         binding.setVariable("system", loadedSystem)
+        binding.setVariable("messageClassifier", messageClassifierService)
         binding.setVariable("exportJson", object : Closure<Unit>(null) {
 
             override fun call(vararg args: Any?) {
