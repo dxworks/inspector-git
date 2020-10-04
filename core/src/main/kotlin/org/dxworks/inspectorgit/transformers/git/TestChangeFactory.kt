@@ -1,12 +1,8 @@
 package org.dxworks.inspectorgit.transformers.git
 
 import org.dxworks.inspectorgit.gitclient.GitClient
-import org.dxworks.inspectorgit.gitclient.enums.ChangeType
 import org.dxworks.inspectorgit.model.TestChange
-import org.dxworks.inspectorgit.model.git.Change
-import org.dxworks.inspectorgit.model.git.Commit
-import org.dxworks.inspectorgit.model.git.File
-import org.dxworks.inspectorgit.model.git.Hunk
+import org.dxworks.inspectorgit.model.git.*
 
 class TestChangeFactory(private val gitClient: GitClient) : ChangeFactory() {
     override fun create(commit: Commit,

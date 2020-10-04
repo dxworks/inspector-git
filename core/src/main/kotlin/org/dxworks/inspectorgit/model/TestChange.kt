@@ -2,11 +2,7 @@ package org.dxworks.inspectorgit.model
 
 import org.dxworks.inspectorgit.gitclient.GitClient
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.AnnotatedLineDTO
-import org.dxworks.inspectorgit.gitclient.enums.ChangeType
-import org.dxworks.inspectorgit.model.git.Change
-import org.dxworks.inspectorgit.model.git.Commit
-import org.dxworks.inspectorgit.model.git.File
-import org.dxworks.inspectorgit.model.git.Hunk
+import org.dxworks.inspectorgit.model.git.*
 import org.slf4j.LoggerFactory
 
 class TestChange(
@@ -21,7 +17,7 @@ class TestChange(
         gitClient: GitClient
 ) : Change(
         commit = commit,
-        type = type,
+        type = ChangeType.valueOf(type.name),
         oldFileName = oldFileName,
         newFileName = newFileName,
         file = file,

@@ -1,7 +1,6 @@
 package org.dxworks.inspectorgit.transformers.git
 
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.ChangeDTO
-import org.dxworks.inspectorgit.gitclient.enums.ChangeType
 import org.dxworks.inspectorgit.model.git.*
 import org.slf4j.LoggerFactory
 
@@ -21,7 +20,7 @@ class ChangeTransformer {
             val file = getFileForChange(changeDTO, lastChange, project)
             return changeFactory.create(
                     commit = commit,
-                    type = changeDTO.type,
+                    type = ChangeType.valueOf(changeDTO.type.name),
                     oldFileName = changeDTO.oldFileName,
                     newFileName = changeDTO.newFileName,
                     file = file,
@@ -34,12 +33,12 @@ class ChangeTransformer {
             LOG.info("Calculating line changes")
             if (lastChange != null && lastChange.file.isBinary)
                 return emptyList()
-            return changeDTO.hunks.map { Hunk(it.lineChanges.map { LineChange(it.operation, it.number, commit) }) }
+            return changeDTO.hunks.map { Hunk(it.lineChanges.map { LineChange(LineOperation.valueOf(it.operation.name), it.number, commit) }) }
         }
 
         private fun getFileForChange(change: ChangeDTO, lastChange: Change?, project: GitProject): File {
             LOG.info("Getting file")
-            return if (change.type == ChangeType.ADD) {
+            return if (change.type == org.dxworks.inspectorgit.gitclient.enums.ChangeType.ADD) {
                 val newFile = File(change.isBinary, project)
                 project.fileRegistry.add(newFile)
                 newFile
