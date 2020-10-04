@@ -1,7 +1,5 @@
 package org.dxworks.inspectorgit.model.git
 
-import org.dxworks.inspectorgit.gitclient.enums.LineOperation
-
 class Hunk(val lineChanges: List<LineChange>) {
     val deletedLines: List<LineChange>
     val addedLines: List<LineChange>
