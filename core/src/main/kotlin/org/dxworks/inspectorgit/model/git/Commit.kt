@@ -58,4 +58,8 @@ data class Commit(var project: GitProject,
     fun addChild(commit: Commit) {
         children = children + listOf(commit)
     }
+
+    fun isAfterInTree(other: Commit): Boolean {
+        return parents.contains(other) || parents.any { it.isAfterInTree(other) }
+    }
 }
