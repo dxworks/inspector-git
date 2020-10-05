@@ -60,7 +60,7 @@ class LocalSystemsService(private val loadedSystem: LoadedSystem,
             (iglogs + issueFiles + remoteFiles).forEach { it.copyTo(systemFolder.resolve(it.name)) }
 
             localSystemRepository.save(LocalSystemEntity(localSystemDTO.id,
-                    localSystemDTO.name, iglogs.map { it.name }, issueFiles.map { it.name }, remoteFiles.map { it.name }))
+                    localSystemDTO.name, (iglogs + repos).map { it.nameWithoutExtension + ".iglog" }, issueFiles.map { it.name }, remoteFiles.map { it.name }))
         } catch (e: Exception) {
             systemFolder.deleteRecursively()
             throw e
