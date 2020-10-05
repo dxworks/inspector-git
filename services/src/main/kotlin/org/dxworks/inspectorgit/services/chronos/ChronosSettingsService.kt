@@ -9,22 +9,19 @@ import org.dxworks.inspectorgit.services.LoadedSystem
 import org.dxworks.inspectorgit.utils.FileSystemUtils.Companion.getSystemFolder
 import org.dxworks.inspectorgit.utils.chronosSettingsFileName
 import org.springframework.stereotype.Service
+import java.io.File
 
 @Service
 class ChronosSettingsService(private val loadedSystem: LoadedSystem,
                              private val accountMergeService: AccountMergeService) {
 
-    fun getAccountMerges(): List<AccountMerge> {
-        val chronosSettingsFile = getSystemFolder(loadedSystem.id).toPath().resolve(chronosSettingsFileName).toFile()
-
+    fun getAccountMerges(file: File): List<AccountMerge> {
         return jacksonObjectMapper().apply {
             configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        }.readValue<ChronosAuthorsWrapper>(chronosSettingsFile).authors.toAccountMerges()
+        }.readValue<ChronosAuthorsWrapper>(file).authors.toAccountMerges()
     }
 
-    fun applyMerges() {
-        accountMergeService.mergeAccounts(getAccountMerges())
+    fun applyMerges(file: File = getSystemFolder(loadedSystem.id).toPath().resolve(chronosSettingsFileName).toFile()) {
+        accountMergeService.mergeAccounts(getAccountMerges(file))
     }
-
-
 }

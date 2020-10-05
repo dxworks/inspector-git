@@ -17,6 +17,7 @@
         <module>web</module>
         <module>services</module>
         <module>spring-parent</module>
+        <module>cli</module>
     </modules>
 
     <properties>
