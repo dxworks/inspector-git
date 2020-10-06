@@ -13,8 +13,8 @@ class Options {
 
 const val usageMessage = """
     arguments: 
-        --id=<the id of the system that will be created> *required
-        --iglogs=<comma separated list of paths to iglog files, git folders or folders containing iglogs or git folders on the first level> *required
+        --id=<the id of the system to analyze (if it exists) / system that will be created with the help of  the next 3 fields (if it doesn't exist)> *required
+        --iglogs=<comma separated list of paths to iglog files, git folders or folders containing iglogs or git folders on the first level>
         --issues=<comma separated list of paths to issue details json files or folders containing these files on the first level>
         --remotes=<comma separated list of paths to remote details json files or folders containing these files on the first level>
         --scripts=<comma separated list of paths to groovy script files you want to run on this system or folders containing these files on the first level>
