@@ -5,17 +5,15 @@ import java.nio.file.Paths
 
 fun main(args: Array<String>) {
     if (args.isEmpty()) {
-        println("Usage: java -jar git-extractor.jar <config file>")
-        println("The first line of the config file should contain the output folder.")
-        println("The following lines should contain the repositories one on each line")
+        println("Usage: java -jar git-extractor.jar <path to repo>")
+        println("The output file will be in the repo named <repo name>.iglog")
         return
     }
 
-    val configFile = Paths.get(args[0]).toFile()
+    val repo = Paths.get(args[0])
 
-    val lines = configFile.readLines()
-    val outputPath = Paths.get(lines[0])
-    outputPath.toFile().mkdirs()
+    if (!repo.toFile().isDirectory)
+        println("Path does not point to a directory")
 
-    lines.drop(1).parallelStream().forEach { MetadataExtractionManager(Paths.get(it), outputPath).extract() }
+    MetadataExtractionManager(repo, repo).extract()
 }

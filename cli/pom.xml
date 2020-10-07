@@ -3,9 +3,10 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>inspectorgit</artifactId>
         <groupId>org.dxworks.inspectorgit</groupId>
+        <artifactId>spring-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
+        <relativePath>../spring-parent</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -30,7 +31,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>org.dxworks.inspectorgit.app.InspectorgitApplicationKt</mainClass>
+                    <mainClass>org.dxworks.inspectorgit.InspectorgitCliKt</mainClass>
                 </configuration>
             </plugin>
             <plugin>
