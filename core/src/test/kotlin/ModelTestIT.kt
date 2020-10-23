@@ -39,9 +39,9 @@ internal class ModelTestIT {
             val repoName = repoPath.fileName.toString()
             val repoCache = tmpFolder.resolve("$repoName.iglog").toFile()
             gitClient = GitClient(repoPath)
-            if (!repoCache.exists()) {
+//            if (!repoCache.exists()) {
                 MetadataExtractionManager(repoPath, tmpFolder).extract()
-            }
+//            }
             val gitLogDTO = IGLogReader().read(repoCache.inputStream())
 //            project = ProjectTransformer(gitLogDTO, repoName, org.dxworks.inspectorgit.transformers.git.TestChangeFactory(gitClient)).transform()
             project = GitProjectTransformer(gitLogDTO, repoName).transform()

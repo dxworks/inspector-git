@@ -13,10 +13,10 @@ class GitRepositoryService {
     }
 
     fun clone(url: String, path: String, branch: String, username: String, password: String) {
-        GitClient(getRepoFolderPath(path)).clone(url, username, password)?.forEach { LOG.info(it) }
-        GitClient(getRepoFolderPath(path)).checkout(branch)?.forEach { LOG.info(it) }
+        GitClient(getRepoFolderPath(path)).clone(url, username, password)?.forEach { LOG.debug(it) }
+        GitClient(getRepoFolderPath(path)).checkout(branch)?.forEach { LOG.debug(it) }
 
-        LOG.info("Done cloning: $url")
+        LOG.debug("Done cloning: $url")
     }
 
     fun delete(path: String): Boolean {

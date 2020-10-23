@@ -11,10 +11,17 @@ import org.dxworks.inspectorgit.gitclient.extractors.impl.LineOperationsMetaExtr
 import org.dxworks.inspectorgit.gitclient.iglog.writers.IGLogWriter
 import org.dxworks.inspectorgit.gitclient.parsers.CommitParserFactory
 import org.dxworks.inspectorgit.gitclient.parsers.LogParser
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.file.Path
 
 class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path) {
+    companion object {
+        private val LOG = LoggerFactory.getLogger(MetadataExtractionManager::class.java)
+        private var commitNumber = 1
+        private var commitCount = 0
+    }
+
     private val gitClient = GitClient(repoPath)
 
     private val commitIterator = GitCommitIterator(gitClient, 4000)
@@ -33,6 +40,8 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
     }
 
     fun extract() {
+        commitNumber = 1
+        commitCount = gitClient.getCommitCount();
         val extractFile = extractDir.resolve("${repoPath.fileName}.iglog")
         extractFile.writeText("Version\n")
 
@@ -91,6 +100,9 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
     }
 
     private fun writeGitLog(extractFile: File, gitLogDTO: GitLogDTO) {
+        print("Commit number ${commitNumber++} of $commitCount. ( ${commitNumber * 100 / commitCount}% )\r")
+//        LOG.debug("Writing commit number ${commitNumber++} of $commitCount")
+//        LOG.debug("Completion ${commitNumber++ * 100 / commitCount}%")
         extractFile.appendText(toIgLog(gitLogDTO))
         writtenCommitIds.addAll(gitLogDTO.commits.map { it.id }.distinct())
     }

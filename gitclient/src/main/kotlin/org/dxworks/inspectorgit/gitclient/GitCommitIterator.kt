@@ -37,7 +37,6 @@ class GitCommitIterator(gitClient: GitClient, pageSize: Int = 2000, private val 
     }
 
     fun next(): List<String> {
-        LOG.info("Requesting next commit")
         index++
         val files = tempDir.list()
         if (!cachingInProgress && (files == null || files.isEmpty())) index = 1
@@ -47,13 +46,15 @@ class GitCommitIterator(gitClient: GitClient, pageSize: Int = 2000, private val 
             currentPage++
         }
 
+        LOG.debug("Requesting commit: $index on page: $currentPage")
+
         return lock.withLock {
             if (index >= cachingIndex || currentPage != gitLogPager.counter) {
-                LOG.info("Waiting for commit: $index of page: $currentPage")
+                LOG.debug("Waiting for commit: $index of page: $currentPage to be cached")
                 condition.await()
             }
 
-            LOG.info("Reading commit: $index of page: $currentPage")
+            LOG.debug("Reading commit: $index of page: $currentPage")
             val file = tempDir.resolve(index.toString())
             val readLines = file.readLines()
             file.delete()
@@ -86,7 +87,7 @@ class GitCommitIterator(gitClient: GitClient, pageSize: Int = 2000, private val 
     private fun cacheCommit(commitLines: MutableList<String>) {
         lock.withLock {
             if (cachingIndex != 0) {
-                LOG.info("Caching commit: $cachingIndex of page: ${gitLogPager.counter}")
+                LOG.debug("Caching commit: $cachingIndex of page: ${gitLogPager.counter}")
 
                 tempDir.resolve(cachingIndex.toString()).writeText(commitLines.joinToString("\n"))
 

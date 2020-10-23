@@ -14,7 +14,7 @@ class ChangeParser(private val parentCommitId: String) : GitParser<ChangeDTO> {
     override fun parse(lines: List<String>): ChangeDTO {
         val type = extractChangeType(lines)
         val (oldFileName, newFileName) = extractFileNames(lines, type)
-        LOG.info("Parsing $type change for $oldFileName -> $newFileName")
+        LOG.debug("Parsing $type change for $oldFileName -> $newFileName")
         return ChangeDTO(
                 type = type,
                 oldFileName = oldFileName.trim(),
@@ -27,7 +27,7 @@ class ChangeParser(private val parentCommitId: String) : GitParser<ChangeDTO> {
     private fun extractHunks(lines: List<String>): List<List<String>> {
         val hunks: MutableList<MutableList<String>> = ArrayList()
         var currentHunkLines: MutableList<String> = ArrayList()
-        LOG.info("Extracting hunks")
+        LOG.debug("Extracting hunks")
         val firstHunkIndex = lines.indexOfFirst { it.startsWith("@") }
         return if (firstHunkIndex == -1)
             emptyList()
@@ -42,7 +42,7 @@ class ChangeParser(private val parentCommitId: String) : GitParser<ChangeDTO> {
                 else
                     currentHunkLines.add("$it\n")
             }
-            LOG.info("Found ${hunks.size} hunks")
+            LOG.debug("Found ${hunks.size} hunks")
             hunks
         }
     }

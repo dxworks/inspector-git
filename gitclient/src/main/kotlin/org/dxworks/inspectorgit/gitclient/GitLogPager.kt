@@ -32,7 +32,7 @@ class GitLogPager(private val gitClient: GitClient, var pageSize: Int = 2000) {
         else
             Pair(pageSize, skippedCommits)
 
-        LOG.info("Getting Page $number/$pageCount containing commits $skip-${skip + numberOfCommits} of $commitCount")
+        LOG.debug("Getting Page $number/$pageCount containing commits $skip-${skip + numberOfCommits} of $commitCount")
         return gitClient.getNCommitLogsInputStream(numberOfCommits, skip)
     }
 

@@ -15,7 +15,7 @@ abstract class CommitParser : GitParser<CommitDTO> {
     override fun parse(lines: List<String>): CommitDTO {
         val mutableLines = lines.toMutableList()
         val commitId = extractCommitId(mutableLines)
-        LOG.info("Parsing commit with id: $commitId")
+        LOG.debug("Parsing commit with id: $commitId")
         val parentIds = extractParentIds(mutableLines)
         return CommitDTO(
                 id = commitId,
@@ -35,7 +35,7 @@ abstract class CommitParser : GitParser<CommitDTO> {
     protected fun extractChanges(lines: List<String>): List<List<String>> {
         val changes: MutableList<MutableList<String>> = ArrayList()
         var currentChangeLines: MutableList<String> = ArrayList()
-        LOG.info("Extracting changes")
+        LOG.debug("Extracting changes")
         lines.forEach {
             if (it.startsWith("diff ")) {
                 currentChangeLines = ArrayList()
@@ -43,7 +43,7 @@ abstract class CommitParser : GitParser<CommitDTO> {
             }
             currentChangeLines.add(it)
         }
-        LOG.info("Found ${changes.size} changes")
+        LOG.debug("Found ${changes.size} changes")
         return changes
     }
 

@@ -73,7 +73,7 @@ class GitClient(path: Path) {
         val lines = getLines(process.inputStream)
 
         return if (process.waitFor() == 0) {
-            LOG.info("Command completed")
+            LOG.debug("Command completed")
             lines
         } else {
             LOG.error("Command completed with errors:\n ${getLines(process.errorStream).joinToString("\n")}")
@@ -83,7 +83,7 @@ class GitClient(path: Path) {
 
     private fun getProcessForCommand(args: String): Process {
         val command = "$git $args"
-        LOG.info("Running command: $command")
+        LOG.debug("Running command: $command")
 
         processBuilder.command(OsUtils.commandInterpreterName, OsUtils.interpreterArg, command)
         return processBuilder.start()
