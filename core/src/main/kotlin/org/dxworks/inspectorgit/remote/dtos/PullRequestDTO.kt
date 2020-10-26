@@ -4,7 +4,7 @@ class PullRequestDTO(
         val id: Number,
         val number: Number,
         val title: String,
-        val body: String,
+        val body: String?,
         val head: BranchDTO,
         val base: BranchDTO,
         val commits: List<String>,

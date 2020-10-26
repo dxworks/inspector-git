@@ -31,12 +31,31 @@ class GitProject(override val name: String) : Project {
                             .onEach { it.pullRequests += pr }
                 }
 
-        issueTrackerProjects.flatMap { it.issueRegistry.allDetailedIssues }
-                .forEach { issue ->
-                    issue.commits += commitRegistry.all
-                            .filter { getRegexWithWordBoundaryGroups(issue.id).containsMatchIn(it.message) }
-                            .onEach { it.issues += issue }
-                }
+        val taskPrefixes = issueTrackerProjects.flatMap { it.issueRegistry.allDetailedIssues }.map { it.id.substringBefore("-") }.distinct()
+
+        commitRegistry.all.forEach { commit ->
+            taskPrefixes.forEach { prefix ->
+                val issues = getRegexWithWordBoundaryGroups("$prefix-[0-9]+").findAll(commit.message)
+                        .mapNotNull { it.groups[1]?.value }
+                        .map { issueID ->
+                            issueTrackerProjects
+                                    .map { it.issueRegistry }
+                                    .mapNotNull { it.getById(issueID) }
+                                    .first()
+                        }.onEach {
+                            it.commits += commit
+                        }.toList()
+
+                commit.issues += issues
+            }
+        }
+
+//        issueTrackerProjects.flatMap { it.issueRegistry.allDetailedIssues }
+//                .forEach { issue ->
+//                    issue.commits += commitRegistry.all
+//                .filter { getRegexWithWordBoundaryGroups(issue.id).containsMatchIn(it.message) }
+//                            .onEach { it.issues += issue }
+//                }
     }
 
     override fun unlink(projects: List<Project>) {

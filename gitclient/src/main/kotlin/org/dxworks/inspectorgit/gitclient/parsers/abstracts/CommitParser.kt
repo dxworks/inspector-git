@@ -3,6 +3,8 @@ package org.dxworks.inspectorgit.gitclient.parsers.abstracts
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.ChangeDTO
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.CommitDTO
 import org.dxworks.inspectorgit.gitclient.iglog.IGLogConstants
+import org.dxworks.inspectorgit.gitclient.iglog.IGLogConstants.Companion.gitLogDiffLineStart
+import org.dxworks.inspectorgit.gitclient.iglog.IGLogConstants.Companion.gitLogMessageEnd
 import org.dxworks.inspectorgit.gitclient.parsers.GitParser
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -36,13 +38,15 @@ abstract class CommitParser : GitParser<CommitDTO> {
         val changes: MutableList<MutableList<String>> = ArrayList()
         var currentChangeLines: MutableList<String> = ArrayList()
         LOG.debug("Extracting changes")
-        lines.forEach {
-            if (it.startsWith("diff ")) {
-                currentChangeLines = ArrayList()
-                changes.add(currentChangeLines)
-            }
-            currentChangeLines.add(it)
-        }
+        lines
+                .dropWhile { !it.startsWith(gitLogDiffLineStart) }
+                .forEach {
+                    if (it.startsWith(gitLogDiffLineStart)) {
+                        currentChangeLines = ArrayList()
+                        changes.add(currentChangeLines)
+                    }
+                    currentChangeLines.add(it)
+                }
         LOG.debug("Found ${changes.size} changes")
         return changes
     }
@@ -56,9 +60,10 @@ abstract class CommitParser : GitParser<CommitDTO> {
 
     private fun extractMessage(lines: MutableList<String>): String {
         var message = ""
-        while (lines.isNotEmpty() && !lines[0].startsWith("diff ")) {
+        while (lines.isNotEmpty() && lines[0] != gitLogMessageEnd) {
             message = "$message\n${lines.removeAt(0)}"
         }
+        lines.removeAt(0)
         return message.trim()
     }
 }

@@ -2,6 +2,7 @@ package org.dxworks.inspectorgit.transformers.git
 
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.ChangeDTO
 import org.dxworks.inspectorgit.model.git.*
+import org.dxworks.inspectorgit.transformers.git.exceptions.NoChangeException
 import org.slf4j.LoggerFactory
 
 class ChangeTransformer {
@@ -10,12 +11,17 @@ class ChangeTransformer {
 
         tailrec fun getLastChange(parentCommit: Commit, fileName: String): Change {
             return parentCommit.changes.find { it.newFileName == fileName }
-                    ?: getLastChange(parentCommit.parents.first(), fileName)
+                    ?: getLastChange(parentCommit.parents.firstOrNull() ?: throw NoChangeException(fileName), fileName)
         }
 
         fun transform(changeDTO: ChangeDTO, commit: Commit, project: GitProject, changeFactory: ChangeFactory): Change? {
             val parentCommit = if (changeDTO.parentCommitId.isEmpty()) null else commit.parents.find { it.id == changeDTO.parentCommitId }!!
-            val lastChange = if (changeDTO.type == org.dxworks.inspectorgit.gitclient.enums.ChangeType.ADD) null else getLastChange(parentCommit!!, changeDTO.oldFileName)
+            val lastChange = try {
+                if (changeDTO.type == org.dxworks.inspectorgit.gitclient.enums.ChangeType.ADD) null else getLastChange(parentCommit!!, changeDTO.oldFileName)
+            } catch (e: NoChangeException) {
+                LOG.error("Change not found for file!",e)
+                return null
+            }
             LOG.info("Creating ${changeDTO.type} change for file: ${changeDTO.oldFileName} -> ${changeDTO.newFileName}")
             val file = getFileForChange(changeDTO, lastChange, project)
             return changeFactory.create(

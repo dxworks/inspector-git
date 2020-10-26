@@ -67,3 +67,4 @@ class IssueTrackerProject(override val name: String) : Project {
         TODO("Not yet implemented")
     }
 }
+

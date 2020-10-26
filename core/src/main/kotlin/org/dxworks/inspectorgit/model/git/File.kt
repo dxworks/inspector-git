@@ -1,5 +1,6 @@
 package org.dxworks.inspectorgit.model.git
 
+import org.dxworks.inspectorgit.utils.devNull
 import org.slf4j.LoggerFactory
 import java.util.*
 import kotlin.collections.ArrayList
@@ -12,22 +13,22 @@ data class File(val isBinary: Boolean, val project: GitProject, var changes: Mut
         private val LOG = LoggerFactory.getLogger(File::class.java)
     }
 
-    fun isAlive(commit: Commit?): Boolean {
+    fun isAlive(commit: Commit? = null): Boolean {
         val type = getLastChange(commit)?.type
         return type != null && type != ChangeType.DELETE
     }
 
-    fun annotatedLines(commit: Commit?): List<Commit> {
+    fun annotatedLines(commit: Commit? = null): List<Commit> {
         return getLastChange(commit)?.annotatedLines ?: emptyList()
     }
 
-    fun fullPath(commit: Commit?) = getLastChange(commit)?.newFileName?.let { "${project.name}/$it" }
+    fun fullPath(commit: Commit? = null) = getLastChange(commit)?.newFileName?.let { "${project.name}/$it" }
 
-    fun fileName(commit: Commit?) = relativePath(commit)?.let { it.substring(it.lastIndexOf("/") + 1) }
+    fun fileName(commit: Commit? = null) = relativePath(commit)?.let { if (it == devNull) it else it.substring(it.lastIndexOf("/") + 1) }
 
-    fun relativePath(commit: Commit?) = getLastChange(commit)?.newFileName
+    fun relativePath(commit: Commit? = null) = getLastChange(commit)?.newFileName
 
-    fun getLastChange(commit: Commit?): Change? {
+    fun getLastChange(commit: Commit? = null): Change? {
         return when {
             changes.isEmpty() -> null
             commit == null -> changes.last()

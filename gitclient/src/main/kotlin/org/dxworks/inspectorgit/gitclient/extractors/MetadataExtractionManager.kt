@@ -29,7 +29,6 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
     private val extractDir = extractToPath.toFile()
 
     private val lineOperationsMetaExtractor = LineOperationsMetaExtractor()
-    private val hunkChangeMetaExtractor = HunkChangeMetaExtractor()
 
     private val writtenCommitIds: MutableSet<String> = HashSet()
     private val logsOnHold: MutableList<GitLogDTO> = ArrayList()

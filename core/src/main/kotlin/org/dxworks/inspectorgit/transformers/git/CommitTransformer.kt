@@ -51,7 +51,20 @@ class CommitTransformer {
 
             addChangesToCommit(commitDTO.changes, commit, project, changeFactory)
 
+            commit.repoSize = getParentCommitSize(commit) + computeCommitGrowth(commit)
+
             LOG.info("Done creating commit with id: ${commitDTO.id}")
+        }
+
+        private fun computeCommitGrowth(commit: Commit): Int {
+            return commit.changes
+                    .filter { commit.parents.isEmpty() || it.parentCommit == commit.parents.first() }
+                    .map { it.addedLines.size - it.deletedLines.size }
+                    .sum()
+        }
+
+        private fun getParentCommitSize(commit: Commit): Long {
+            return commit.parents.firstOrNull()?.repoSize ?: 0
         }
 
         private fun parseDate(timestamp: String): ZonedDateTime {

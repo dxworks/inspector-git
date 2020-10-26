@@ -20,7 +20,7 @@ class RemoteGitTransformer(private val remoteInfoDTO: RemoteInfoDTO, private val
             val pullRequest = PullRequest(
                     id = it.id,
                     title = it.title,
-                    body = it.body,
+                    body = it.body ?: "",
                     head = getBranch(project, it.head),
                     base = getBranch(project, it.base),
                     commitIds = it.commits,
@@ -66,12 +66,14 @@ class RemoteGitTransformer(private val remoteInfoDTO: RemoteInfoDTO, private val
         pullRequest.createdBy.openedPullRequests += pullRequest;
     }
 
-    private fun getAccount(project: RemoteGitProject, user: RemoteUserDTO): RemoteGitAccount {
-        val byId = project.accountRegistry.getById(user.url)
+    private fun getAccount(project: RemoteGitProject, user: RemoteUserDTO?): RemoteGitAccount {
+        val remoteUser = user ?: RemoteUserDTO(-1, "anonymous", "anonymous")
+
+        val byId = project.accountRegistry.getById(remoteUser.url)
         return if (byId != null)
             byId as RemoteGitAccount
         else {
-            val entity = RemoteGitAccount(user.login, user.url, user.email, user.avatarUrl, user.name, project)
+            val entity = RemoteGitAccount(remoteUser.login, remoteUser.url, remoteUser.email, remoteUser.avatarUrl, remoteUser.name, project)
             project.accountRegistry.add(entity)
             entity
         }

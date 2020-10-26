@@ -73,12 +73,16 @@ class LocalSystemsService(private val loadedSystem: LoadedSystem,
         val remoteFiles = mapToFilesOrThrow(getSystemFiles(localSystemDTO.id, localSystemDTO.remotes))
 
         val gitLogsAndNames = allIglogs.parallelStream().map { Pair(IGLogReader().read(it.inputStream()), it.nameWithoutExtension) }.collect(Collectors.toList())
-        val issueTrackerImportDTOsAndNames = issueFiles.map { Pair(mapper.readValue<IssueTrackerImportDTO>(it), it.nameWithoutExtension) }
-        val remoteImportDTOsAndNames = remoteFiles.map { Pair(mapper.readValue<RemoteInfoDTO>(it), it.nameWithoutExtension) }
+        val issueTrackerImportDTOsAndNames = issueFiles.map {
+            Pair(mapper.readValue<IssueTrackerImportDTO>(it.readText().replace("[^\\x20-\\x7e]", "")), it.nameWithoutExtension)
+        }
+        val remoteImportDTOsAndNames = remoteFiles.map {
+            Pair(mapper.readValue<RemoteInfoDTO>(it.readText().replace("[^\\x20-\\x7e]", "")), it.nameWithoutExtension)
+        }
 
 
         val projects = (gitLogsAndNames + issueTrackerImportDTOsAndNames + remoteImportDTOsAndNames)
-                .parallelStream().map { ProjectFactories.create(it.first, it.second) }.collect(Collectors.toList())
+                .map { ProjectFactories.create(it.first, it.second) }
 
         loadedSystem.set(localSystemDTO.id, localSystemDTO.name, projects)
         applyChronosMergesIfPossible()

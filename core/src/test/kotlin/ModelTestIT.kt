@@ -21,9 +21,13 @@ internal class ModelTestIT {
         private lateinit var project: GitProject
 
         private val LOG = LoggerFactory.getLogger(ModelTestIT::class.java)
-        private val kafkaPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\licenta\\kafka\\kafka")
-        private val dxPlatformPath = Paths.get("C:\\Users\\dnagy\\Documents\\personal\\dx\\dx-platform")
-        private val seanTest = Paths.get("C:\\Users\\dnagy\\Documents\\Endava\\testProjects\\SeAN")
+        private val dxPlatformPath = Paths.get("/Users/mario/Dxworks/dx-platform")
+        private val mavenPath = Paths.get("/Users/mario/projects/case-studies/maven")
+        private val kafkaPath = Paths.get("/Users/mario/projects/case-studies/kafka")
+        private val vlcPath = Paths.get("/Users/mario/projects/case-studies/vlc")
+        private val sparkPath = Paths.get("/Users/mario/projects/case-studies/spark")
+        private val springPath = Paths.get("/Users/mario/projects/case-studies/spring-framework")
+
 
         private var lines = 0.0
         private var linesWithDifferentCommit = 0.0
@@ -34,14 +38,14 @@ internal class ModelTestIT {
             val tmpFolderFile = tmpFolder.toFile()
             tmpFolderFile.mkdirs()
 
-            val repoPath = dxPlatformPath
+            val repoPath = sparkPath
 
             val repoName = repoPath.fileName.toString()
             val repoCache = tmpFolder.resolve("$repoName.iglog").toFile()
             gitClient = GitClient(repoPath)
-//            if (!repoCache.exists()) {
+            if (!repoCache.exists()) {
                 MetadataExtractionManager(repoPath, tmpFolder).extract()
-//            }
+            }
             val gitLogDTO = IGLogReader().read(repoCache.inputStream())
 //            project = ProjectTransformer(gitLogDTO, repoName, org.dxworks.inspectorgit.transformers.git.TestChangeFactory(gitClient)).transform()
             project = GitProjectTransformer(gitLogDTO, repoName).transform()

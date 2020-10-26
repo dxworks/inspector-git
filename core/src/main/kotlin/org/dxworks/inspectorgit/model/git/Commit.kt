@@ -19,7 +19,8 @@ data class Commit(var project: GitProject,
                   var issues: Set<Issue> = emptySet(),
                   var pullRequests: Set<PullRequest> = emptySet(),
                   var remoteInfo: CommitRemoteInfo? = null,
-                  var branchId: Long = 0) {
+                  var branchId: Long = 0,
+                  var repoSize: Long = 0) {
     fun olderThan(age: Period, other: Commit) = committerDate.isBefore(other.committerDate.minus(age))
 
     override fun equals(other: Any?): Boolean {
