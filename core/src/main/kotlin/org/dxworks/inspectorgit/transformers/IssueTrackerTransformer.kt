@@ -5,6 +5,7 @@ import org.dxworks.inspectorgit.jira.dtos.IssueDTO
 import org.dxworks.inspectorgit.jira.dtos.IssueStatusDTO
 import org.dxworks.inspectorgit.jira.dtos.IssueTypeDTO
 import org.dxworks.inspectorgit.model.issuetracker.*
+import org.slf4j.LoggerFactory
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -17,11 +18,13 @@ class IssueTrackerTransformer(
 ) {
     companion object {
         val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+        private val LOG = LoggerFactory.getLogger(IssueTrackerTransformer::class.java)
     }
 
 
     fun transform(): IssueTrackerProject {
         val project = IssueTrackerProject(name)
+        LOG.info("Creating JIRA project $name")
         project.accountRegistry.add(IssueTrackerAccount(
                 self = "0",
                 name = "Anonymous",
@@ -36,7 +39,9 @@ class IssueTrackerTransformer(
         addTaskTypesToProject(project)
         addTaskStatusesToProject(project)
 
-        project.issueRegistry.addAll(issueDTOS.map {
+        val issueNo = issueDTOS.size
+        project.issueRegistry.addAll(issueDTOS.mapIndexed { index, it ->
+            LOG.info("Adding JIRA issue ${index + 1} / $issueNo (${(index + 1) * 100 / issueNo}%)\r")
             val detailedTask = DetailedIssue(
                     project = project,
                     id = it.key,
@@ -62,11 +67,14 @@ class IssueTrackerTransformer(
             detailedTask
         })
 
+        LOG.info("Linking issues with statuses, types, authors and parents...")
+
         linkTasksWithStatuses(project)
         linkTasksWithTypes(project)
         lintTasksWithAuthors(project)
         linkTasksWithSubtasksAndParents(project)
 
+        LOG.info("Done creating JIRA project $name")
         return project
     }
 

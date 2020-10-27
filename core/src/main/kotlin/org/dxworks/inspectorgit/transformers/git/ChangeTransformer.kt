@@ -22,7 +22,7 @@ class ChangeTransformer {
                 LOG.error("Change not found for file!",e)
                 return null
             }
-            LOG.info("Creating ${changeDTO.type} change for file: ${changeDTO.oldFileName} -> ${changeDTO.newFileName}")
+            LOG.debug("Creating ${changeDTO.type} change for file: ${changeDTO.oldFileName} -> ${changeDTO.newFileName}")
             val file = getFileForChange(changeDTO, lastChange, project)
             return changeFactory.create(
                     commit = commit,
@@ -36,14 +36,14 @@ class ChangeTransformer {
         }
 
         private fun getHunks(lastChange: Change?, changeDTO: ChangeDTO, commit: Commit): List<Hunk> {
-            LOG.info("Calculating line changes")
+            LOG.debug("Calculating line changes")
             if (lastChange != null && lastChange.file.isBinary)
                 return emptyList()
             return changeDTO.hunks.map { Hunk(it.lineChanges.map { LineChange(LineOperation.valueOf(it.operation.name), it.number, commit) }) }
         }
 
         private fun getFileForChange(change: ChangeDTO, lastChange: Change?, project: GitProject): File {
-            LOG.info("Getting file")
+            LOG.debug("Getting file")
             return if (change.type == org.dxworks.inspectorgit.gitclient.enums.ChangeType.ADD) {
                 val newFile = File(change.isBinary, project)
                 project.fileRegistry.add(newFile)

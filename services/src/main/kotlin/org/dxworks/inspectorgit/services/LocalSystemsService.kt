@@ -62,6 +62,7 @@ class LocalSystemsService(private val loadedSystem: LoadedSystem,
             localSystemRepository.save(LocalSystemEntity(localSystemDTO.id,
                     localSystemDTO.name, (iglogs + repos).map { it.nameWithoutExtension + ".iglog" }, issueFiles.map { it.name }, remoteFiles.map { it.name }))
         } catch (e: Exception) {
+            LOG.error("Project not loaded successfully!", e)
             systemFolder.deleteRecursively()
             throw e
         }

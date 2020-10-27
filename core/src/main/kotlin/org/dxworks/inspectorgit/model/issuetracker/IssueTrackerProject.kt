@@ -10,8 +10,13 @@ import org.dxworks.inspectorgit.registries.issuetracker.IssueStatusCategoryRegis
 import org.dxworks.inspectorgit.registries.issuetracker.IssueStatusRegistry
 import org.dxworks.inspectorgit.registries.issuetracker.IssueTypeRegistry
 import org.dxworks.inspectorgit.transformers.getRegexWithWordBoundaryGroups
+import org.slf4j.LoggerFactory
 
-class IssueTrackerProject(override val name: String) : Project {
+class IssueTrackerProject(override val name: String) : Project() {
+
+    companion object {
+        private val LOG = LoggerFactory.getLogger(IssueTrackerProject::class.java)
+    }
 
     override val accountRegistry = AccountRegistry()
     val issueRegistry = IssueRegistry()
@@ -20,18 +25,20 @@ class IssueTrackerProject(override val name: String) : Project {
     val issueStatusCategoryRegistry = IssueStatusCategoryRegistry()
 
 
-    override fun link(projects: List<Project>) {
+    override fun internalLink(projects: List<Project>) {
         val remoteGitProjects = projects.filterIsInstance<RemoteGitProject>()
         val gitProjects = projects.filterIsInstance<GitProject>()
 
         val issuePrefixes = issueRegistry.all.map { it.id.substring(0, it.id.indexOf("-")) }.distinct()
 
+        LOG.info("Linking JIRA project $name with git projects")
         val taskRegexList = issuePrefixes.map { getTaskRegex(it) }
         val smartCommits = gitProjects.flatMap { it.commitRegistry.all }
                 .filter { taskRegexList.any { taskRegex -> taskRegex.containsMatchIn(it.message) } }
         val taskIdToSmartCommitMap = mapOfCommitsByTaskId(smartCommits, taskRegexList)
         taskIdToSmartCommitMap.forEach { (id, commits) -> commits.forEach { it.taskIds = it.taskIds + id } }
 
+        LOG.info("Linking JIRA project $name with remote git projects")
         remoteGitProjects.flatMap { it.pullRequestRegistry.all }
                 .forEach { pr ->
                     issueRegistry.allDetailedIssues.forEach {

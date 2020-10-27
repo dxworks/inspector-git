@@ -10,8 +10,13 @@ import org.dxworks.inspectorgit.registries.remote.PullRequestRegistry
 import org.dxworks.inspectorgit.registries.remote.RemoteRepoRegistry
 import org.dxworks.inspectorgit.registries.remote.SimpleBranchRegistry
 import org.dxworks.inspectorgit.transformers.getRegexWithWordBoundaryGroups
+import org.slf4j.LoggerFactory
 
-class RemoteGitProject(override val name: String) : Project {
+class RemoteGitProject(override val name: String) : Project() {
+
+    companion object {
+        private val LOG = LoggerFactory.getLogger(RemoteGitProject::class.java)
+    }
 
     override val accountRegistry = AccountRegistry()
     val pullRequestRegistry = PullRequestRegistry()
@@ -19,9 +24,11 @@ class RemoteGitProject(override val name: String) : Project {
     val simpleBranchRegistry = SimpleBranchRegistry()
     val commitRemoteInfoRegistry = CommitRemoteInfoRegistry()
 
-    override fun link(projects: List<Project>) {
+    override fun internalLink(projects: List<Project>) {
         val issueTrackerProjects = projects.filterIsInstance<IssueTrackerProject>()
         val gitProjects = projects.filterIsInstance<GitProject>()
+
+        LOG.info("Linking Remote GIT project $name with Git and JIRA projects")
         pullRequestRegistry.all.forEach {
             it.commits = getCommits(gitProjects, it.commitIds)
             it.issues = getLinkedIssues(issueTrackerProjects, "${it.title} ${it.head.ref} ${it.body}")
@@ -35,6 +42,7 @@ class RemoteGitProject(override val name: String) : Project {
 
             addPullRequestToCommits(it)
         }
+
         simpleBranchRegistry.all.forEach {
             it.commit = gitProjects.mapNotNull { project -> project.commitRegistry.getById(it.commitId) }.firstOrNull()
             it.issue = getLinkedIssues(issueTrackerProjects, it.ref).firstOrNull()

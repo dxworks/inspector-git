@@ -2,6 +2,7 @@ package org.dxworks.inspectorgit.transformers
 
 import org.dxworks.inspectorgit.model.remote.*
 import org.dxworks.inspectorgit.remote.dtos.*
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -11,12 +12,17 @@ class RemoteGitTransformer(private val remoteInfoDTO: RemoteInfoDTO, private val
 
     companion object {
         val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+        private val LOG = LoggerFactory.getLogger(RemoteGitTransformer::class.java)
     }
 
     fun transform(): RemoteGitProject {
         val project = RemoteGitProject(name)
+        LOG.info("Creating REMOTE project $name")
+
         val pullRequestDTOs = remoteInfoDTO.pullRequests
-        pullRequestDTOs.forEach {
+        val prNo = pullRequestDTOs.size
+        pullRequestDTOs.forEachIndexed { index, it ->
+            LOG.info("Adding Pull Request ${index + 1} / $prNo (${(index + 1) * 100 / prNo}%)\r")
             val pullRequest = PullRequest(
                     id = it.id,
                     title = it.title,
@@ -38,6 +44,8 @@ class RemoteGitTransformer(private val remoteInfoDTO: RemoteInfoDTO, private val
             addPullRequestToAccounts(pullRequest)
             project.pullRequestRegistry.add(pullRequest)
         }
+
+        LOG.info("Adding Remote Authors...")
         project.commitRemoteInfoRegistry.addAll(
                 remoteInfoDTO.commitInfos.map {
                     CommitRemoteInfo(
@@ -47,9 +55,11 @@ class RemoteGitTransformer(private val remoteInfoDTO: RemoteInfoDTO, private val
                     )
                 })
 
+        LOG.info("Adding Remote Branches...")
         project.simpleBranchRegistry.addAll(remoteInfoDTO.branches.map {
             SimpleBranch(null, it.commit, it.name, null)
         })
+        LOG.info("Done creating REMOTE project $name")
         return project
     }
 

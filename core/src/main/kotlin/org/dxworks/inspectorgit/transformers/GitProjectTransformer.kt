@@ -16,13 +16,15 @@ class GitProjectTransformer(private val gitLogDTO: GitLogDTO, private val name: 
 
     fun transform(): GitProject {
         val project = GitProject(name)
-        LOG.info("Creating project $name")
-        gitLogDTO.commits.forEach {
+        LOG.info("Creating GIT project $name")
+        val commitNo = gitLogDTO.commits.size
+        gitLogDTO.commits.forEachIndexed { index, it ->
+            LOG.info("Creating commit ${index + 1} / $commitNo (${(index + 1) * 100 / commitNo}%)\r")
             CommitTransformer.addToProject(it, project, changeFactory)
         }
         computeBranchIds(project.commitRegistry.all.first())
 
-        LOG.info("Done creating project $name")
+        LOG.info("Done creating GIT project $name")
         return project
     }
 

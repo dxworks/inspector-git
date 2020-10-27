@@ -16,16 +16,16 @@ class CommitTransformer {
         private val LOG = LoggerFactory.getLogger(CommitTransformer::class.java)
 
         fun addToProject(commitDTO: CommitDTO, project: GitProject, changeFactory: ChangeFactory = SimpleChangeFactory()) {
-            LOG.info("Creating commit with id: ${commitDTO.id}")
+            LOG.debug("Creating commit with id: ${commitDTO.id}")
             val parents = getParentsFromIds(commitDTO.parentIds, project)
             if (parents.size > 1)
-                LOG.info("Is merge commit")
+                LOG.debug("Is merge commit")
 
             val author = getAuthor(commitDTO, project)
-            LOG.info("Parsed author ${author.id}")
+            LOG.debug("Parsed author ${author.id}")
 
             val committer = if (commitDTO.committerName.isEmpty()) author else getCommitter(commitDTO, project)
-            LOG.info("Parsed committer ${author.id}")
+            LOG.debug("Parsed committer ${author.id}")
 
 
             val authorDate = parseDate(commitDTO.authorDate)
@@ -42,7 +42,7 @@ class CommitTransformer {
                     changes = ArrayList())
 
             commit.parents.forEach { it.addChild(commit) }
-            LOG.info("Adding commit to repository and to authors")
+            LOG.debug("Adding commit to repository and to authors")
 
             project.commitRegistry.add(commit)
             author.commits += commit
@@ -53,7 +53,7 @@ class CommitTransformer {
 
             commit.repoSize = getParentCommitSize(commit) + computeCommitGrowth(commit)
 
-            LOG.info("Done creating commit with id: ${commitDTO.id}")
+            LOG.debug("Done creating commit with id: ${commitDTO.id}")
         }
 
         private fun computeCommitGrowth(commit: Commit): Int {
@@ -73,7 +73,7 @@ class CommitTransformer {
         }
 
         private fun addChangesToCommit(changes: List<ChangeDTO>, commit: Commit, project: GitProject, changeFactory: ChangeFactory) {
-            LOG.info("Filtering changes")
+            LOG.debug("Filtering changes")
             if (commit.isMergeCommit) {
                 val changesByFile = changes.groupBy {
                     if (it.type == ChangeType.DELETE) it.oldFileName
@@ -84,7 +84,7 @@ class CommitTransformer {
                 commit.changes = changes.mapNotNull { ChangeTransformer.transform(it, commit, project, changeFactory) }
             }
             commit.changes.forEach { it.file.changes.add(it) }
-            LOG.info("Transforming changes")
+            LOG.debug("Transforming changes")
         }
 
         private fun getAuthor(commitDTO: CommitDTO, project: GitProject): GitAccount =

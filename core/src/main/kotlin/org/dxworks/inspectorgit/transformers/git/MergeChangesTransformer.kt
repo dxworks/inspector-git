@@ -18,14 +18,14 @@ class MergeChangesTransformer {
         }
 
         private fun fixChanges(changes: List<Change>, commit: Commit, project: GitProject): List<Change> {
-            LOG.info("Merging ${changes.size} changes")
+            LOG.debug("Merging ${changes.size} changes")
 
             val missingChange = if (changes.size < commit.parents.size && !changes.all { it.type == ChangeType.DELETE })
                 getMissingChange(changes, commit) else null
             fixAnnotatedLinesCommits(changes, missingChange, commit)
             mergeFiles(changes, missingChange, project)
 
-            LOG.info("Finished merging changes")
+            LOG.debug("Finished merging changes")
             return changes
         }
 

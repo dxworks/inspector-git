@@ -28,7 +28,7 @@ open class Change(val commit: Commit,
     }
 
     init {
-        LOG.info("Applying ${lineChanges.size} line changes for $newFileName having ${parentChange?.annotatedLines?.size
+        LOG.debug("Applying ${lineChanges.size} line changes for $newFileName having ${parentChange?.annotatedLines?.size
                 ?: 0} lines")
         applyLineChanges(parentChange)
     }
