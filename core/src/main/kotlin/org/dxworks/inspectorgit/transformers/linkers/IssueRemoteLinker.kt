@@ -22,7 +22,7 @@ class IssueRemoteLinker : ProjectLinker<IssueTrackerProject, RemoteGitProject> {
                     LOG.info("Linking PR ${index + 1} / $totalPrs (${(index + 1) * 100 / totalPrs}%)")
                     taskPrefixes.forEach {
                         val issues = getRegexWithWordBoundaryGroups("$it-[0-9]+").findAll("${pr.title} ${pr.head.ref} ${pr.body}")
-                                .mapNotNull { match -> match.groups[1]?.value }
+                                .mapNotNull { match -> match.groups[0]?.value }
                                 .mapNotNull { issueID -> a.issueRegistry.getById(issueID) }
                                 .filterIsInstance<DetailedIssue>()
                                 .onEach { issue -> issue.pullRequests += pr }

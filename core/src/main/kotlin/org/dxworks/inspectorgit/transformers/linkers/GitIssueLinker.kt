@@ -21,7 +21,7 @@ class GitIssueLinker : ProjectLinker<GitProject, IssueTrackerProject> {
             LOG.info("Linking commit ${index + 1} / $totalCommits (${(index + 1) * 100 / totalCommits}%)")
             taskPrefixes.forEach { prefix ->
                 val issues = getRegexWithWordBoundaryGroups("$prefix-[0-9]+").findAll(commit.message)
-                        .mapNotNull { it.groups[1]?.value }
+                        .mapNotNull { it.groups[0]?.value }
                         .mapNotNull { issueID -> b.issueRegistry.getById(issueID) }
                         .onEach { it.commits += commit }
                         .toList()
