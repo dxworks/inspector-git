@@ -15,6 +15,6 @@ class ChronosAuthorMerge(private val name: String, private val aliases: List<Chr
 
 class ChronosAuthorId(private val name: String, private val email: String) {
     val id: String
-        get() = "$name <$email>"
+        get() = if (email.isNotBlank()) "$name <$email>" else name
 }
 
