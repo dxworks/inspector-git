@@ -86,4 +86,9 @@ class AccountMergeService(private val system: LoadedSystem) {
     fun mergeDevelopers(devMerges: List<AccountMerge>) {
         devMerges.forEach(this::mergeDevelopers)
     }
+
+    fun clearDevelopers() {
+        system.developerRegistry.all.forEach { it.accounts.forEach { it.developer = null } }
+        system.developerRegistry.clear()
+    }
 }

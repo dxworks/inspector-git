@@ -22,6 +22,13 @@ class ChronosSettingsService(private val loadedSystem: LoadedSystem,
     }
 
     fun applyMerges(file: File = getSystemFolder(loadedSystem.id).toPath().resolve(chronosSettingsFileName).toFile()) {
+        accountMergeService.clearDevelopers()
         accountMergeService.mergeAccounts(getAccountMerges(file))
+        accountMergeService.mergeAccounts(
+                loadedSystem.projects
+                        .flatMap { it.value.accountRegistry.all }
+                        .filter { it.developer == null }
+                        .map { AccountMerge(it.name, listOf(it.id)) }
+        )
     }
 }
