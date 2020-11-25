@@ -28,7 +28,7 @@ class ChronosSettingsService(private val loadedSystem: LoadedSystem,
                 loadedSystem.projects
                         .flatMap { it.value.accountRegistry.all }
                         .filter { it.developer == null }
-                        .map { AccountMerge(it.name, listOf(it.id)) }
+                        .map { AccountMerge(it.id, listOf(it.id)) }
         )
     }
 }
