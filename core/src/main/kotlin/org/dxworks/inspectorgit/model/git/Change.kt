@@ -28,22 +28,31 @@ open class Change(val commit: Commit,
     }
 
     init {
-        LOG.debug("Applying ${lineChanges.size} line changes for $newFileName having ${parentChange?.annotatedLines?.size
-                ?: 0} lines")
-        applyLineChanges(parentChange)
+        if (!file.isBinary) {
+            LOG.debug("Applying ${lineChanges.size} line changes for $newFileName having ${
+                parentChange?.annotatedLines?.size
+                        ?: 0
+            } lines")
+            applyLineChanges(parentChange)
+        }
     }
 
     private fun applyLineChanges(parentChange: Change?) {
-        val newAnnotatedLines = parentChange?.annotatedLines
-                ?.toMutableList() ?: ArrayList()
-        val deletes = deletedLines
-        val adds = addedLines
-        deletes.sortedByDescending { it.lineNumber }
-                .forEach { newAnnotatedLines.removeAt(it.lineNumber - 1) }
+        try {
+            val newAnnotatedLines = parentChange?.annotatedLines
+                    ?.toMutableList() ?: ArrayList()
+            val deletes = deletedLines
+            val adds = addedLines
+            deletes.sortedByDescending { it.lineNumber }
+                    .forEach { newAnnotatedLines.removeAt(it.lineNumber - 1) }
 
-        adds.forEach { newAnnotatedLines.add(it.lineNumber - 1, it.commit) }
+            adds.forEach { newAnnotatedLines.add(it.lineNumber - 1, it.commit) }
 
-        annotatedLines = newAnnotatedLines
+            annotatedLines = newAnnotatedLines
+        } catch (e: IndexOutOfBoundsException) {
+            file.isBinary = true
+            LOG.warn("Applying line changes to ${newFileName} failed. File will be considered binary")
+        }
     }
 
     override fun equals(other: Any?): Boolean {

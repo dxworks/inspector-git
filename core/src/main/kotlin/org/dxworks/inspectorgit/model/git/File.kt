@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory
 import java.util.*
 import kotlin.collections.ArrayList
 
-data class File(val isBinary: Boolean, val project: GitProject, var changes: MutableList<Change> = ArrayList()) {
+data class File(var isBinary: Boolean, val project: GitProject, var changes: MutableList<Change> = ArrayList()) {
 
     val id: UUID = UUID.randomUUID()
 
