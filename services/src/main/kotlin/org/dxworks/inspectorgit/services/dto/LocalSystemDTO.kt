@@ -5,5 +5,6 @@ data class LocalSystemDTO(
         val name: String,
         var sources: List<String>,
         val issues: List<String> = emptyList(),
-        val remotes: List<String> = emptyList()
+        val remotes: List<String> = emptyList(),
+        val computeAnnotatedLines: Boolean = true
 )

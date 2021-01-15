@@ -10,7 +10,8 @@ class SimpleChangeFactory : ChangeFactory() {
                         file: File,
                         parentCommit: Commit?,
                         hunks: List<Hunk>,
-                        parentChange: Change?): Change =
+                        parentChange: Change?,
+                        computeAnnotatedLines: Boolean): Change =
             Change(commit = commit,
                     type = type,
                     oldFileName = oldFileName,
@@ -18,5 +19,6 @@ class SimpleChangeFactory : ChangeFactory() {
                     file = file,
                     parentCommit = parentCommit,
                     hunks = hunks,
-                    parentChange = parentChange)
+                    parentChange = parentChange,
+                    computeAnnotatedLines = computeAnnotatedLines)
 }

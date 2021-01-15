@@ -10,5 +10,6 @@ abstract class ChangeFactory {
                         file: File,
                         parentCommit: Commit?,
                         hunks: List<Hunk>,
-                        parentChange: Change?): Change
+                        parentChange: Change?,
+                        computeAnnotatedLines: Boolean): Change
 }

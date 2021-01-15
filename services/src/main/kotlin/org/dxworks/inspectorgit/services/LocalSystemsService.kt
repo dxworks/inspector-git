@@ -81,7 +81,7 @@ class LocalSystemsService(private val loadedSystem: LoadedSystem,
             Pair(mapper.readValue<RemoteInfoDTO>(it.readText().replace("[^\\x20-\\x7e]", "")), it.nameWithoutExtension)
         }
 
-
+        ProjectFactories.computeAnnotatedLines = localSystemDTO.computeAnnotatedLines
         val projects = (gitLogsAndNames + issueTrackerImportDTOsAndNames + remoteImportDTOsAndNames)
                 .map { ProjectFactories.create(it.first, it.second) }
 
@@ -107,7 +107,7 @@ class LocalSystemsService(private val loadedSystem: LoadedSystem,
                 .onEach { if (!it.exists()) throw FileNotFoundException("${it.absolutePath} is not a file or folder.") }
     }
 
-    fun load(id: String) {
+    fun load(id: String, computeAnnotatedLines: Boolean) {
         if (loadedSystem.isSet && loadedSystem.id == id)
             return
 
@@ -117,15 +117,15 @@ class LocalSystemsService(private val loadedSystem: LoadedSystem,
             throw FileNotFoundException("Project with id $id does not exist")
         }
 
-        loadSystem(localSystemDTO(localSystemRepository.findBySystemId(id)))
+        loadSystem(localSystemDTO(localSystemRepository.findBySystemId(id), computeAnnotatedLines))
     }
 
     fun list(): List<LocalSystemDTO> {
         return localSystemRepository.findAll().map { localSystemDTO(it) }
     }
 
-    private fun localSystemDTO(it: LocalSystemEntity) =
-            LocalSystemDTO(it.systemId, it.name, it.sources, it.issues, it.remotes)
+    private fun localSystemDTO(it: LocalSystemEntity, computeAnnotatedLines: Boolean = true) =
+            LocalSystemDTO(it.systemId, it.name, it.sources, it.issues, it.remotes, computeAnnotatedLines)
 
     @Transactional
     fun delete(id: String) {

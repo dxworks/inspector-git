@@ -6,9 +6,10 @@ import org.dxworks.inspectorgit.model.Project
 import org.dxworks.inspectorgit.transformers.GitProjectTransformer
 
 class GitProjectFactory : ProjectFactory {
+    var computeAnnotatedLines = true
     override fun create(dto: Any, name: String): Project? {
         if (dto is GitLogDTO) {
-            return GitProjectTransformer(dto, name).transform()
+            return GitProjectTransformer(dto, name, computeAnnotatedLines).transform()
         }
         return null
     }

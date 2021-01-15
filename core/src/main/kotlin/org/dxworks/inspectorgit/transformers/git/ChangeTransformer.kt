@@ -14,12 +14,12 @@ class ChangeTransformer {
                     ?: getLastChange(parentCommit.parents.firstOrNull() ?: throw NoChangeException(fileName), fileName)
         }
 
-        fun transform(changeDTO: ChangeDTO, commit: Commit, project: GitProject, changeFactory: ChangeFactory): Change? {
+        fun transform(changeDTO: ChangeDTO, commit: Commit, project: GitProject, computeAnnotatedLines: Boolean, changeFactory: ChangeFactory): Change? {
             val parentCommit = if (changeDTO.parentCommitId.isEmpty()) null else commit.parents.find { it.id == changeDTO.parentCommitId }!!
             val lastChange = try {
                 if (changeDTO.type == org.dxworks.inspectorgit.gitclient.enums.ChangeType.ADD) null else getLastChange(parentCommit!!, changeDTO.oldFileName)
             } catch (e: NoChangeException) {
-                LOG.error("Change not found for file!",e)
+                LOG.error("Change not found for file!", e)
                 return null
             }
             LOG.debug("Creating ${changeDTO.type} change for file: ${changeDTO.oldFileName} -> ${changeDTO.newFileName}")
@@ -32,7 +32,8 @@ class ChangeTransformer {
                     file = file,
                     parentCommit = parentCommit,
                     hunks = getHunks(lastChange, changeDTO, commit),
-                    parentChange = lastChange)
+                    parentChange = lastChange,
+                    computeAnnotatedLines = computeAnnotatedLines)
         }
 
         private fun getHunks(lastChange: Change?, changeDTO: ChangeDTO, commit: Commit): List<Hunk> {

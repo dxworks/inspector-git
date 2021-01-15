@@ -40,7 +40,7 @@ class InspectorgitCli(
 
         val id = args.getOptionValues(Options.id)[0]
         try {
-            localSystemsService.load(id)
+            localSystemsService.load(id, computeAnnotatedLines)
         } catch (_: Exception) {
         }
         try {

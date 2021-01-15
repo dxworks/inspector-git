@@ -12,7 +12,8 @@ class TestChangeFactory(private val gitClient: GitClient) : ChangeFactory() {
                         file: File,
                         parentCommit: Commit?,
                         hunks: List<Hunk>,
-                        parentChange: Change?): Change =
+                        parentChange: Change?,
+                        computeAnnotatedLines: Boolean): Change =
             TestChange(commit = commit,
                     type = type,
                     oldFileName = oldFileName,
@@ -21,5 +22,6 @@ class TestChangeFactory(private val gitClient: GitClient) : ChangeFactory() {
                     parentCommit = parentCommit,
                     hunks = hunks,
                     parentChange = parentChange,
-                    gitClient = gitClient)
+                    gitClient = gitClient,
+                    computeAnnotatedLines = computeAnnotatedLines)
 }

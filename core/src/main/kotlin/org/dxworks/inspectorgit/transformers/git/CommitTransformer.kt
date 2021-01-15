@@ -15,7 +15,7 @@ class CommitTransformer {
     companion object {
         private val LOG = LoggerFactory.getLogger(CommitTransformer::class.java)
 
-        fun addToProject(commitDTO: CommitDTO, project: GitProject, changeFactory: ChangeFactory = SimpleChangeFactory()) {
+        fun addToProject(commitDTO: CommitDTO, project: GitProject, computeAnnotatedLines: Boolean, changeFactory: ChangeFactory = SimpleChangeFactory()) {
             LOG.debug("Creating commit with id: ${commitDTO.id}")
             val parents = getParentsFromIds(commitDTO.parentIds, project)
             if (parents.size > 1)
@@ -49,7 +49,7 @@ class CommitTransformer {
             if (committer != author)
                 committer.commits += commit
 
-            addChangesToCommit(commitDTO.changes, commit, project, changeFactory)
+            addChangesToCommit(commitDTO.changes, commit, project, computeAnnotatedLines, changeFactory)
 
             commit.repoSize = getParentCommitSize(commit) + computeCommitGrowth(commit)
 
@@ -72,16 +72,16 @@ class CommitTransformer {
             return ZonedDateTime.parse(timestamp, commitDateTimeFormatter)
         }
 
-        private fun addChangesToCommit(changes: List<ChangeDTO>, commit: Commit, project: GitProject, changeFactory: ChangeFactory) {
+        private fun addChangesToCommit(changes: List<ChangeDTO>, commit: Commit, project: GitProject, computeAnnotatedLines: Boolean, changeFactory: ChangeFactory) {
             LOG.debug("Filtering changes")
             if (commit.isMergeCommit) {
                 val changesByFile = changes.groupBy {
                     if (it.type == ChangeType.DELETE) it.oldFileName
                     else it.newFileName
                 }
-                commit.changes = changesByFile.mapNotNull { MergeChangesTransformer.transform(it.value, commit, project, changeFactory) }.flatten()
+                commit.changes = changesByFile.mapNotNull { MergeChangesTransformer.transform(it.value, commit, project, computeAnnotatedLines, changeFactory) }.flatten()
             } else {
-                commit.changes = changes.mapNotNull { ChangeTransformer.transform(it, commit, project, changeFactory) }
+                commit.changes = changes.mapNotNull { ChangeTransformer.transform(it, commit, project, computeAnnotatedLines, changeFactory) }
             }
             commit.changes.forEach { it.file.changes.add(it) }
             LOG.debug("Transforming changes")

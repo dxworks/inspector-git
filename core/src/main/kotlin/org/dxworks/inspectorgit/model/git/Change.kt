@@ -10,7 +10,8 @@ open class Change(val commit: Commit,
                   var parentCommit: Commit?,
                   var hunks: List<Hunk>,
                   var annotatedLines: MutableList<Commit> = ArrayList(),
-                  protected var parentChange: Change?) {
+                  protected var parentChange: Change?,
+                  computeAnnotatedLines: Boolean) {
 
     val id: String get() = "${commit.id}-$oldFileName->$newFileName"
 
@@ -28,7 +29,7 @@ open class Change(val commit: Commit,
     }
 
     init {
-        if (!file.isBinary) {
+        if (!file.isBinary && computeAnnotatedLines) {
             LOG.debug("Applying ${lineChanges.size} line changes for $newFileName having ${
                 parentChange?.annotatedLines?.size
                         ?: 0

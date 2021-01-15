@@ -12,8 +12,8 @@ class MergeChangesTransformer {
     companion object {
         val LOG = LoggerFactory.getLogger(MergeChangesTransformer::class.java)
 
-        fun transform(changeDTOs: List<ChangeDTO>, commit: Commit, project: GitProject, changeFactory: ChangeFactory): List<Change> {
-            val changes = changeDTOs.mapNotNull { ChangeTransformer.transform(it, commit, project, changeFactory) }
+        fun transform(changeDTOs: List<ChangeDTO>, commit: Commit, project: GitProject, computeAnnotatedLines: Boolean, changeFactory: ChangeFactory): List<Change> {
+            val changes = changeDTOs.mapNotNull { ChangeTransformer.transform(it, commit, project, computeAnnotatedLines, changeFactory) }
             return if (changes.isEmpty()) return emptyList() else fixChanges(changes, commit, project)
         }
 

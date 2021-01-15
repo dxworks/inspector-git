@@ -14,7 +14,8 @@ class TestChange(
         parentCommit: Commit?,
         hunks: List<Hunk>,
         parentChange: Change?,
-        gitClient: GitClient
+        gitClient: GitClient,
+        computeAnnotatedLines: Boolean
 ) : Change(
         commit = commit,
         type = ChangeType.valueOf(type.name),
@@ -23,7 +24,8 @@ class TestChange(
         file = file,
         parentCommit = parentCommit,
         hunks = hunks,
-        parentChange = parentChange
+        parentChange = parentChange,
+        computeAnnotatedLines = computeAnnotatedLines
 ) {
     companion object {
         private val LOG = LoggerFactory.getLogger(TestChange::class.java)

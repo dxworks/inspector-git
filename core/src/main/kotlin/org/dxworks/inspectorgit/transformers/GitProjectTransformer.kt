@@ -8,7 +8,7 @@ import org.dxworks.inspectorgit.transformers.git.CommitTransformer
 import org.dxworks.inspectorgit.transformers.git.SimpleChangeFactory
 import org.slf4j.LoggerFactory
 
-class GitProjectTransformer(private val gitLogDTO: GitLogDTO, private val name: String = "Project", private val changeFactory: ChangeFactory = SimpleChangeFactory()) {
+class GitProjectTransformer(private val gitLogDTO: GitLogDTO, private val name: String = "Project", private val computeAnnotatedLines: Boolean = true, private val changeFactory: ChangeFactory = SimpleChangeFactory()) {
     companion object {
         private val LOG = LoggerFactory.getLogger(GitProjectTransformer::class.java)
         private var branchId: Long = 0
@@ -20,7 +20,7 @@ class GitProjectTransformer(private val gitLogDTO: GitLogDTO, private val name: 
         val commitNo = gitLogDTO.commits.size
         gitLogDTO.commits.forEachIndexed { index, it ->
             LOG.info("Creating commit ${index + 1} / $commitNo (${(index + 1) * 100 / commitNo}%)\r")
-            CommitTransformer.addToProject(it, project, changeFactory)
+            CommitTransformer.addToProject(it, project, computeAnnotatedLines, changeFactory)
         }
         computeBranchIds(project.commitRegistry.all.first())
 

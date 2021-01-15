@@ -19,8 +19,8 @@ class LocalSystemsController(private val localSystemsService: LocalSystemsServic
     }
 
     @GetMapping("/{id}")
-    fun loadSystem(@PathVariable("id") id: String) {
-        localSystemsService.load(id)
+    fun loadSystem(@PathVariable("id") id: String, @RequestParam(required = false) computeAnnotatedLines: Boolean = true) {
+        localSystemsService.load(id, computeAnnotatedLines)
     }
 
     @DeleteMapping("/{id}")
