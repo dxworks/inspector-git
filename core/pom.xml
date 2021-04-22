@@ -23,7 +23,7 @@
         </dependency>
         <dependency>
             <groupId>org.dxworks.inspectorgit</groupId>
-            <artifactId>client</artifactId>
+            <artifactId>gitClient</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
 
