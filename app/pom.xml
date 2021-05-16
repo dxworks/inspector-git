@@ -40,12 +40,6 @@
             <version>${kotlin.version}</version>
             <scope>test</scope>
         </dependency>
-
-        <dependency>
-            <groupId>org.dxworks.inspectorgit</groupId>
-            <artifactId>frontend</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 
     <build>
@@ -82,15 +76,31 @@
                     <jvmTarget>1.8</jvmTarget>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.8.2</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
-    <repositories>
-        <repository>
-            <id>github</id>
-            <name>GitHub Java Rest Client Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/dxworks/inspector-git-fe</url>
-        </repository>
-    </repositories>
+    <profiles>
+        <profile>
+            <id>withEmbeddedFrontend</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.dxworks.inspectorgit</groupId>
+                    <artifactId>frontend</artifactId>
+                    <version>1.0-SNAPSHOT</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 
 </project>
