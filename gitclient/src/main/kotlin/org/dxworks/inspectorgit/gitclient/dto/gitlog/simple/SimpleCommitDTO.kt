@@ -26,11 +26,7 @@ class SimpleCommitDTO(
             email:$email
             date:${date.format(simpleCommitDateTimeFormatter)} 
             message:
-            $message
-            
-            numstat:
-            
-        """.trimIndent() + getNumstat()
+        """.trimIndent() + "\n$message\n\nnumstat:\n" + getNumstat()
     }
 
     private fun getNumstat(): String {
@@ -51,13 +47,13 @@ class SimpleCommitDTO(
         it.newFileName == devNull -> it.oldFileName
         it.oldFileName == devNull -> it.newFileName
         it.oldFileName == it.newFileName -> it.oldFileName
-        else -> "${it.oldFileName} ${it.newFileName}"
+        else -> "${it.oldFileName}\t${it.newFileName}"
     }
 
     private fun type(it: ChangeDTO) = when (it.type) {
         ChangeType.ADD -> "A"
         ChangeType.DELETE -> "D"
-        ChangeType.RENAME -> "R"
+        ChangeType.RENAME -> "R100"
         ChangeType.MODIFY -> "M"
     }
 

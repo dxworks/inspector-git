@@ -15,7 +15,7 @@ class SimpleLogWriter {
         Paths.get(".").resolve("$name.git").toFile().writeText(toSimpleCommitLog(gitLogDTO))
 
     private fun toSimpleCommitLog(gitLogDTO: GitLogDTO) =
-        gitLogDTO.commits.reversed().joinToString(separator = "\n") {
+        gitLogDTO.commits.filter { it.parentIds.size < 2 }.reversed().joinToString(separator = "\n") {
             SimpleCommitDTO(it).toString()
         }
 }
