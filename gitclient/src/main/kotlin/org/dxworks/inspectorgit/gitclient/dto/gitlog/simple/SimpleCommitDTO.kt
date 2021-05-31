@@ -24,7 +24,7 @@ class SimpleCommitDTO(
             commit:$commit
             author:$author
             email:$email
-            date:${date.format(simpleCommitDateTimeFormatter)}
+            date:${date.format(simpleCommitDateTimeFormatter)} 
             message:
             $message
             
@@ -35,9 +35,9 @@ class SimpleCommitDTO(
 
     private fun getNumstat(): String {
         return commitDTO.changes.joinToString(separator = "\n", prefix = "\n") {
-            ":${idPairs(it)} ${idPairs(it)} ${type(it)}\t ${names(it)}"
+            ":${idPairs6(it)} ${idPairs7(it)} ${type(it)}\t${names(it)}"
         } + commitDTO.changes.joinToString(separator = "\n", prefix = "\n") {
-            "${added(it)}\t${deleted(it)} ${name(it)}"
+            "${added(it)}\t${deleted(it)}\t${name(it)}"
         }
     }
 
@@ -48,8 +48,9 @@ class SimpleCommitDTO(
     private fun deleted(it: ChangeDTO) = it.hunks.flatMap { it.deletedLineChanges }.count()
 
     private fun names(it: ChangeDTO) = when {
-        it.oldFileName == devNull -> it.newFileName
         it.newFileName == devNull -> it.oldFileName
+        it.oldFileName == devNull -> it.newFileName
+        it.oldFileName == it.newFileName -> it.oldFileName
         else -> "${it.oldFileName} ${it.newFileName}"
     }
 
@@ -60,13 +61,21 @@ class SimpleCommitDTO(
         ChangeType.MODIFY -> "M"
     }
 
-    private fun idPairs(it: ChangeDTO) =
-        "${if (it.type == ChangeType.ADD) id0 else id} ${if (it.type == ChangeType.DELETE) id0 else id}"
+    private fun idPairs6(it: ChangeDTO) =
+        "${if (it.type == ChangeType.ADD) id60 else id6} ${if (it.type == ChangeType.DELETE) id60 else id6}"
 
-    private val id: String
+    private fun idPairs7(it: ChangeDTO) =
+        "${if (it.type == ChangeType.ADD) id70 else id7} ${if (it.type == ChangeType.DELETE) id70 else id7}"
+
+    private val id6: String
+        get() = Random(System.currentTimeMillis()).nextLong(100000L, 1000000L).toString()
+
+    private val id60: String = "000000"
+
+    private val id7: String
         get() = Random(System.currentTimeMillis()).nextLong(1000000L, 10000000L).toString()
 
-    private val id0: String = "0000000"
+    private val id70: String = "0000000"
 }
 
 private const val commitDateFormat = "EEE, d MMM yyyy HH:mm:ss Z"
