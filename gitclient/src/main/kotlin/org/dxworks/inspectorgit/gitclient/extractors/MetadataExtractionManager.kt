@@ -6,7 +6,6 @@ import org.dxworks.inspectorgit.gitclient.dto.gitlog.GitLogDTO
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.HunkDTO
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.LineChangeDTO
 import org.dxworks.inspectorgit.gitclient.enums.LineOperation
-import org.dxworks.inspectorgit.gitclient.extractors.impl.HunkChangeMetaExtractor
 import org.dxworks.inspectorgit.gitclient.extractors.impl.LineOperationsMetaExtractor
 import org.dxworks.inspectorgit.gitclient.iglog.writers.IGLogWriter
 import org.dxworks.inspectorgit.gitclient.parsers.CommitParserFactory
@@ -27,6 +26,7 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
     private val commitIterator = GitCommitIterator(gitClient, 4000)
 
     private val extractDir = extractToPath.toFile()
+    val extractFile = extractDir.resolve("${repoPath.fileName}.iglog")
 
     private val lineOperationsMetaExtractor = LineOperationsMetaExtractor()
 
@@ -40,8 +40,7 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
 
     fun extract() {
         commitNumber = 1
-        commitCount = gitClient.getCommitCount();
-        val extractFile = extractDir.resolve("${repoPath.fileName}.iglog")
+        commitCount = gitClient.getCommitCount()
         extractFile.writeText("Version\n")
 
 
@@ -116,7 +115,7 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
 
     private fun swapContentWithMetadata(hunkDTO: HunkDTO) {
         hunkDTO.lineChanges = listOf(
-                ContentOnlyLineChange(lineOperationsMetaExtractor.write(hunkDTO))
+            ContentOnlyLineChange(lineOperationsMetaExtractor.write(hunkDTO))
 //                ContentOnlyLineChange(hunkChangeMetaExtractor.write(hunkDTO))
         )
     }

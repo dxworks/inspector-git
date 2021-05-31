@@ -48,7 +48,7 @@ class LocalSystemsService(private val loadedSystem: LoadedSystem,
             val (repos, iglogs) = mapToFilesOrThrow(localSystemDTO.sources)
                     .partition { it.isDirectory }
 
-            repos.forEach { MetadataExtractionManager(it.toPath(), systemFolder.toPath()).extract() }
+            repos.forEach { MetadataExtractionManager(it.toPath(), systemFolder.toPath()).extract(simpleLog) }
 
             localSystemDTO.sources = (iglogs + (systemFolder.list()?.map { systemFolder.resolve(it) }
                     ?: emptyList())).map { it.absolutePath }
