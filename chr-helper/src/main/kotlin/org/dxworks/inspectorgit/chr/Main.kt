@@ -20,12 +20,10 @@ fun main(args: Array<String>) {
         ).transform()
     }?.flatMap {
         it.commitRegistry.all.filterNot { it.isMergeCommit }.flatMap { it.changes }
-    }?.map {
-        mapOf(
-            getFileName(it) + it.commit.id to mapOf(
-                "fileSize" to it.addedLines.size,
-                "isAlive" to !(it == it.file.changes.last() && it.type == ChangeType.DELETE)
-            )
+    }?.associate {
+        getFileName(it) + it.commit.id to mapOf(
+            "fileSize" to it.addedLines.size,
+            "isAlive" to !(it == it.file.changes.last() && it.type == ChangeType.DELETE)
         )
     }
 
