@@ -24,7 +24,7 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
 
     private val gitClient = GitClient(repoPath)
 
-    private val commitIterator = GitCommitIterator(gitClient, 4000)
+    private val commitIterator = GitCommitIterator(gitClient, 10000)
 
     private val extractDir = extractToPath.toFile()
 
