@@ -22,7 +22,7 @@ fun main(args: Array<String>) {
         it.commitRegistry.all.filterNot { it.isMergeCommit }.flatMap { it.changes }
     }?.associate {
         getFileName(it) + it.commit.id to mapOf(
-            "fileSize" to it.addedLines.size,
+            "fileSize" to it.annotatedLines.size,
             "isAlive" to !(it == it.file.changes.last() && it.type == ChangeType.DELETE)
         )
     }
