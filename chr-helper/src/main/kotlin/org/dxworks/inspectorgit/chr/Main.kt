@@ -32,4 +32,4 @@ fun main(args: Array<String>) {
     jacksonObjectMapper().writeValue(file, changeMeta)
 }
 
-fun getFileName(it: Change) = if (it.newFileName == devNull) it.oldFileName else it.newFileName
+fun getFileName(it: Change) = if (it.oldFileName == devNull) it.newFileName else it.oldFileName
