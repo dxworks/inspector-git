@@ -10,20 +10,24 @@ import java.io.FileFilter
 import java.nio.file.Paths
 
 fun main(args: Array<String>) {
-    val folder = Paths.get(args[0]).toFile()
+    val folder = Paths.get(args.firstOrNull() ?: ".").toFile()
     folder.isDirectory
 
-    val changeMeta = folder.listFiles(FileFilter { it.extension == "iglog" })?.map {
+    val files = folder.listFiles(FileFilter { it.extension == "iglog" }) ?: return
+    val doPrefix = files.size > 1
+
+    val changeMeta = files.map {
         GitProjectTransformer(
             IGLogReader().read(it.inputStream()),
             it.nameWithoutExtension
         ).transform()
-    }?.flatMap {
-        it.commitRegistry.all.filterNot { it.isMergeCommit }.flatMap { it.changes }
-    }?.associate {
-        getFileName(it) + it.commit.id to mapOf(
-            "fileSize" to it.annotatedLines.size,
-            "isAlive" to !(it == it.file.changes.last() && it.type == ChangeType.DELETE)
+    }.flatMap { project ->
+        project.commitRegistry.all.filterNot { it.isMergeCommit }.flatMap { it.changes }.map { it to project.name }
+    }.associate {
+        val change = it.first
+        getId(it, doPrefix) to mapOf(
+            "fileSize" to change.annotatedLines.size,
+            "isAlive" to !(it == change.file.changes.last() && change.type == ChangeType.DELETE)
         )
     }
 
@@ -32,4 +36,14 @@ fun main(args: Array<String>) {
     jacksonObjectMapper().writeValue(file, changeMeta)
 }
 
-fun getFileName(it: Change) = if (it.oldFileName == devNull) it.newFileName else it.oldFileName
+private fun getId(
+    changeAndProjectName: Pair<Change, String>,
+    doPrefix: Boolean
+) = (getFileName(changeAndProjectName.first) + changeAndProjectName.first.commit.id).let {
+    if (doPrefix)
+        "${changeAndProjectName.second}/$it${changeAndProjectName.second}"
+    else
+        it
+}
+
+fun getFileName(change: Change) = if (change.oldFileName == devNull) change.newFileName else change.oldFileName
