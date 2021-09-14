@@ -1,10 +1,11 @@
-name: IGlog
+name: iglog
 run: onEach
 results:
   - dir: ${instrument}/results
     files:
       - "*.iglog"
+
 commands:
   - name: extract iglogs
-    win: java -jar iglog.jar ${repo}
-    unix: java -jar iglog.jar ${repo}
+    win: java -jar iglog.jar "${repo}"
+    unix: java -jar iglog.jar "${repo}"
