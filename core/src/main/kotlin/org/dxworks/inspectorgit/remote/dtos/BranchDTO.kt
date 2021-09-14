@@ -5,5 +5,5 @@ class BranchDTO(
         val label: String,
         val ref: String,
         val user: RemoteUserDTO,
-        val repo: RemoteRepoDTO
+        val repo: RemoteRepoDTO?
 )

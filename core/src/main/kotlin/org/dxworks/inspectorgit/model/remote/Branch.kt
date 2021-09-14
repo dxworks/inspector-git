@@ -8,7 +8,7 @@ class Branch(
         val label: String,
         ref: String,
         val user: RemoteGitAccount,
-        val remoteRepo: RemoteRepo,
+        val remoteRepo: RemoteRepo?,
         commit: Commit? = null,
         issue: DetailedIssue? = null
 ) : SimpleBranch(

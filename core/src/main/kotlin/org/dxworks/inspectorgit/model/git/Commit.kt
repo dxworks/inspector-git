@@ -49,7 +49,6 @@ data class Commit(var project: GitProject,
         return result
     }
 
-    var taskIds: List<String> = emptyList()
     val isMergeCommit: Boolean
         get() = parents.size > 1
 

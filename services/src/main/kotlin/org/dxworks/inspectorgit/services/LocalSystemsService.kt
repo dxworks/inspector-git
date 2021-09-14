@@ -107,7 +107,7 @@ class LocalSystemsService(private val loadedSystem: LoadedSystem,
                 .onEach { if (!it.exists()) throw FileNotFoundException("${it.absolutePath} is not a file or folder.") }
     }
 
-    fun load(id: String, computeAnnotatedLines: Boolean) {
+    fun load(id: String, computeAnnotatedLines: Boolean = true) {
         if (loadedSystem.isSet && loadedSystem.id == id)
             return
 
