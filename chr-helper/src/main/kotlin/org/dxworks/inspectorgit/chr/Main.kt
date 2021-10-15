@@ -8,6 +8,7 @@ import org.dxworks.inspectorgit.transformers.GitProjectTransformer
 import org.dxworks.inspectorgit.utils.devNull
 import java.io.FileFilter
 import java.nio.file.Paths
+import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
     val arguments = args.toMutableList()
@@ -15,7 +16,14 @@ fun main(args: Array<String>) {
 
     val folder = Paths.get(arguments.firstOrNull() ?: ".").toFile()
 
-    val files = folder.listFiles(FileFilter { it.extension == "iglog" }) ?: return
+    val files = folder.listFiles(FileFilter { it.extension == "iglog" }) ?: run {
+        println("could not list files")
+        exitProcess(0)
+    }
+
+    if (files.isEmpty()) {
+        println("No iglog files found in ${folder.absolutePath}")
+    }
     val doPrefix = files.size > 1 || prefix
 
     val changeMeta = files.map {
@@ -36,6 +44,8 @@ fun main(args: Array<String>) {
         val file = folder.resolve("chr-help.json")
         file.createNewFile()
         jacksonObjectMapper().writeValue(file, changeMeta)
+    } else {
+        println("Nothing to write")
     }
 }
 
