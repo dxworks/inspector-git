@@ -2,18 +2,21 @@ package org.dxworks.inspectorgit.gitclient.iglog.writers
 
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.CommitDTO
 import org.dxworks.inspectorgit.gitclient.iglog.IGLogConstants
+import org.dxworks.inspectorgit.gitclient.utils.maskString
 
 class IGCommitWriter(private val commitDTO: CommitDTO) : IGWriter() {
+    private val incognito = System.getenv("GIT_INCOGNITO")?.toBoolean() ?: false
+
     override fun appendLines(responseBuilder: StringBuilder) {
         responseBuilder.appendln(getIdLine())
         responseBuilder.appendln(getParentsLine())
         responseBuilder.appendln(commitDTO.authorDate)
-        responseBuilder.appendln(commitDTO.authorEmail)
-        responseBuilder.appendln(commitDTO.authorName)
+        responseBuilder.appendln(commitDTO.authorEmail.let { if(incognito) maskString(it) else it})
+        responseBuilder.appendln(commitDTO.authorName.let { if(incognito) maskString(it) else it})
         if (commitDTO.authorDate != commitDTO.committerDate) {
             responseBuilder.appendln(commitDTO.committerDate)
-            responseBuilder.appendln(commitDTO.committerEmail)
-            responseBuilder.appendln(commitDTO.committerName)
+            responseBuilder.appendln(commitDTO.committerEmail.let { if(incognito) maskString(it) else it})
+            responseBuilder.appendln(commitDTO.committerName.let { if(incognito) maskString(it) else it})
         }
         responseBuilder.appendln(getMessageLine())
 
