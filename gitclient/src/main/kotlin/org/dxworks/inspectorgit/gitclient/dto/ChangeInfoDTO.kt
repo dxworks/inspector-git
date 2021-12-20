@@ -7,5 +7,5 @@ open class ChangeInfoDTO(
         val newFileName: String,
         var type: ChangeType,
         var parentCommitId: String,
-        val isBinary: Boolean
+        var isBinary: Boolean
 )

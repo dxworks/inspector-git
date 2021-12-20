@@ -3,7 +3,7 @@ package org.dxworks.inspectorgit.gitclient.dto.gitlog
 import org.dxworks.inspectorgit.gitclient.dto.ChangeInfoDTO
 import org.dxworks.inspectorgit.gitclient.enums.ChangeType
 
-class ChangeDTO(
+open class ChangeDTO(
         oldFileName: String,
         newFileName: String,
         type: ChangeType,
