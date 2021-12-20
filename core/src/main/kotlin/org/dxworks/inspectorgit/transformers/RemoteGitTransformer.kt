@@ -70,8 +70,8 @@ class RemoteGitTransformer(private val remoteInfoDTO: RemoteInfoDTO, private val
 
     private fun addPullRequestToAccounts(pullRequest: PullRequest) {
         val allAuthors = (pullRequest.reviews.map { it.user } + pullRequest.createdBy + pullRequest.mergedBy +
-                pullRequest.head.user + pullRequest.head.remoteRepo.owner +
-                pullRequest.base.user + pullRequest.base.remoteRepo.owner).filterNotNull().toSet()
+                pullRequest.head.user + pullRequest.head.remoteRepo?.owner +
+                pullRequest.base.user + pullRequest.base.remoteRepo?.owner).filterNotNull().toSet()
         allAuthors.forEach { it.pullRequests += pullRequest }
         pullRequest.createdBy.openedPullRequests += pullRequest;
     }
@@ -101,7 +101,9 @@ class RemoteGitTransformer(private val remoteInfoDTO: RemoteInfoDTO, private val
             getRepo(project, branch.repo)
     )
 
-    private fun getRepo(project: RemoteGitProject, remoteRepo: RemoteRepoDTO): RemoteRepo {
+    private fun getRepo(project: RemoteGitProject, remoteRepo: RemoteRepoDTO?): RemoteRepo? {
+        if(remoteRepo == null)
+            return null
         val byId = project.repoRegistry.getById(remoteRepo.id)
         return if (byId != null)
             byId

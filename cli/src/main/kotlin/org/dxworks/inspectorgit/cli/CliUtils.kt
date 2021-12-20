@@ -3,6 +3,7 @@ package org.dxworks.inspectorgit.cli
 class Options {
     companion object {
         const val id = "id"
+        const val computeAnnotatedLines = "computeAnnotatedLines"
         const val scripts = "scripts"
         const val iglogs = "iglogs"
         const val issues = "issues"

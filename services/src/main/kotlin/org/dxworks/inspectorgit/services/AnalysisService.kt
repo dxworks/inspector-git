@@ -8,6 +8,9 @@ import groovy.lang.Binding
 import groovy.lang.Closure
 import groovy.lang.GroovyShell
 import org.dxworks.inspectorgit.AccountMerge
+import org.dxworks.inspectorgit.services.chronos.chart.BarChartDTO
+import org.dxworks.inspectorgit.services.chronos.chart.convertBarChartToRequestBody
+import org.dxworks.inspectorgit.services.chronos.chart.exportChart
 import org.dxworks.inspectorgit.services.dto.GroovyScriptDTO
 import org.dxworks.inspectorgit.services.dto.LocalSystemDTO
 import org.dxworks.inspectorgit.services.dto.ScriptResult
@@ -100,6 +103,21 @@ class AnalysisService(private val loadedSystem: LoadedSystem,
             override fun call(vararg args: Any?) {
                 val name = args[0].toString()
                 accountMergeService.mergeDevelopers(AccountMerge(name, args.drop(1).mapNotNull { it?.toString() }))
+            }
+        })
+
+        binding.setVariable("exportBarChart", object : Closure<Unit>(null) {
+
+            override fun call(vararg args: Any?) {
+                if (args[0] is BarChartDTO) {
+                    val barChartDTO: BarChartDTO = args[0] as BarChartDTO
+                    val requestBody = convertBarChartToRequestBody(barChartDTO)
+
+                    if (args.size == 3 && args[1] is String && args[2] is String)
+                        exportChart(requestBody, args[1] as String, args[2] as String)
+                    else
+                        exportChart(requestBody, args[1] as String)
+                }
             }
         })
 

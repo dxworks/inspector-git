@@ -8,10 +8,10 @@ import javax.persistence.*
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["systemId"])])
 class LocalSystemEntity() : BaseEntity<UUID>(UUID.randomUUID()) {
 
-    @Column
+    @Column(unique = true)
     lateinit var systemId: String
 
-    @Column(unique = true)
+    @Column
     lateinit var name: String
 
     @ElementCollection(targetClass = String::class)

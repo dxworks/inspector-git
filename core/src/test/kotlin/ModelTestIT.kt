@@ -89,8 +89,8 @@ internal class ModelTestIT {
                     }
         }
 
-        LOG.info("Test ended with ${(lines - linesWithDifferentCommit) / lines * 100}% line owner accuracy(against git).")
-        LOG.info("$linesWithDifferentCommit / $lines")
+        LOG.debug("Test ended with ${(lines - linesWithDifferentCommit) / lines * 100}% line owner accuracy(against git).")
+        LOG.debug("$linesWithDifferentCommit / $lines")
         assertTrue { ok }
     }
 
