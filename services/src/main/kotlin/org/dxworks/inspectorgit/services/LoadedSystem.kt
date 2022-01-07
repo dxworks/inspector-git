@@ -20,16 +20,16 @@ class LoadedSystem {
         private set
 
     val gitProjects: Map<String, GitProject>
-        get() = getProjectsByType()
+        get() = getProjectsByType<GitProject>()
     val issueProjects: Map<String, IssueTrackerProject>
-        get() = getProjectsByType()
+        get() = getProjectsByType<IssueTrackerProject>()
     val remoteProjects: Map<String, RemoteGitProject>
-        get() = getProjectsByType()
+        get() = getProjectsByType<RemoteGitProject>()
 
     val developerRegistry = DeveloperRegistry()
 
     private inline fun <reified T : Project> getProjectsByType() =
-            projects.values.filterIsInstance<T>().map { Pair(it.name, it) }.toMap()
+        projects.values.filterIsInstance<T>().associateBy { it.name }
 
 
     val isSet get() = this::id.isInitialized
@@ -40,7 +40,7 @@ class LoadedSystem {
 
         val gitProjects = projects.filterIsInstance<GitProject>()
         val issueProjects = projects.filterIsInstance<IssueTrackerProject>()
-        val remoteProjectsByName = projects.filterIsInstance<RemoteGitProject>().map { Pair(it.name, it) }.toMap()
+        val remoteProjectsByName = projects.filterIsInstance<RemoteGitProject>().associateBy { it.name }
 
         gitProjects.forEach { git ->
             remoteProjectsByName["${git.name}-remote"]?.also { projectLinkers.link(git, it) }
@@ -50,11 +50,7 @@ class LoadedSystem {
             gitProjects.forEach { projectLinkers.link(it, issue) }
             remoteProjectsByName.values.forEach { projectLinkers.link(issue, it) }
         }
-//
-//        projects.reduce { acc, project ->
-//            projectLinkers.link(acc, project)
-//            project
-//        }
-        this.projects = projects.map { Pair(it.name, it) }.toMap()
+
+        this.projects = projects.associateBy { it.name }
     }
 }

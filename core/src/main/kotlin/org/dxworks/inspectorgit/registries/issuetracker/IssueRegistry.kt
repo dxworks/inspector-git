@@ -15,7 +15,7 @@ class IssueRegistry : AbstractRegistry<Issue, String>() {
 
     val period: Period
         get() = Period(
-                allDetailedIssues.minBy { it.created }!!.created.with(LocalTime.MIN),
-                allDetailedIssues.maxBy { it.updated }!!.updated.with(LocalTime.MAX)
+                allDetailedIssues.minByOrNull { it.created }!!.created.with(LocalTime.MIN),
+                allDetailedIssues.maxByOrNull { it.updated }!!.updated.with(LocalTime.MAX)
         )
 }

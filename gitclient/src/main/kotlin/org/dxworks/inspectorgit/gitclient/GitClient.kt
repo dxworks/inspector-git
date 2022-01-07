@@ -3,6 +3,7 @@ package org.dxworks.inspectorgit.gitclient
 import org.dxworks.inspectorgit.gitclient.iglog.IGLogConstants
 import org.dxworks.inspectorgit.gitclient.iglog.IGLogConstants.Companion.gitLogMessageEnd
 import org.dxworks.inspectorgit.utils.OsUtils
+import org.dxworks.inspectorgit.utils.OsUtils.Companion.isUnix
 import org.slf4j.LoggerFactory
 import java.io.BufferedReader
 import java.io.File
@@ -25,8 +26,10 @@ class GitClient(path: Path) {
     private val gitLogCommand =
         "log $renameDetectionThreshold -m $contextThreshold $encodingUTF8 --format=\"${IGLogConstants.commitIdPrefix}%H%n%P%n%an%n%ae%n%ad%n%cn%n%ce%n%cd %n%s%n%b%n$gitLogMessageEnd%n\" --reverse"
 
-    private val simpleLogCommand =
+    private val simpleLogCommandWin =
         "log $encodingUTF8 --no-merges --find-renames --numstat --raw --format=\"commit:%H%nauthor:%an%nemail:%ae%ndate:%cD %nmessage:%n%s%n%b%nnumstat:\""
+    private val simpleLogCommandUnix =
+        "log $encodingUTF8 --no-merges --find-renames --numstat --raw --format=\"commit:%H%nauthor:%an%nemail:%ae%ndate:%cD%nmessage:%n%s%n%b%nnumstat:\""
     private val gitAffectedFilesCommand = "log $renameDetectionThreshold -m -1 --name-only --pretty=\"format:\""
     private val gitCommitLinksCommand =
         "log -m  $encodingUTF8 --format=\"${IGLogConstants.commitIdPrefix}%H%n%P\" --reverse"
@@ -48,8 +51,10 @@ class GitClient(path: Path) {
 
     fun getLogs(): List<String> = runGitCommand(gitLogCommand)!!
 
-    fun getSimpleLog() {
-        runGitCommand("$simpleLogCommand > simpleLog.git")
+    fun getSimpleLog(file: String = "simpleLog"): File {
+        val logCommand = if (isUnix) simpleLogCommandUnix else simpleLogCommandWin
+        runGitCommand("$logCommand > $file")
+        return processBuilder.directory().resolve(file)
     }
 
     fun getCommitCount(): Int = runGitCommand(gitCountCommitsCommand)!!.getOrElse(0) { "0" }.toInt()
