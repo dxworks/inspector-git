@@ -49,11 +49,11 @@ class DetailedIssue(id: String,
         val statusChanges = getStatusChanges()
         return statusChanges
                 .filter { it.created < date }
-                .maxBy { it.created }
+                .maxByOrNull { it.created }
                 ?.let { it.getItemForField(statusFieldName) }
                 ?.let { it.to }
                 ?.let { project.issueStatusRegistry.getById(it) }
-                ?: statusChanges.minBy { it.created }
+                ?: statusChanges.minByOrNull { it.created }
                         ?.let { it.getItemForField(statusFieldName) }
                         ?.let { it.from }
                         ?.let { project.issueStatusRegistry.getById(it) }
@@ -74,16 +74,16 @@ class DetailedIssue(id: String,
                 .filter {
                     it.getItemForField(statusFieldName)?.to?.let { project.issueStatusRegistry.isDone(it) } ?: false
                 }
-                .minBy { it.created }?.created
+                .minByOrNull { it.created }?.created
                 ?: return null
         val openedDate = statusChanges
                 .filter {
                     it.getItemForField(statusFieldName)?.to?.let { project.issueStatusRegistry.isIndeterminate(it) } ?: false
                             && it.getItemForField(statusFieldName)?.from?.let { project.issueStatusRegistry.isNew(it) } ?: false
-                }.maxBy { it.created }?.created
+                }.maxByOrNull { it.created }?.created
                 ?: statusChanges.filter {
                     it.getItemForField(statusFieldName)?.to?.let { !project.issueStatusRegistry.isDone(it) } ?: true
-                }.maxBy { it.created }?.created
+                }.maxByOrNull { it.created }?.created
                 ?: created
 
 

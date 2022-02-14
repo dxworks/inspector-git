@@ -8,6 +8,7 @@ import java.io.Reader
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.thread
 import kotlin.concurrent.withLock
+import kotlin.system.exitProcess
 
 class GitCommitIterator(gitClient: GitClient, pageSize: Int = 2000, private val pageNumber: Int = 0) {
     companion object {
@@ -42,7 +43,13 @@ class GitCommitIterator(gitClient: GitClient, pageSize: Int = 2000, private val 
         if (!cachingInProgress && (files == null || files.isEmpty())) index = 1
 
         if (index == 1) {
-            thread { cacheNextPage() }
+            thread {
+                try {
+                    cacheNextPage()
+                } catch (_:Exception) {
+                    exitProcess(2)
+                }
+            }
             currentPage++
         }
 
@@ -89,8 +96,11 @@ class GitCommitIterator(gitClient: GitClient, pageSize: Int = 2000, private val 
             if (cachingIndex != 0) {
                 LOG.debug("Caching commit: $cachingIndex of page: ${gitLogPager.counter}")
 
-                tempDir.resolve(cachingIndex.toString()).writeText(commitLines.joinToString("\n"))
-
+                tempDir.resolve(cachingIndex.toString()).bufferedWriter().use { bufferedWriter ->
+                    commitLines.forEach {
+                        bufferedWriter.write("$it\n")
+                    }
+                }
                 if (index <= cachingIndex) condition.signal()
             }
             cachingIndex++

@@ -26,7 +26,7 @@ class IGCommitReader(private val igChangeReader: IGChangeReader = IGChangeReader
         }
 
         var currentChangeLines: MutableList<String> = ArrayList()
-        val changes: MutableList<ChangeDTO> = ArrayList();
+        val changes: MutableList<ChangeDTO> = ArrayList()
         lines.forEach {
             if (it.startsWith(IGLogConstants.changePrefix)) {
                 if (currentChangeLines.isNotEmpty()) changes.add(igChangeReader.read(currentChangeLines))

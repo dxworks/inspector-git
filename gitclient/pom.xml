@@ -12,8 +12,10 @@
     <artifactId>gitclient</artifactId>
 
     <properties>
+        <version>$tag_version</version>
         <main.class>org.dxworks.inspectorgit.gitclient.MainKt</main.class>
         <kotlin.version>1.3.71</kotlin.version>
+        <jar.final.name>iglog</jar.final.name>
     </properties>
 
     <dependencies>
@@ -50,6 +52,18 @@
             <artifactId>junit-jupiter</artifactId>
             <version>5.6.1</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+            <version>6.0.0.202111291000-r</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.ajalt.clikt</groupId>
+            <artifactId>clikt-jvm</artifactId>
+            <version>3.1.0</version>
         </dependency>
 
     </dependencies>
@@ -94,16 +108,38 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.jetbrains.kotlin</groupId>
+                        <artifactId>kotlin-maven-plugin</artifactId>
+                        <version>${kotlin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>compile</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>test-compile</id>
+                                <phase>test-compile</phase>
+                                <goals>
+                                    <goal>test-compile</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <jvmTarget>1.8</jvmTarget>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
-                        <version>2.4.1</version>
                         <configuration>
-                            <finalName>iglog</finalName>
-                            <!-- get all project dependencies -->
+                            <finalName>${jar.final.name}</finalName>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
-                            <!-- MainClass in mainfest make a executable jar -->
                             <archive>
                                 <manifest>
                                     <mainClass>${main.class}</mainClass>
@@ -114,11 +150,27 @@
                         <executions>
                             <execution>
                                 <id>make-assembly</id>
-                                <!-- bind to the packaging phase -->
                                 <phase>package</phase>
                                 <goals>
                                     <goal>single</goal>
                                 </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>properties-maven-plugin</artifactId>
+                        <version>1.0.0</version>
+                        <executions>
+                            <execution>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>write-project-properties</goal>
+                                </goals>
+                                <configuration>
+                                    <outputFile>${project.build.outputDirectory}/maven.properties</outputFile>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

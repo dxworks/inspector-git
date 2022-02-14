@@ -6,7 +6,6 @@ import org.dxworks.inspectorgit.gitclient.dto.gitlog.GitLogDTO
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.HunkDTO
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.LineChangeDTO
 import org.dxworks.inspectorgit.gitclient.enums.LineOperation
-import org.dxworks.inspectorgit.gitclient.extractors.impl.HunkChangeMetaExtractor
 import org.dxworks.inspectorgit.gitclient.extractors.impl.LineOperationsMetaExtractor
 import org.dxworks.inspectorgit.gitclient.iglog.writers.IGLogWriter
 import org.dxworks.inspectorgit.gitclient.parsers.CommitParserFactory
@@ -15,7 +14,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.file.Path
 
-class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path) {
+class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path, private val incognito: Boolean = false) {
     companion object {
         private val LOG = LoggerFactory.getLogger(MetadataExtractionManager::class.java)
         private var commitNumber = 1
@@ -106,7 +105,7 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
         writtenCommitIds.addAll(gitLogDTO.commits.map { it.id }.distinct())
     }
 
-    private fun toIgLog(gitLogDTO: GitLogDTO) = IGLogWriter(gitLogDTO).write()
+    private fun toIgLog(gitLogDTO: GitLogDTO) = IGLogWriter(gitLogDTO, incognito).write()
 
     private fun swapContentWithMetadata(gitLogDTO: GitLogDTO) {
         gitLogDTO.commits.parallelStream().forEach { commitDTO ->

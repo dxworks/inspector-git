@@ -41,7 +41,7 @@ class LocalSystemsService(private val loadedSystem: LoadedSystem,
         if (systemFolder.exists())
             throw FileAlreadyExistsException(systemFolder, reason = "Project with id ${localSystemDTO.id} already exists")
 
-        systemFolder.mkdir()
+        systemFolder.mkdirs()
 
         try {
 

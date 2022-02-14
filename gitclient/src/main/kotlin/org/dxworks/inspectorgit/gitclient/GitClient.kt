@@ -3,8 +3,10 @@ package org.dxworks.inspectorgit.gitclient
 import org.dxworks.inspectorgit.gitclient.iglog.IGLogConstants
 import org.dxworks.inspectorgit.gitclient.iglog.IGLogConstants.Companion.gitLogMessageEnd
 import org.dxworks.inspectorgit.utils.OsUtils
+import org.dxworks.inspectorgit.utils.OsUtils.Companion.isUnix
 import org.slf4j.LoggerFactory
 import java.io.BufferedReader
+import java.io.File
 import java.io.InputStream
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets.UTF_8
@@ -16,14 +18,21 @@ class GitClient(path: Path) {
         private val git = "git"
         const val contextThreshold = "-U1"
         const val renameDetectionThreshold = "-M60%"
+        const val encodingUTF8 = "--encoding=UTF8"
 
         //    private val renameDetectionThreshold = "--no-renames"
-
     }
 
-    private val gitLogCommand = "log $renameDetectionThreshold -m $contextThreshold --encoding=UTF-8 --format=\"${IGLogConstants.commitIdPrefix}%H%n%P%n%an%n%ae%n%ad%n%cn%n%ce%n%cd %n%s%n%b%n$gitLogMessageEnd%n\" --reverse"
+    private val gitLogCommand =
+        "log $renameDetectionThreshold -m $contextThreshold $encodingUTF8 --format=\"${IGLogConstants.commitIdPrefix}%H%n%P%n%an%n%ae%n%ad%n%cn%n%ce%n%cd %n%s%n%b%n$gitLogMessageEnd%n\" --reverse"
+
+    private val simpleLogCommandWin =
+        "log $encodingUTF8 --no-merges --find-renames --numstat --raw --format=\"commit:%H%nauthor:%an%nemail:%ae%ndate:%cD %nmessage:%n%s%n%b%nnumstat:\""
+    private val simpleLogCommandUnix =
+        "log $encodingUTF8 --no-merges --find-renames --numstat --raw --format=\"commit:%H%nauthor:%an%nemail:%ae%ndate:%cD%nmessage:%n%s%n%b%nnumstat:\""
     private val gitAffectedFilesCommand = "log $renameDetectionThreshold -m -1 --name-only --pretty=\"format:\""
-    private val gitCommitLinksCommand = "log -m  --encoding=UTF-8 --format=\"${IGLogConstants.commitIdPrefix}%H%n%P\" --reverse"
+    private val gitCommitLinksCommand =
+        "log -m  $encodingUTF8 --format=\"${IGLogConstants.commitIdPrefix}%H%n%P\" --reverse"
     private val gitCountCommitsCommand = "rev-list HEAD --count"
     private val gitDiffCommand = "diff $renameDetectionThreshold $contextThreshold"
     private val gitDiffFileNamesCommand = "diff $renameDetectionThreshold --name-only"
@@ -42,6 +51,11 @@ class GitClient(path: Path) {
 
     fun getLogs(): List<String> = runGitCommand(gitLogCommand)!!
 
+    fun getSimpleLog(file: String = "simpleLog"): File {
+        val logCommand = if (isUnix) simpleLogCommandUnix else simpleLogCommandWin
+        runGitCommand("$logCommand > $file")
+        return processBuilder.directory().resolve(file)
+    }
 
     fun getCommitCount(): Int = runGitCommand(gitCountCommitsCommand)!!.getOrElse(0) { "0" }.toInt()
 
@@ -49,13 +63,17 @@ class GitClient(path: Path) {
 
     fun getCommitLinks(): List<String> = runGitCommand(gitCommitLinksCommand)!!
 
-    fun getNCommitLogs(n: Int, skip: Int = 0): List<String> = runGitCommand("$gitLogCommand --max-count=$n --skip=$skip")!!
+    fun getNCommitLogs(n: Int, skip: Int = 0): List<String> =
+        runGitCommand("$gitLogCommand --max-count=$n --skip=$skip")!!
 
-    fun getNCommitLogsInputStream(n: Int, skip: Int = 0): InputStream = getProcessForCommand("$gitLogCommand --max-count=$n --skip=$skip").inputStream
+    fun getNCommitLogsInputStream(n: Int, skip: Int = 0): InputStream =
+        getProcessForCommand("$gitLogCommand --max-count=$n --skip=$skip").inputStream
 
-    fun diff(parent: String, revision: String, file: String): List<String> = runGitCommand("$gitDiffCommand $parent $revision -- $file")!!
+    fun diff(parent: String, revision: String, file: String): List<String> =
+        runGitCommand("$gitDiffCommand $parent $revision -- $file")!!
 
-    fun diffFileNames(parent: String, revision: String): List<String> = runGitCommand("$gitDiffFileNamesCommand $revision..$parent")
+    fun diffFileNames(parent: String, revision: String): List<String> =
+        runGitCommand("$gitDiffFileNamesCommand $revision..$parent")
             ?: emptyList()
 
     fun blame(revision: String, file: String): List<String>? = runGitCommand("$gitBlameCommand $file $revision")
@@ -63,11 +81,11 @@ class GitClient(path: Path) {
     fun affectedFiles(revision: String): List<String> = runGitCommand("$gitAffectedFilesCommand $revision")!!
 
     fun clone(repoUrl: String, username: String, password: String): List<String>? =
-            runGitCommand("$gitCloneCommand ${buildAuthenticatedUrl(repoUrl, username, password)}")
+        runGitCommand("$gitCloneCommand ${buildAuthenticatedUrl(repoUrl, username, password)}")
 
     //TODO: write UnitTests!!!
     private fun buildAuthenticatedUrl(repoUrl: String, username: String, password: String) =
-            repoUrl.replace("//[^@].*@", "//$username:${URLEncoder.encode(password, UTF_8.toString())}@")
+        repoUrl.replace("//[^@].*@", "//$username:${URLEncoder.encode(password, UTF_8.toString())}@")
 
     fun runGitCommand(args: String): List<String>? {
         val process = getProcessForCommand(args)
