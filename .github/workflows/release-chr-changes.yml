@@ -28,6 +28,7 @@ jobs:
           sed -i "s/\$tag_version/$tag/" chr-helper/pom.xml
 
       - name: Build
+        working-directory: chr-helper
         run: mvn clean package
 
       - name: Prepare Release Notes
@@ -43,4 +44,4 @@ jobs:
           prerelease: false
           draft: false
           fail_on_unmatched_files: true
-          files: chr-helper/target/ig-chr-changes.zip
+          files: chr-helper/target/ig-chr-changes.jar
