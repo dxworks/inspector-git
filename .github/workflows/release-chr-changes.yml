@@ -1,0 +1,46 @@
+on:
+  push:
+    tags:
+      - 'v*-chr'
+
+name: Create ig-chr-changes Release
+
+jobs:
+  release:
+    name: Release ig-chr-changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Extract Semver
+        id: semver_parser
+        run: |
+          semver=${TAG#"refs/tags/v"}
+          semver=${semver%"-chr"}
+          echo ::set-output name=semver::$semver
+        env:
+          TAG: ${{ github.ref }}
+
+      - name: Fill Version
+        run: |
+          tag=${{ steps.semver_parser.outputs.semver }}
+          sed -i "s/\$tag_version/$tag/" chr-helper/pom.xml
+
+      - name: Build
+        run: mvn clean package
+
+      - name: Prepare Release Notes
+        run: touch ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ig-chr-changes ${{ steps.semver_parser.outputs.semver }}
+          body_path: ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
+          body: ""
+          prerelease: false
+          draft: false
+          fail_on_unmatched_files: true
+          files: chr-helper/target/ig-chr-changes.zip
