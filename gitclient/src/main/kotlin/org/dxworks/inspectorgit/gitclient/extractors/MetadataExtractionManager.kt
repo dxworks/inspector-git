@@ -6,7 +6,6 @@ import org.dxworks.inspectorgit.gitclient.dto.gitlog.GitLogDTO
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.HunkDTO
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.LineChangeDTO
 import org.dxworks.inspectorgit.gitclient.enums.LineOperation
-import org.dxworks.inspectorgit.gitclient.extractors.impl.HunkChangeMetaExtractor
 import org.dxworks.inspectorgit.gitclient.extractors.impl.LineOperationsMetaExtractor
 import org.dxworks.inspectorgit.gitclient.iglog.writers.IGLogWriter
 import org.dxworks.inspectorgit.gitclient.parsers.CommitParserFactory
@@ -15,7 +14,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.file.Path
 
-class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path) {
+class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path, private val incognito: Boolean = false) {
     companion object {
         private val LOG = LoggerFactory.getLogger(MetadataExtractionManager::class.java)
         private var commitNumber = 1
@@ -24,7 +23,7 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
 
     private val gitClient = GitClient(repoPath)
 
-    private val commitIterator = GitCommitIterator(gitClient, 4000)
+    private val commitIterator = GitCommitIterator(gitClient, 10000)
 
     private val extractDir = extractToPath.toFile()
 
@@ -32,11 +31,6 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
 
     private val writtenCommitIds: MutableSet<String> = HashSet()
     private val logsOnHold: MutableList<GitLogDTO> = ArrayList()
-
-    init {
-        if (!extractDir.isDirectory && !extractDir.mkdir())
-            throw IllegalArgumentException("Output directory is not a valid location: $extractToPath")
-    }
 
     fun extract() {
         commitNumber = 1
@@ -99,14 +93,14 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path)
     }
 
     private fun writeGitLog(extractFile: File, gitLogDTO: GitLogDTO) {
-        print("Commit number ${commitNumber++} of $commitCount. ( ${commitNumber * 100 / commitCount}% )\r")
+        print("(${extractFile.normalize().absolutePath}) Commit number ${commitNumber++} of $commitCount. ( ${commitNumber * 100 / commitCount}% )\r")
 //        LOG.debug("Writing commit number ${commitNumber++} of $commitCount")
 //        LOG.debug("Completion ${commitNumber++ * 100 / commitCount}%")
         extractFile.appendText(toIgLog(gitLogDTO))
         writtenCommitIds.addAll(gitLogDTO.commits.map { it.id }.distinct())
     }
 
-    private fun toIgLog(gitLogDTO: GitLogDTO) = IGLogWriter(gitLogDTO).write()
+    private fun toIgLog(gitLogDTO: GitLogDTO) = IGLogWriter(gitLogDTO, incognito).write()
 
     private fun swapContentWithMetadata(gitLogDTO: GitLogDTO) {
         gitLogDTO.commits.parallelStream().forEach { commitDTO ->

@@ -5,7 +5,7 @@
     <parent>
         <artifactId>inspectorgit</artifactId>
         <groupId>org.dxworks.inspectorgit</groupId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>1.3.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -19,12 +19,12 @@
         <dependency>
             <groupId>org.dxworks.inspectorgit</groupId>
             <artifactId>utils</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.3.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.dxworks.inspectorgit</groupId>
             <artifactId>gitclient</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.3.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -45,7 +45,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
-                        <version>2.4.1</version>
+                        <version>3.3.0</version>
                         <configuration>
                             <finalName>${executable.jar.finalName}</finalName>
                             <!-- get all project dependencies -->
@@ -70,29 +70,6 @@
                                 </goals>
                             </execution>
                         </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>com.spotify</groupId>
-                        <artifactId>dockerfile-maven-plugin</artifactId>
-                        <version>1.4.13</version>
-                        <executions>
-                            <execution>
-                                <id>default</id>
-                                <goals>
-                                    <goal>build</goal>
-                                    <goal>push</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <repository>dxworks/inspector-git</repository>
-                            <tag>compass-${project.version}</tag>
-                            <tag>compass</tag>
-                            <buildArgs>
-                                <JAR_FILE>${executable.jar.finalName}.jar</JAR_FILE>
-                            </buildArgs>
-                            <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>

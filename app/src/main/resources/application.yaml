@@ -1,9 +1,0 @@
-server:
-  port: 6061
-  servlet:
-    context-path: /inspectorgit
-
-spring:
-  output:
-    ansi:
-      enabled: always

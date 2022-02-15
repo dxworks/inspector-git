@@ -7,3 +7,9 @@ classes/
 */target/
 config/
 log-*.txt
+
+results
+dist
+node_modules
+
+*.log

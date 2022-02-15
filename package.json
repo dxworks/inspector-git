@@ -1,0 +1,52 @@
+{
+  "name": "@dxworks/inspector-git",
+  "version": "1.2.1",
+  "description": "Inspector Git is a tool that extracts and analysis metadata about Git repositories",
+  "keywords": [
+    "iglog",
+    "ig",
+    "inspector-git",
+    "git"
+  ],
+  "homepage": "https://github.com/dxworks/inspector-git#readme",
+  "bugs": {
+    "url": "https://github.com/dxworks/inspector-git/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dxworks/inspector-git.git"
+  },
+  "license": "Apache-2.0",
+  "author": "Vlad Galuska",
+  "main": "dist/index.js",
+  "bin": {
+    "iglog": "dist/iglog.js",
+    "ig-chr-helper": "dist/ig-chr-helper.js"
+  },
+  "scripts": {
+    "build": "npm run clean && mkdir dist && cp lib/*.js dist && cp gitclient/target/iglog.jar dist && cp chr-helper/target/ig-chr-helper.jar dist",
+    "clean": "rimraf dist/",
+    "local": "npm run build && npm i"
+  },
+  "dependencies": {
+    "commander": "^8.3.0",
+    "java-caller": "^2.4.0"
+  },
+  "devDependencies": {
+    "json": "^11.0.0",
+    "rimraf": "^3.0.2",
+    "sort-package-json": "^1.52.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
+  },
+  "dxw": {
+    "commands": [
+      {
+        "file": "dist/index.js",
+        "command": "igCommand"
+      }
+    ]
+  }
+}

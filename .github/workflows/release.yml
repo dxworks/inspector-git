@@ -1,13 +1,14 @@
 on:
   push:
     tags:
-      - 'v*-voyager'
+      - 'v*'
+      - '!v*-voyager'
 
-name: Create Voyager Release
+name: Create ig-chr-changes Release
 
 jobs:
   release:
-    name: Release
+    name: Release ig-chr-changes
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -23,7 +24,7 @@ jobs:
         id: semver_parser
         run: |
           semver=${TAG#"refs/tags/v"}
-          semver=${semver%"-voyager"}
+          semver=${semver%"-chr"}
           echo ::set-output name=semver::$semver
         env:
           TAG: ${{ github.ref }}
@@ -36,16 +37,30 @@ jobs:
       - name: Build
         run: mvn clean package
 
-      - name: Prepare Assets
-        run: |
-          mkdir iglog
-          mkdir iglog/results
-          cp README.md iglog/README.md
-          cp gitclient/target/iglog.jar iglog/iglog.jar
-          cp gitclient/src/main/resources/instrument.yml iglog/instrument.yml
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+          cache: 'npm'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@dxworks'
 
-      - name: Create Archive
-        run: zip -r iglog.zip iglog
+      - name: Prepare Node App
+        run: |
+          npm install
+          npm run build
+
+      - name: Setup Version
+        run: |
+          ls -al node_modules/.bin
+          node_modules/.bin/json -I -f package.json -e "this.version='$VERSION'"
+        env:
+          VERSION: ${{ steps.semver_parser.outputs.semver }}
+
+      - name: Publish NPM
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Prepare Release Notes
         run: touch ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
@@ -54,10 +69,12 @@ jobs:
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
-          name: Iglog ${{ steps.semver_parser.outputs.semver }} Voyager
+          name: Inspector Git ${{ steps.semver_parser.outputs.semver }}
           body_path: ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
           body: ""
           prerelease: false
           draft: false
           fail_on_unmatched_files: true
-          files: iglog.zip
+          files: |
+            dist/ig-chr-helper.jar
+            dist/iglog.jar
