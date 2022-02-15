@@ -6,9 +6,9 @@ import org.dxworks.inspectorgit.gitclient.iglog.IGLogConstants
 
 class IGChangeWriter(private val changeDTO: ChangeDTO) : IGWriter() {
     override fun appendLines(responseBuilder: StringBuilder) {
-        responseBuilder.appendln(getTypeLine())
-        responseBuilder.appendln(changeDTO.parentCommitId)
-        responseBuilder.appendln(getFileNames())
+        responseBuilder.appendLine(getTypeLine())
+        responseBuilder.appendLine(changeDTO.parentCommitId)
+        responseBuilder.appendLine(getFileNames())
 
         changeDTO.hunks.forEach { responseBuilder.append(IGHunkWriter(it).write()) }
     }
@@ -22,7 +22,7 @@ class IGChangeWriter(private val changeDTO: ChangeDTO) : IGWriter() {
 
     private fun getTypeLine() = "${IGLogConstants.changePrefix}${getTypeLetter()}${isBinary()}"
 
-    private fun isBinary(): String = if(changeDTO.isBinary) "b" else ""
+    private fun isBinary(): String = if (changeDTO.isBinary) "b" else ""
 
     private fun getTypeLetter() = when (changeDTO.type) {
         ChangeType.ADD -> "A"

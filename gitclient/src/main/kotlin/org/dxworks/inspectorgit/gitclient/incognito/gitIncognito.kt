@@ -8,9 +8,9 @@ import java.nio.charset.StandardCharsets
 val authorRegex = Regex("(author:)(.*)")
 val emailRegex = Regex("(email:)(.*)(@.*)")
 
-fun processLogfile(logFile: File, destination: File? = null, charset: Charset = Charsets.UTF_8) {
+fun processGitLogFileIncognito(logFile: File, destination: File? = null, charset: Charset = Charsets.UTF_8) {
     val incognitoFile = logFile.resolveSibling("${logFile.nameWithoutExtension}-incognito.git")
-
+    println("Processing incognito Git log from ${logFile.absolutePath} to ${incognitoFile.absolutePath}")
     try {
         logFile.useLines(charset) { lines ->
             incognitoFile.bufferedWriter().use { writer ->
@@ -25,7 +25,7 @@ fun processLogfile(logFile: File, destination: File? = null, charset: Charset = 
         }
     } catch (e: MalformedInputException) {
         if (charset == Charsets.UTF_8)
-            processLogfile(logFile, charset = StandardCharsets.ISO_8859_1)
+            processGitLogFileIncognito(logFile, charset = StandardCharsets.ISO_8859_1)
     }
 
     incognitoFile.copyTo(destination ?: logFile, true)

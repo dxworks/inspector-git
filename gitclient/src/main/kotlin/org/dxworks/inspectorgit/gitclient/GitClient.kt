@@ -51,10 +51,12 @@ class GitClient(path: Path) {
 
     fun getLogs(): List<String> = runGitCommand(gitLogCommand)!!
 
-    fun getSimpleLog(file: String = "simpleLog"): File {
+    fun getSimpleLog(file: File): File {
+        println("Creating Git log for ${processBuilder.directory().normalize().absolutePath} in ${file.normalize().absolutePath}")
         val logCommand = if (isUnix) simpleLogCommandUnix else simpleLogCommandWin
-        runGitCommand("$logCommand > $file")
-        return processBuilder.directory().resolve(file)
+        runGitCommand("$logCommand > \"${file.absolutePath}\"")
+        println("DONE! Exported Git log for ${processBuilder.directory().normalize().absolutePath} to ${file.normalize().absolutePath}")
+        return file
     }
 
     fun getCommitCount(): Int = runGitCommand(gitCountCommitsCommand)!!.getOrElse(0) { "0" }.toInt()

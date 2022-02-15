@@ -7,6 +7,6 @@ class IGHunkWriter(private val hunkDTO: HunkDTO) : IGWriter() {
 
     override fun appendLines(responseBuilder: StringBuilder) {
         responseBuilder.append(IGLogConstants.hunkPrefixLine)
-        hunkDTO.lineChanges.forEach { responseBuilder.appendln(it.content) }
+        hunkDTO.lineChanges.forEach { responseBuilder.appendLine(it.content) }
     }
 }

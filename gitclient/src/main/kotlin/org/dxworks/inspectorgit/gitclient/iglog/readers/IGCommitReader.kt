@@ -51,7 +51,7 @@ class IGCommitReader(private val igChangeReader: IGChangeReader = IGChangeReader
     private fun extractMessage(commitLines: MutableList<String>): String {
         val messageBuilder = StringBuilder()
         while (commitLines.isNotEmpty() && commitLines.first().startsWith(IGLogConstants.messagePrefix)) {
-            messageBuilder.appendln(commitLines.removeAt(0).removePrefix(IGLogConstants.messagePrefix))
+            messageBuilder.appendLine(commitLines.removeAt(0).removePrefix(IGLogConstants.messagePrefix))
         }
         return messageBuilder.toString().trim()
     }

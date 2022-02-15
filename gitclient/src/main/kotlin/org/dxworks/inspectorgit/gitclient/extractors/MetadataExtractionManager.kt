@@ -32,11 +32,6 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path,
     private val writtenCommitIds: MutableSet<String> = HashSet()
     private val logsOnHold: MutableList<GitLogDTO> = ArrayList()
 
-    init {
-        if (!extractDir.isDirectory && !extractDir.mkdir())
-            throw IllegalArgumentException("Output directory is not a valid location: $extractToPath")
-    }
-
     fun extract() {
         commitNumber = 1
         commitCount = gitClient.getCommitCount();
@@ -98,7 +93,7 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path,
     }
 
     private fun writeGitLog(extractFile: File, gitLogDTO: GitLogDTO) {
-        print("Commit number ${commitNumber++} of $commitCount. ( ${commitNumber * 100 / commitCount}% )\r")
+        print("(${extractFile.normalize().absolutePath}) Commit number ${commitNumber++} of $commitCount. ( ${commitNumber * 100 / commitCount}% )\r")
 //        LOG.debug("Writing commit number ${commitNumber++} of $commitCount")
 //        LOG.debug("Completion ${commitNumber++ * 100 / commitCount}%")
         extractFile.appendText(toIgLog(gitLogDTO))

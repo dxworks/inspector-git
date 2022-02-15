@@ -9,7 +9,7 @@ val charTransformer: CharTransformer =
         CharTransformer(charmapFilePath)
     else CharTransformer()
 
-fun encryptString(name: String): String = name.map { charTransformer.mapChar(it) }.toString()
+fun encryptString(name: String): String = name.map { charTransformer.mapChar(it) }.joinToString("")
 
 
 class CharTransformer {

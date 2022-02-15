@@ -41,8 +41,8 @@ class AccountMergeService(private val system: LoadedSystem) {
 
         if (alreadyMergedAccounts.isNotEmpty()) {
             val sb = StringBuilder()
-            sb.appendln("Could not create developer $name. The following accounts are already merged:")
-            alreadyMergedAccounts.forEach { sb.appendln(it.id) }
+            sb.appendLine("Could not create developer $name. The following accounts are already merged:")
+            alreadyMergedAccounts.forEach { sb.appendLine(it.id) }
             LOG.warn(sb.toString())
             return
         }
