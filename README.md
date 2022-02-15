@@ -48,3 +48,8 @@ environment:
 
 ## Run as dxw instrument
 Inspector git Chronos helper is also available as part of the Inspector-Git releases and as a `dxw` CLI plugin.
+
+InspectorGit exposes the `ig` command (aliased `inspector-git`), that contains 2 subcommands:
+
+* `dxw ig iglog <path/to/folder>` will run the iglog command
+* `dxw ig chr <path/to/folder/containing/iglogs>` will produce a `chr-help.json` file that can be uploaded to Chronos.
