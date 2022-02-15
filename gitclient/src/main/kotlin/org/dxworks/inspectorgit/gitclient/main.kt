@@ -77,7 +77,7 @@ fun main(args: Array<String>) {
             }
     }
 
-
+    println("\n\nResults will be available at ${resultsPath.toFile().normalize().absolutePath}")
 }
 
 private fun extractRepo(

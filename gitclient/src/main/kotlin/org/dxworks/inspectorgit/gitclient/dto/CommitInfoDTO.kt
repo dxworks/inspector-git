@@ -10,7 +10,7 @@ open class CommitInfoDTO(val id: String,
                          @JsonIgnore
                          val committerName: String,
                          @JsonIgnore
-                         val committerDate: String,
-                         @JsonIgnore
                          val committerEmail: String,
+                         @JsonIgnore
+                         val committerDate: String,
                          val message: String)

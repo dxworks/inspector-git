@@ -2,7 +2,6 @@ package org.dxworks.inspectorgit.gitclient.iglog.writers
 
 import org.dxworks.inspectorgit.gitclient.dto.gitlog.CommitDTO
 import org.dxworks.inspectorgit.gitclient.iglog.IGLogConstants
-import org.dxworks.inspectorgit.gitclient.incognito.CharTransformer
 import org.dxworks.inspectorgit.gitclient.incognito.encryptString
 
 class IGCommitWriter(private val commitDTO: CommitDTO, incognito: Boolean) : IGWriter(incognito) {

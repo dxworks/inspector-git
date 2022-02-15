@@ -12,12 +12,6 @@
         <module>gitclient</module>
         <module>core</module>
         <module>utils</module>
-        <module>persistence</module>
-        <module>app</module>
-        <module>web</module>
-        <module>services</module>
-        <module>spring-parent</module>
-        <module>cli</module>
         <module>chr-helper</module>
     </modules>
 

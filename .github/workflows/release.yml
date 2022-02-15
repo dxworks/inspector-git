@@ -26,11 +26,35 @@ jobs:
       - name: Fill Version
         run: |
           tag=${{ steps.semver_parser.outputs.semver }}
-          sed -i "s/\$tag_version/$tag/" chr-helper/pom.xml
+          sed -i "s/\$tag_version/$tag/" gitClient/pom.xml
 
       - name: Build
-        working-directory: chr-helper
         run: mvn clean package
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+          cache: 'npm'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@dxworks'
+
+      - name: Prepare Node App
+        run: |
+          npm install
+          npm run build
+
+      - name: Setup Version
+        run: |
+          ls -al node_modules/.bin
+          node_modules/.bin/json -I -f package.json -e "this.version='$VERSION'"
+        env:
+          VERSION: ${{ steps.semver_parser.outputs.semver }}
+
+      - name: Publish NPM
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Prepare Release Notes
         run: touch ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
@@ -45,4 +69,6 @@ jobs:
           prerelease: false
           draft: false
           fail_on_unmatched_files: true
-          files: chr-helper/target/ig-chr-changes.jar
+          files: |
+            dist/ig-chr-changes.jar
+            dist/iglog.jar

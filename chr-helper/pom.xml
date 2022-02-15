@@ -19,6 +19,8 @@
     </dependencies>
 
     <properties>
+        <jar.final.name>ig-chr-helper</jar.final.name>
+        <main.class>org.dxworks.inspectorgit.chr.MainKt</main.class>
         <maven.compiler.source>16</maven.compiler.source>
         <maven.compiler.target>16</maven.compiler.target>
     </properties>
@@ -70,26 +72,16 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <mainClass>org.dxworks.inspectorgit.chr.MainKt</mainClass>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.3.0</version>
                 <configuration>
-                    <finalName>ig-chr-changes</finalName>
-                    <!-- get all project dependencies -->
+                    <finalName>${jar.final.name}</finalName>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
-                    <!-- MainClass in mainfest make a executable jar -->
                     <archive>
                         <manifest>
-                            <mainClass>org.dxworks.inspectorgit.chr.MainKt</mainClass>
+                            <mainClass>${main.class}</mainClass>
                         </manifest>
                     </archive>
                     <appendAssemblyId>false</appendAssemblyId>
@@ -97,7 +89,6 @@
                 <executions>
                     <execution>
                         <id>make-assembly</id>
-                        <!-- bind to the packaging phase -->
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
