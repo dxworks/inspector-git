@@ -1,8 +1,6 @@
 name: iglog
 results:
   - dir: ${instrument}/results
-    files:
-      - "*.iglog"
 
 commands:
   - name: extract iglogs
