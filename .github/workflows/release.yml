@@ -70,5 +70,5 @@ jobs:
           draft: false
           fail_on_unmatched_files: true
           files: |
-            dist/ig-chr-changes.jar
+            dist/ig-chr-helper.jar
             dist/iglog.jar
