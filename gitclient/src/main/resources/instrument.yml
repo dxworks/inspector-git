@@ -1,4 +1,4 @@
-name: iglog
+name: inspector-git
 results:
   - dir: ${instrument}/results
 
