@@ -11,6 +11,6 @@ parameters:
   igFlags: ''
 
 environment:
-#  IG_IGLOG: false
+  IG_IGLOG: false
 #  IG_GITLOG: false
 #  IG_INCOGNITO: true
