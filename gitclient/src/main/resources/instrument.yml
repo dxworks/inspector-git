@@ -14,3 +14,4 @@ environment:
   IG_IGLOG: false
 #  IG_GITLOG: false
 #  IG_INCOGNITO: true
+#  IG_RECURSIVE: true

@@ -25,7 +25,7 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path,
 
     private val commitIterator = GitCommitIterator(gitClient, 10000)
 
-    private val extractDir = extractToPath.toFile()
+    private val extractFile = extractToPath.toFile()
 
     private val lineOperationsMetaExtractor = LineOperationsMetaExtractor()
 
@@ -35,7 +35,6 @@ class MetadataExtractionManager(private val repoPath: Path, extractToPath: Path,
     fun extract() {
         commitNumber = 1
         commitCount = gitClient.getCommitCount();
-        val extractFile = extractDir.resolve("${repoPath.fileName}.iglog")
         extractFile.writeText("Version\n")
 
 

@@ -14,11 +14,13 @@ The following flags are available:
 * `--no-iglog` disables the iglog generation
 * `--no-gitlog` disables the git log generation
 * `--incognito` enables incognito extraction (anonymize author names)
+* `--recursive` enables recursive extraction of git logs for all .git folders in the provided path
 
 The following environment variables are available:
 * `IG_IGLOG` if `false` will disable iglog generation. (Is overridden by `--no-iglog`)
 * `IG_GITLOG` if `false` will disable git log generation. (Is overridden by `--no-gitlog`)
-* `IG_INCOGNITO` if `true` enables incognito extraction (anonymize author names)
+* `IG_INCOGNITO` if `true` enables incognito extraction (anonymize author names) (Is overridden by `--incognito`)
+* `IG_RECURSIVE` if `true` enables recursive extraction of git logs for all .git folders in the provided path (Is overridden by `--recursive`)
 
 To use these values in Voyager, you can add configure any of the above-mentioned flags or environment variables in the `mission.yml` file as follows: 
 ```yaml
@@ -31,7 +33,7 @@ instruments:
     # A map of parameter name to value
     parameters:
       # Only add the flags you need, separated by spaces
-      igFlags: '--no-iglog --no-gitlog --incognito'
+      igFlags: '--no-iglog --incognito --recursive'
 ```
 
 or using environment variables:
@@ -44,6 +46,7 @@ environment:
   IG_IGLOG: false
   IG_GITLOG: false
   IG_INCOGNITO: true
+  IG_RECURSIVE: true
 ```
 
 ## Run as dxw instrument
