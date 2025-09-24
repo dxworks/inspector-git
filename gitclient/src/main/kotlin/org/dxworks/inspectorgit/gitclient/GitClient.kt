@@ -52,10 +52,11 @@ class GitClient(path: Path) {
     fun getLogs(): List<String> = runGitCommand(gitLogCommand)!!
 
     fun getSimpleLog(resultLogFile: File): File {
-        println("Creating Git log for ${processBuilder.directory().normalize().absolutePath} in ${resultLogFile.normalize().absolutePath}")
+        val branchName = branch ?: "UNKNOWN"
+        println("Creating Git log for ${processBuilder.directory().normalize().absolutePath} (branch: $branchName) in ${resultLogFile.normalize().absolutePath}")
         val logCommand = if (isUnix) simpleLogCommandUnix else simpleLogCommandWin
         runGitCommand("$logCommand > \"${resultLogFile.absolutePath}\"")
-        println("DONE! Exported Git log for ${processBuilder.directory().normalize().absolutePath} to ${resultLogFile.normalize().absolutePath}")
+        println("DONE! Exported Git log for ${processBuilder.directory().normalize().absolutePath} (branch: $branchName) to ${resultLogFile.normalize().absolutePath}")
         return resultLogFile
     }
 
