@@ -14,7 +14,7 @@
     <properties>
         <version>$tag_version</version>
         <main.class>org.dxworks.inspectorgit.gitclient.MainKt</main.class>
-        <kotlin.version>1.6.10</kotlin.version>
+        <kotlin.version>2.3.0</kotlin.version>
         <jar.final.name>iglog</jar.final.name>
     </properties>
 
@@ -27,13 +27,13 @@
         <dependency>
             <groupId>net.lingala.zip4j</groupId>
             <artifactId>zip4j</artifactId>
-            <version>2.10.0</version>
+            <version>2.11.5</version>
         </dependency>
 
         <dependency>
             <groupId>io.github.java-diff-utils</groupId>
             <artifactId>java-diff-utils</artifactId>
-            <version>4.5</version>
+            <version>4.16</version>
         </dependency>
     </dependencies>
 
