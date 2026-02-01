@@ -25,7 +25,7 @@ jobs:
         run: |
           semver=${TAG#"refs/tags/v"}
           semver=${semver%"-chr"}
-          echo ::set-output name=semver::$semver
+          echo "semver=$semver" >> $GITHUB_OUTPUT
         env:
           TAG: ${{ github.ref }}
 
