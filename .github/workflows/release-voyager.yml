@@ -11,12 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: '11'
+          java-version: '21'
           cache: 'maven'
 
       - name: Extract Semver
@@ -24,7 +24,7 @@ jobs:
         run: |
           semver=${TAG#"refs/tags/v"}
           semver=${semver%"-voyager"}
-          echo ::set-output name=semver::$semver
+          echo "semver=$semver" >> $GITHUB_OUTPUT
         env:
           TAG: ${{ github.ref }}
 
@@ -52,7 +52,7 @@ jobs:
 
       - name: Create Release
         id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           name: Iglog ${{ steps.semver_parser.outputs.semver }} Voyager
           body_path: ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md

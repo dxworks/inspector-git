@@ -12,12 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: '11'
+          java-version: '21'
           cache: 'maven'
 
       - name: Extract Semver
@@ -25,7 +25,7 @@ jobs:
         run: |
           semver=${TAG#"refs/tags/v"}
           semver=${semver%"-chr"}
-          echo ::set-output name=semver::$semver
+          echo "semver=$semver" >> $GITHUB_OUTPUT
         env:
           TAG: ${{ github.ref }}
 
@@ -38,12 +38,10 @@ jobs:
         run: mvn clean package
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6
         with:
-          node-version: '18.x'
+          node-version: '24.x'
           cache: 'npm'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@dxworks'
 
       - name: Prepare Node App
         run: |
@@ -57,23 +55,8 @@ jobs:
         env:
           VERSION: ${{ steps.semver_parser.outputs.semver }}
 
-      - name: Publish NPM
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup Node with NPM Package Registry
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18.x'
-          cache: 'npm'
-          registry-url: 'https://registry.npmjs.org'
-          scope: '@dxworks'
-
       - name: Publish on NPM
         run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Prepare Release Notes
         run: touch ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md

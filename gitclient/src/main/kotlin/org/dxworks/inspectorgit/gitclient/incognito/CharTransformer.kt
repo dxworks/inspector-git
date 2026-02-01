@@ -56,8 +56,8 @@ class CharTransformer {
         if (char.isLetter()) {
             if (char.isLowerCase() && charMap.containsKey(char))
                 return charMap[char]!!
-            if (char.isUpperCase() && charMap.containsKey(char.toLowerCase()))
-                return charMap[char.toLowerCase()]!!.toUpperCase()
+            if (char.isUpperCase() && charMap.containsKey(char.lowercaseChar()))
+                return charMap[char.lowercaseChar()]!!.uppercaseChar()
         } else if (char.isDigit() && charMap.containsKey(char))
             return charMap[char]!!
         return char
