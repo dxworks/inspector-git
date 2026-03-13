@@ -1,62 +1,21 @@
 from __future__ import annotations
 
 import html
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 
 DEFAULT_TEMPLATE_PATH = Path(__file__).resolve().parent / 'templates' / 'summary.html'
-
-FALLBACK_TEMPLATE = """<section class=\"inspector-git-summary {{statusClass}}\">\
-  <h2>Inspector Git</h2>\
-  <p>Status: <strong>{{status}}</strong></p>\
-  <ul>\
-    <li>Repositories: {{metrics.repositoriesCount}}</li>\
-    <li>IGLOG files: {{metrics.iglogFiles}}</li>\
-    <li>Git logs: {{metrics.gitlogFiles}}</li>\
-    <li>Total commits: {{metrics.commitsTotal}}</li>\
-    <li>Unique authors: {{metrics.authorsTotal}}</li>\
-    <li>First commit: {{metrics.firstCommitDate}}</li>\
-    <li>Latest commit: {{metrics.lastCommitDate}}</li>\
-  </ul>\
-  <h3>Repository Breakdown</h3>\
-  <table>\
-    <thead>\
-      <tr>\
-        <th>Repository</th>\
-        <th>Commits</th>\
-        <th>Authors</th>\
-        <th>First Commit</th>\
-        <th>Latest Commit</th>\
-      </tr>\
-    </thead>\
-    <tbody>\
-      {{#if repositories}}\
-        {{#each repositories}}\
-          <tr>\
-            <td>{{this.name}}</td>\
-            <td>{{this.commits}}</td>\
-            <td>{{this.authors}}</td>\
-            <td>{{this.firstCommitDate}}</td>\
-            <td>{{this.lastCommitDate}}</td>\
-          </tr>\
-        {{/each}}\
-      {{else}}\
-        <tr><td colspan=\"5\">No repository metrics available.</td></tr>\
-      {{/if}}\
-    </tbody>\
-  </table>\
-</section>"""
+FALLBACK_TEMPLATE = '<section><h2>{{tool}}</h2><p>Status: <strong>{{status}}</strong></p></section>'
 
 
-def render_inspector_git_summary(
+def render_summary(
     results_directory: str | Path,
-    extracted: dict[str, Any],
+    payload: dict[str, Any],
     template_path: str | Path | None = None,
 ) -> dict[str, Any]:
-    template = FALLBACK_TEMPLATE
-    effective_status = extracted.get('status') or 'unknown'
+    target = Path(results_directory)
+    target.mkdir(parents=True, exist_ok=True)
 
     template_file = Path(template_path) if template_path else DEFAULT_TEMPLATE_PATH
     try:
@@ -64,116 +23,55 @@ def render_inspector_git_summary(
     except Exception:
         template = FALLBACK_TEMPLATE
 
-    target = Path(results_directory)
-    target.mkdir(parents=True, exist_ok=True)
+    tool = str(payload.get('tool') or 'unknown')
+    status = str(payload.get('status') or 'unknown')
+    metadata = payload.get('metadata') or {}
+    markdown = str(payload.get('markdown') or '')
+    template_model = payload.get('templateModel') or {}
 
-    model = _build_template_model(extracted, effective_status)
+    if not isinstance(metadata, dict):
+        raise ValueError('summary payload metadata must be an object')
+    if not isinstance(template_model, dict):
+        raise ValueError('summary payload templateModel must be an object')
+
+    model = dict(template_model)
+    model.setdefault('tool', tool)
+    model.setdefault('status', status)
+
     rendered_html = _render_template(template, model)
-    rendered_markdown = _build_markdown(extracted, effective_status)
-    metadata_block = _build_metadata(extracted, effective_status)
+    metadata_block = _build_metadata_block(tool, status, metadata)
 
     summary_md_path = target / 'summary.md'
     summary_html_path = target / 'summary.html'
 
     summary_html_path.write_text(rendered_html, encoding='utf-8')
-    summary_md_path.write_text(f"{metadata_block}\n---\n{rendered_markdown}\n", encoding='utf-8')
+    summary_md_path.write_text(f"{metadata_block}\n---\n{markdown}\n", encoding='utf-8')
 
     return {
-        'status': effective_status,
+        'status': status,
         'summaryMdPath': str(summary_md_path),
         'summaryHtmlPath': str(summary_html_path),
     }
 
 
-def _build_template_model(extracted: dict[str, Any], effective_status: str) -> dict[str, Any]:
-    model: dict[str, Any] = dict(extracted)
-    metrics = extracted.get('metrics', {})
-
-    model['status'] = effective_status
-    model['statusClass'] = _to_status_class(effective_status)
-    model['generatedAt'] = extracted.get('generatedAt') or _iso_now()
-    model['metrics'] = {
-        'repositoriesCount': metrics.get('repositoriesCount', 0),
-        'iglogFiles': metrics.get('iglogFiles', 0),
-        'gitlogFiles': metrics.get('gitlogFiles', 0),
-        'commitsTotal': metrics.get('commitsTotal', 0),
-        'authorsTotal': metrics.get('authorsTotal', 0),
-        'firstCommitDate': metrics.get('firstCommitDate') or 'unknown',
-        'lastCommitDate': metrics.get('lastCommitDate') or 'unknown',
-    }
-
-    return model
-
-
-def _build_metadata(extracted: dict[str, Any], effective_status: str) -> str:
-    metrics = extracted.get('metrics', {})
+def _build_metadata_block(tool: str, status: str, metadata: dict[str, Any]) -> str:
     lines = [
         '---',
-        'tool: inspector-git',
+        f'tool: {tool}',
         'html-template: reference',
-        f'status: {effective_status}',
-        'metadata:',
-        f"  repositories.count: {metrics.get('repositoriesCount', 0)}",
-        f"  iglog.files: {metrics.get('iglogFiles', 0)}",
-        f"  gitlog.files: {metrics.get('gitlogFiles', 0)}",
-        f"  commits.total: {metrics.get('commitsTotal', 0)}",
-        f"  authors.total: {metrics.get('authorsTotal', 0)}",
-        f"  commits.first.date: {metrics.get('firstCommitDate') or 'unknown'}",
-        f"  commits.last.date: {metrics.get('lastCommitDate') or 'unknown'}",
-        '  warnings.count: 0',
-        f"  generated.at: {extracted.get('generatedAt') or _iso_now()}",
-    ]
-    return '\n'.join(lines)
-
-
-def _build_markdown(extracted: dict[str, Any], effective_status: str) -> str:
-    metrics = extracted.get('metrics', {})
-    repositories = extracted.get('repositories', [])
-
-    lines = [
-        '## Inspector Git',
-        '',
-        f'- Status: {effective_status}',
-        f"- Repositories detected: {metrics.get('repositoriesCount', 0)}",
-        f"- IGLOG files: {metrics.get('iglogFiles', 0)}",
-        f"- Git logs: {metrics.get('gitlogFiles', 0)}",
-        f"- Total commits: {metrics.get('commitsTotal', 0)}",
-        f"- Unique authors: {metrics.get('authorsTotal', 0)}",
-        f"- First commit date: {metrics.get('firstCommitDate') or 'unknown'}",
-        f"- Latest commit date: {metrics.get('lastCommitDate') or 'unknown'}",
-        '',
-        '### Repository Breakdown',
-        '',
-        '| Repository | Commits | Authors | First Commit | Latest Commit |',
-        '| --- | ---: | ---: | --- | --- |',
+        f'status: {status}',
     ]
 
-    if not repositories:
-        lines.append('| _none_ | 0 | 0 | unknown | unknown |')
-    else:
-        for repository in repositories:
-            lines.append(
-                f"| {repository.get('name', 'unknown')} | {repository.get('commits', 0)} | {repository.get('authors', 0)} | "
-                f"{_to_display_date(repository.get('firstCommitDate'))} | {_to_display_date(repository.get('lastCommitDate'))} |"
-            )
+    for key, value in metadata.items():
+        lines.append(f'{key}: {_stringify_metadata_value(value)}')
 
     return '\n'.join(lines)
 
 
-def _to_display_date(value: Any) -> str:
+def _stringify_metadata_value(value: Any) -> str:
     if value is None:
-        return 'unknown'
+        return 'null'
     return str(value)
-
-
-def _to_status_class(status: str) -> str:
-    if status == 'success':
-        return 'status-success'
-    if status == 'partial':
-        return 'status-warning'
-    if status == 'failed':
-        return 'status-error'
-    return 'status-unknown'
 
 
 def _render_template(template: str, model: dict[str, Any]) -> str:
@@ -201,7 +99,7 @@ def _parse_nodes(template: str, start: int, stop_tags: set[str]) -> tuple[list[d
                 nodes.append({'type': 'text', 'value': template[marker:]})
                 return nodes, len(template)
 
-            expression = template[marker + 3 : close].strip()
+            expression = template[marker + 3:close].strip()
             nodes.append({'type': 'raw', 'expression': expression})
             index = close + 3
             continue
@@ -211,7 +109,7 @@ def _parse_nodes(template: str, start: int, stop_tags: set[str]) -> tuple[list[d
             nodes.append({'type': 'text', 'value': template[marker:]})
             return nodes, len(template)
 
-        expression = template[marker + 2 : close].strip()
+        expression = template[marker + 2:close].strip()
         index = close + 2
 
         if not expression:
@@ -272,7 +170,7 @@ def _read_tag_expression(template: str, marker: int) -> str:
     close = template.find('}}', marker + 2)
     if close < 0:
         return ''
-    return template[marker + 2 : close].strip()
+    return template[marker + 2:close].strip()
 
 
 def _render_nodes(nodes: list[dict[str, Any]], context: dict[str, Any]) -> str:
@@ -371,7 +269,3 @@ def _stringify(value: Any) -> str:
 
 def _escape(value: Any) -> str:
     return html.escape(str(value), quote=True)
-
-
-def _iso_now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec='milliseconds').replace('+00:00', 'Z')

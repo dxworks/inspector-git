@@ -196,6 +196,7 @@ def _create_summary_payload(
         gitlog_count=len(gitlog_files),
         has_data_quality_issues=has_data_quality_issues,
     )
+    generated_at = _to_iso_string(datetime.now(timezone.utc))
 
     normalized_repositories: list[dict[str, Any]] = []
     for repository in repositories_sorted:
@@ -207,11 +208,49 @@ def _create_summary_payload(
             }
         )
 
-    return {
-        'tool': 'inspector-git',
-        'generatedAt': _to_iso_string(datetime.now(timezone.utc)),
-        'resultsDirectory': str(results_directory),
+    metadata = {
+        'metadata.repositories.count': len(normalized_repositories),
+        'metadata.iglog.files': len(iglog_files),
+        'metadata.gitlog.files': len(gitlog_files),
+        'metadata.commits.total': commits_total,
+        'metadata.authors.total': authors_total,
+        'metadata.commits.first.date': first_commit_date,
+        'metadata.commits.last.date': last_commit_date,
+        'metadata.warnings.count': 0,
+        'metadata.generated.at': generated_at,
+    }
+
+    markdown_lines = [
+        '## Inspector Git',
+        '',
+        f'- Status: {status}',
+        f'- Repositories detected: {len(normalized_repositories)}',
+        f'- IGLOG files: {len(iglog_files)}',
+        f'- Git logs: {len(gitlog_files)}',
+        f'- Total commits: {commits_total}',
+        f'- Unique authors: {authors_total}',
+        f'- First commit date: {first_commit_date}',
+        f'- Latest commit date: {last_commit_date}',
+        '',
+        '### Repository Breakdown',
+        '',
+        '| Repository | Commits | Authors | First Commit | Latest Commit |',
+        '| --- | ---: | ---: | --- | --- |',
+    ]
+
+    if not normalized_repositories:
+        markdown_lines.append('| _none_ | 0 | 0 | unknown | unknown |')
+    else:
+        for repository in normalized_repositories:
+            markdown_lines.append(
+                f"| {repository.get('name', 'unknown')} | {repository.get('commits', 0)} | {repository.get('authors', 0)} | "
+                f"{repository.get('firstCommitDate', 'unknown')} | {repository.get('lastCommitDate', 'unknown')} |"
+            )
+
+    template_model = {
         'status': status,
+        'statusClass': _to_status_class(status),
+        'generatedAt': generated_at,
         'metrics': {
             'repositoriesCount': len(normalized_repositories),
             'iglogFiles': len(iglog_files),
@@ -222,7 +261,14 @@ def _create_summary_payload(
             'lastCommitDate': last_commit_date,
         },
         'repositories': normalized_repositories,
-        'indexByPrefix': index_by_prefix,
+    }
+
+    return {
+        'tool': 'inspector-git',
+        'status': status,
+        'metadata': metadata,
+        'markdown': '\n'.join(markdown_lines),
+        'templateModel': template_model,
     }
 
 
@@ -258,3 +304,13 @@ def _resolve_status(gitlog_count: int, has_data_quality_issues: bool) -> str:
     if has_data_quality_issues:
         return 'partial'
     return 'success'
+
+
+def _to_status_class(status: str) -> str:
+    if status == 'success':
+        return 'status-success'
+    if status == 'partial':
+        return 'status-warning'
+    if status == 'failed':
+        return 'status-error'
+    return 'status-unknown'

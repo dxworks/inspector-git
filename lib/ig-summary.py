@@ -6,7 +6,7 @@ import argparse
 from pathlib import Path
 
 from summary_extract import extract_inspector_git_summary
-from summary_render import render_inspector_git_summary
+from summary_render import render_summary
 
 
 def main() -> int:
@@ -20,8 +20,8 @@ def main() -> int:
     target_directory = Path(args.results_directory).resolve()
 
     try:
-        extracted = extract_inspector_git_summary(target_directory)
-        rendered = render_inspector_git_summary(target_directory, extracted)
+        payload = extract_inspector_git_summary(target_directory)
+        rendered = render_summary(target_directory, payload)
 
         print(f"Generated summary markdown at {rendered['summaryMdPath']}")
         print(f"Generated summary html at {rendered['summaryHtmlPath']}")
