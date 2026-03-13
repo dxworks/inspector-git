@@ -1,10 +1,9 @@
 name: inspector-git
 id: inspector-git
 version: 1.0.0
-runOrder: 500
 
 actions:
-  run:
+  start:
     parameters:
       igFlags: ''
     environment:
@@ -24,7 +23,7 @@ actions:
         id: generate-summary
         dir: ${instrumentPath}
         command:
-          win: py -3 ig-summary.py "${instrumentPath}/results"
+          windows: py -3 ig-summary.py "${instrumentPath}/results"
           unix: python3 ig-summary.py "${instrumentPath}/results"
 
   pack:
