@@ -294,7 +294,7 @@ def _find_boundary_date(repositories: list[dict[str, Any]], edge: str) -> dateti
 
 def _to_iso_string(value: Any) -> str:
     if isinstance(value, datetime):
-        return value.astimezone(timezone.utc).isoformat(timespec='milliseconds').replace('+00:00', 'Z')
+        return value.astimezone(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
     return 'unknown'
 
 
