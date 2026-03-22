@@ -1,0 +1,23 @@
+name: Trivy Security Scan
+
+on:
+  pull_request:
+    branches: [develop]
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: write
+
+jobs:
+  trivy-fs:
+    uses: dxworks/pipelines/.github/workflows/trivy-fs-scan.yml@v1
+
+  trivy-image:
+    uses: dxworks/pipelines/.github/workflows/trivy-image-scan.yml@v1
+    with:
+      image-ref: inspector-git-test:latest
+      build-context: '.'
+      build-setup: './mvnw clean package -q'
+      java-version: '21'
+      post-pr-comment: true

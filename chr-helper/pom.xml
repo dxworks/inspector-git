@@ -21,8 +21,8 @@
     <properties>
         <jar.final.name>ig-chr-helper</jar.final.name>
         <main.class>org.dxworks.inspectorgit.chr.MainKt</main.class>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
     </properties>
 
     <build>
@@ -49,13 +49,13 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <jvmTarget>11</jvmTarget>
+                    <jvmTarget>21</jvmTarget>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.2</version>
+                <version>3.1.3</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
