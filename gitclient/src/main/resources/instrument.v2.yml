@@ -16,8 +16,9 @@ actions:
           java -jar iglog.jar "${repo}" ${igFlags}
 
   summary:
-    summaryMdFile: results/summary.md
-    summaryHtmlFile: results/summary.html
+    md-file: results/summary.md
+    html-file: results/summary.html
+    category: Git History
     commands:
       generate-summary:
         id: generate-summary
