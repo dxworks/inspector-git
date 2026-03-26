@@ -41,11 +41,11 @@
     <p>Summary input is missing</p>
   {{else}}
     <div class="summary-grid">
-      <div class="summary-item"><strong>Repositories</strong><br>{{metrics.repositoriesCount}}</div>
-      <div class="summary-item"><strong>IGLOG files</strong><br>{{metrics.iglogFiles}}</div>
-      <div class="summary-item"><strong>Git logs</strong><br>{{metrics.gitlogFiles}}</div>
-      <div class="summary-item"><strong>Total commits</strong><br>{{metrics.commitsTotal}}</div>
-      <div class="summary-item"><strong>Unique authors</strong><br>{{metrics.authorsTotal}}</div>
+      <div class="summary-item"><strong>Repositories</strong><br>{{metrics.repositoriesCountFormatted}}</div>
+      <div class="summary-item"><strong>IGLOG files</strong><br>{{metrics.iglogFilesFormatted}}</div>
+      <div class="summary-item"><strong>Git logs</strong><br>{{metrics.gitlogFilesFormatted}}</div>
+      <div class="summary-item"><strong>Total commits</strong><br>{{metrics.commitsTotalFormatted}}</div>
+      <div class="summary-item"><strong>Unique authors</strong><br>{{metrics.authorsTotalFormatted}}</div>
       <div class="summary-item"><strong>First commit</strong><br>{{metrics.firstCommitDate}}</div>
       <div class="summary-item"><strong>Latest commit</strong><br>{{metrics.lastCommitDate}}</div>
       <div class="summary-item"><strong>Generated at</strong><br>{{generatedAt}}</div>
@@ -67,8 +67,8 @@
           {{#each repositories}}
             <tr>
               <td>{{this.name}}</td>
-              <td>{{this.commits}}</td>
-              <td>{{this.authors}}</td>
+              <td>{{this.commitsFormatted}}</td>
+              <td>{{this.authorsFormatted}}</td>
               <td>{{this.firstCommitDate}}</td>
               <td>{{this.lastCommitDate}}</td>
             </tr>

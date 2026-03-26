@@ -223,12 +223,11 @@ def _create_summary_payload(
     markdown_lines = [
         '## Inspector Git',
         '',
-        f'- Status: {status}',
-        f'- Repositories detected: {len(normalized_repositories)}',
-        f'- IGLOG files: {len(iglog_files)}',
-        f'- Git logs: {len(gitlog_files)}',
-        f'- Total commits: {commits_total}',
-        f'- Unique authors: {authors_total}',
+        f'- Repositories detected: {_format_int(len(normalized_repositories))}',
+        f'- IGLOG files: {_format_int(len(iglog_files))}',
+        f'- Git logs: {_format_int(len(gitlog_files))}',
+        f'- Total commits: {_format_int(commits_total)}',
+        f'- Unique authors: {_format_int(authors_total)}',
         f'- First commit date: {first_commit_date}',
         f'- Latest commit date: {last_commit_date}',
         '',
@@ -243,24 +242,29 @@ def _create_summary_payload(
     else:
         for repository in normalized_repositories:
             markdown_lines.append(
-                f"| {repository.get('name', 'unknown')} | {repository.get('commits', 0)} | {repository.get('authors', 0)} | "
+                f"| {repository.get('name', 'unknown')} | {_format_int(int(repository.get('commits', 0)))} | {_format_int(int(repository.get('authors', 0)))} | "
                 f"{repository.get('firstCommitDate', 'unknown')} | {repository.get('lastCommitDate', 'unknown')} |"
             )
 
     template_model = {
-        'status': status,
-        'statusClass': _to_status_class(status),
         'generatedAt': generated_at,
         'metrics': {
-            'repositoriesCount': len(normalized_repositories),
-            'iglogFiles': len(iglog_files),
-            'gitlogFiles': len(gitlog_files),
-            'commitsTotal': commits_total,
-            'authorsTotal': authors_total,
+            'repositoriesCountFormatted': _format_int(len(normalized_repositories)),
+            'iglogFilesFormatted': _format_int(len(iglog_files)),
+            'gitlogFilesFormatted': _format_int(len(gitlog_files)),
+            'commitsTotalFormatted': _format_int(commits_total),
+            'authorsTotalFormatted': _format_int(authors_total),
             'firstCommitDate': first_commit_date,
             'lastCommitDate': last_commit_date,
         },
-        'repositories': normalized_repositories,
+        'repositories': [
+            {
+                **repository,
+                'commitsFormatted': _format_int(int(repository.get('commits', 0))),
+                'authorsFormatted': _format_int(int(repository.get('authors', 0))),
+            }
+            for repository in normalized_repositories
+        ],
     }
 
     return {
@@ -306,11 +310,5 @@ def _resolve_status(gitlog_count: int, has_data_quality_issues: bool) -> str:
     return 'success'
 
 
-def _to_status_class(status: str) -> str:
-    if status == 'success':
-        return 'status-success'
-    if status == 'partial':
-        return 'status-warning'
-    if status == 'failed':
-        return 'status-error'
-    return 'status-unknown'
+def _format_int(value: int) -> str:
+    return f'{value:,}'
