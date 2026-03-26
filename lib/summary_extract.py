@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 from typing import Any
@@ -169,8 +169,8 @@ def _parse_date(value: str) -> datetime | None:
 
 def _ensure_aware_utc(value: datetime) -> datetime:
     if value.tzinfo is None:
-        return value.replace(tzinfo=timezone.utc)
-    return value.astimezone(timezone.utc)
+        return value.replace(tzinfo=datetime.now().astimezone().tzinfo)
+    return value
 
 
 def _create_summary_payload(
@@ -196,7 +196,7 @@ def _create_summary_payload(
         gitlog_count=len(gitlog_files),
         has_data_quality_issues=has_data_quality_issues,
     )
-    generated_at = _to_iso_string(datetime.now(timezone.utc))
+    generated_at = _to_iso_string(datetime.now().astimezone())
 
     normalized_repositories: list[dict[str, Any]] = []
     for repository in repositories_sorted:
@@ -298,7 +298,8 @@ def _find_boundary_date(repositories: list[dict[str, Any]], edge: str) -> dateti
 
 def _to_iso_string(value: Any) -> str:
     if isinstance(value, datetime):
-        return value.astimezone(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
+        local_value = value.astimezone()
+        return f"{local_value.strftime('%Y-%m-%d %H:%M:%S')} {_format_gmt_offset(local_value.strftime('%z'))}"
     return 'unknown'
 
 
@@ -312,3 +313,17 @@ def _resolve_status(gitlog_count: int, has_data_quality_issues: bool) -> str:
 
 def _format_int(value: int) -> str:
     return f'{value:,}'
+
+
+def _format_gmt_offset(offset: str) -> str:
+    if len(offset) != 5:
+        return 'GMT+0'
+
+    sign = offset[0]
+    hours = int(offset[1:3])
+    minutes = int(offset[3:5])
+
+    if minutes == 0:
+        return f'GMT{sign}{hours}'
+
+    return f'GMT{sign}{hours}:{minutes:02d}'
