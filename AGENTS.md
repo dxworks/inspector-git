@@ -1,170 +1,98 @@
-# AGENTS.md
+# Inspector Git
 
-## Purpose
-This document is for coding agents operating in this repository.
-It defines build/test commands, single-test execution patterns, and code-style conventions.
+## Project Overview
 
-## Scope
-- Applies to the whole repository.
-- Main tech stack:
-  - Kotlin (Maven multi-module): `gitclient`, `core`, `utils`, `chr-helper`
-  - Node.js wrapper scripts in `lib/` and package publishing via `npm`
+Inspector Git is a CLI tool for extracting and analysing metadata from Git repositories. It produces an intermediate representation called **iglog** — a compact, structured log format that captures commits, changes, hunks, and line-level operations. The tool also supports author anonymization (incognito mode), commit graph extraction, and Chronos helper metrics.
 
-## Repository Layout
-- `pom.xml` (root aggregator)
-- `gitclient/` (git extraction + parsers + tests)
-- `core/` (model/transformers + tests)
-- `utils/` (shared utilities)
-- `chr-helper/` (chronos helper CLI jar)
-- `lib/` (Node wrappers that execute built jars)
-- `.github/workflows/` (CI/release pipelines)
+The tool is also packaged as a [Voyager](https://github.com/dxworks/voyager) instrument (`iglog-voyager.zip`).
 
-## Toolchain and Runtime
-- Java: minimum 11 (project compiles to JVM target 11)
-- CI currently runs Java 21 (Temurin)
-- Maven wrapper available: `./mvnw` / `mvnw.cmd`
-- Node required for packaging and publishing npm artifacts
+## Build & Run
 
-## Build Commands (Primary)
-Run from repo root unless stated otherwise.
+- **Language:** Kotlin (JVM target 21)
+- **Build tool:** Maven (wrapper included: `./mvnw`)
+- **Build:** `./mvnw clean package`
+- **Output:** `gitclient/target/iglog.jar` (fat JAR — main tool), `chr-helper/target/ig-chr-helper.jar` (Chronos helper)
+- **Run:** `java -jar gitclient/target/iglog.jar <repo-path> [flags]`
+- **Main class:** `org.dxworks.inspectorgit.gitclient.MainKt`
 
-### Maven (all modules)
-- Build all modules:
-  - `./mvnw clean package`
-- Build without tests:
-  - `./mvnw clean package -DskipTests`
-- Run all tests:
-  - `./mvnw test`
-- Build one module (and required dependencies):
-  - `./mvnw -pl gitclient -am clean package`
-  - `./mvnw -pl core -am clean package`
-  - `./mvnw -pl chr-helper -am clean package`
-  - `./mvnw -pl utils -am clean package`
+### Configuration
 
-### Node packaging
-- Install deps:
-  - `npm ci`
-- Build distributable `dist/` (copies JS + built jars):
-  - `npm run build`
-- Clean dist:
-  - `npm run clean`
+Configuration is passed via environment variables (prefixed `IG_`):
 
-## Test Commands (Including Single Test)
-Maven Surefire is used (no dedicated Failsafe configuration found).
+| Variable | Default | Description |
+|---|---|---|
+| `IG_IGLOG` | `false` | Generate iglog output |
+| `IG_GITLOG` | `true` | Generate git log output |
+| `IG_INCOGNITO` | `false` | Enable author anonymization |
+| `IG_RECURSIVE` | `false` | Recursively process sub-repositories |
 
-### All tests
-- `./mvnw test`
-- Module-only:
-  - `./mvnw -pl gitclient test`
-  - `./mvnw -pl core test`
+## Project Structure
 
-### Single test class
-- `./mvnw -pl gitclient -Dtest=LineOperationsMetaExtractorTest test`
-- `./mvnw -pl core -Dtest=IssueTrackerTransformerTest test`
+```
+gitclient/                          — Main iglog extraction tool
+  src/main/kotlin/org/dxworks/inspectorgit/gitclient/
+    main.kt                         — CLI entry point
+    GitClient.kt                    — Git process wrapper
+    parsers/                         — Git log parsers
+    iglog/                           — IGLog format readers/writers
+    incognito/                       — Author anonymization
+    dto/                             — Data transfer objects
+  src/main/resources/
+    instrument.yml                   — Voyager instrument descriptor
 
-### Single test method
-- `./mvnw -pl gitclient -Dtest=LineOperationsMetaExtractorTest#readModify test`
-- `./mvnw -pl core -Dtest=IssueTrackerTransformerTest#test\ task\ regex test`
+core/                               — Core domain model and transformers
+  src/main/kotlin/org/dxworks/inspectorgit/
+    model/                           — Git, issue tracker, remote models
+    transformers/                    — Data transformation logic
+    factories/                       — Project factory implementations
+    registries/                      — Registry pattern implementations
 
-### Pattern-based selection
-- `./mvnw -pl gitclient -Dtest=*ParserTest test`
-- `./mvnw -pl core -Dtest=*TransformerTest test`
+utils/                              — Shared utility classes
+chr-helper/                         — Chronos helper tool
 
-### Notes on integration-style tests
-- Some tests are named `*IT` (for example `ModelTestIT`) but no dedicated integration-test plugin config is present.
-- Treat `*IT` tests as potentially environment-heavy and run explicitly when needed:
-  - `./mvnw -pl core -Dtest=ModelTestIT test`
+lib/                                — Node.js CLI wrappers (npm package)
+scripts/
+  build.sh                          — Build script (wraps mvnw)
+  prepare-release.sh                — Package standard release ZIP
+  prepare-release-voyager.sh        — Package Voyager instrument ZIP
+  regression-test.sh                — Compare output against latest release
+releaseNotes/                       — Per-version release notes
+```
 
-## Lint/Formatting Commands
-No explicit lint or formatter task is configured in Maven or npm scripts.
-Operational guidance:
-- Use IntelliJ Kotlin formatting defaults already used by the codebase.
-- Keep changes minimal and style-consistent with surrounding files.
-- Do not introduce new lint frameworks unless requested.
+## Dependencies
 
-## Running the CLI Locally
-After building jars and npm dist:
-- `node lib/iglog.js <path-to-repo>`
-- `node lib/ig-chr-helper.js <path-to-folder-containing-iglogs>`
+- `jackson-module-kotlin`, `jackson-dataformat-csv` — JSON/CSV serialization
+- `kotlin-reflect`, `kotlin-stdlib-jdk8` — Kotlin runtime
+- `logback-classic` — Logging (SLF4J)
+- `zip4j` — ZIP file handling (gitclient)
+- `java-diff-utils` — Diff generation (gitclient)
+- `groovy` — Groovy scripting support (core)
 
-## Code Style Guidelines
+## Docker
 
-### General
-- Follow existing module/package organization; avoid cross-module shortcuts.
-- Prefer small, composable functions over long procedural blocks.
-- Keep public APIs stable unless task explicitly requires API changes.
+- **Image:** `dxworks/inspector-git` on Docker Hub
+- **Base:** `eclipse-temurin:21-jre-alpine`
+- **Build:** `docker build -t inspector-git-test .` (requires `gitclient/target/iglog.jar` — run `./mvnw clean package` first)
+- **Run:** `docker run -v /path/to/repo:/repo -e IG_IGLOG=true inspector-git-test /repo`
 
-### Kotlin Formatting
-- 4-space indentation, no tabs.
-- Keep one top-level declaration per conceptual unit when practical.
-- Use trailing commas in multiline argument lists where surrounding code uses them.
-- Keep line wrapping readable over strict compactness.
+## CI/CD
 
-### Imports
-- Order:
-  1. project imports
-  2. third-party imports
-  3. JDK/Kotlin imports
-- Avoid unnecessary imports.
-- Wildcard imports exist in some files; prefer explicit imports for new/updated code unless wildcard keeps parity with the file's existing style.
+- **Build:** `build.yml` runs on every push (build verification)
+- **Release:** Tag `v*` triggers `release.yml` — parse-tag → gate → archive + npm + docker (parallel) → GitHub Release
+- **Voyager release:** Tag `v*-voyager` triggers `release-voyager.yml` — parse-tag → gate → archive → GitHub Release
+- **Security:** `trivy-security-scan.yml` runs on PRs to `develop` (filesystem + Docker image scan); `trivy-daily-scan.yml` runs daily
+- **Regression:** `regression-test.yml` runs on PRs (non-blocking) and manual dispatch
 
-### Naming
-- Classes/objects/interfaces: `PascalCase`
-- Functions/properties/locals: `camelCase`
-- Constants:
-  - `UPPER_SNAKE_CASE` for global constants and env-var-like values
-  - `camelCase` constants inside companion objects are also common here; preserve local style in touched files
-- Test names:
-  - Descriptive names; backtick test names are acceptable and common
+All release workflows use reusable pipelines from `dxworks/pipelines@v1`.
 
-### Types and Nullability
-- Prefer `val` over `var`; use `var` only for required mutability.
-- Model immutable data with `data class` where appropriate.
-- Use Kotlin null-safety idioms (`?.`, `?:`, `?.let`) instead of defensive null checks.
-- Avoid `!!` unless logically guaranteed; if used, keep it tightly scoped and justified.
+## Branching Strategy
 
-### Error Handling
-- Use domain-specific exceptions for domain failures (for example patterns like `NoChangeException`).
-- Catch specific exceptions, not broad `Exception`, unless truly boundary-level handling.
-- Log meaningful context with SLF4J (`LoggerFactory`) before returning fallback/null.
-- Prefer fail-fast for invalid invariant states; prefer graceful continuation for partial parsing/extraction issues.
+- Main development branch: `develop`
+- Release tags: `v<semver>` (standard) and `v<semver>-voyager` (Voyager instrument)
 
-### Logging
-- Use `private val LOG = LoggerFactory.getLogger(...)` in companion objects/classes.
-- Keep log messages actionable and contextual (entity id, file name, commit id).
-- Use `debug` for noisy loops, `info` for progress milestones, `warn/error` for anomalies.
+## Output Format
 
-### Collections and Transformations
-- Prefer Kotlin collection operators (`map`, `filter`, `mapNotNull`, `firstOrNull`) over manual mutable loops where readable.
-- Use sequences/streams only when needed for large datasets or parallel operations.
-- Keep recursion (`tailrec`) only where it improves clarity and remains safe.
-
-### Tests
-- Use JUnit 5 (`@Test`) with Kotlin/JUnit assertions.
-- Keep test fixtures local and explicit.
-- Prefer deterministic test data; avoid hardcoded machine-specific paths in new tests.
-- For parser/transformer behavior, assert both size and content-level expectations.
-
-### JavaScript (lib wrappers)
-- CommonJS style (`require`, `module.exports`) is current standard here.
-- Keep wrappers thin: argument passthrough + Java caller orchestration.
-- Do not add heavy logic in Node wrappers when Kotlin modules own behavior.
-
-## Agent Operating Checklist
-- Before coding: identify target module (`gitclient`, `core`, `utils`, `chr-helper`).
-- After coding: run the smallest relevant test scope first.
-- Before finalizing: run module-level tests if change spans multiple files.
-- If packaging-related change: run `npm run build` after Maven package succeeds.
-- Do not add new build systems or style tools unless explicitly requested.
-
-## CI and Release Notes (for context)
-- CI build workflow runs `mvn clean package`.
-- Release workflows also run npm packaging (`npm ci`, `npm run build`).
-- `gitclient/pom.xml` contains `$tag_version` replacement logic in release flow; avoid altering this unless release automation is being updated.
-
-## Cursor/Copilot Rules Discovery
-- `.cursor/rules/`: not found
-- `.cursorrules`: not found
-- `.github/copilot-instructions.md`: not found
-
-If such files are later added, merge their guidance into this document and treat them as higher-priority local agent instructions.
+iglog produces output files in the results directory:
+- `.iglog` files — compact intermediate representation of git history
+- `.gitlog` files — structured git log output
+- Commit graph data (when requested)
