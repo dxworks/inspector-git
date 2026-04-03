@@ -1,6 +1,6 @@
 name: inspector-git
 id: inspector-git
-version: 1.0.0
+version: 1.6.0
 
 actions:
   start:
@@ -26,6 +26,11 @@ actions:
         command:
           windows: py -3 ig-summary.py "${instrumentPath}/results"
           unix: python3 ig-summary.py "${instrumentPath}/results"
+
+  clean:
+    with:
+      locations:
+        - source: ${instrumentDir}/results
 
   pack:
     with:
