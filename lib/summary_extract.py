@@ -196,7 +196,6 @@ def _create_summary_payload(
         gitlog_count=len(gitlog_files),
         has_data_quality_issues=has_data_quality_issues,
     )
-    generated_at = _to_iso_string(datetime.now().astimezone())
 
     normalized_repositories: list[dict[str, Any]] = []
     for repository in repositories_sorted:
@@ -211,13 +210,12 @@ def _create_summary_payload(
     metadata = {
         'metadata.repositories.count': len(normalized_repositories),
         'metadata.iglog.files': len(iglog_files),
-        'metadata.gitlog.files': len(gitlog_files),
+        'metadata.git.log.files': len(gitlog_files),
         'metadata.commits.total': commits_total,
         'metadata.authors.total': authors_total,
         'metadata.commits.first.date': first_commit_date,
         'metadata.commits.last.date': last_commit_date,
         'metadata.warnings.count': 0,
-        'metadata.generated.at': generated_at,
     }
 
     markdown_lines = [
@@ -225,7 +223,7 @@ def _create_summary_payload(
         '',
         f'- Repositories detected: {_format_int(len(normalized_repositories))}',
         f'- IGLOG files: {_format_int(len(iglog_files))}',
-        f'- Git logs: {_format_int(len(gitlog_files))}',
+        f'- Git log files: {_format_int(len(gitlog_files))}',
         f'- Total commits: {_format_int(commits_total)}',
         f'- Unique authors: {_format_int(authors_total)}',
         f'- First commit date: {first_commit_date}',
@@ -247,7 +245,6 @@ def _create_summary_payload(
             )
 
     template_model = {
-        'generatedAt': generated_at,
         'metrics': {
             'repositoriesCountFormatted': _format_int(len(normalized_repositories)),
             'iglogFilesFormatted': _format_int(len(iglog_files)),
@@ -298,8 +295,7 @@ def _find_boundary_date(repositories: list[dict[str, Any]], edge: str) -> dateti
 
 def _to_iso_string(value: Any) -> str:
     if isinstance(value, datetime):
-        local_value = value.astimezone()
-        return f"{local_value.strftime('%Y-%m-%d %H:%M:%S')} {_format_gmt_offset(local_value.strftime('%z'))}"
+        return value.astimezone().strftime('%Y-%m-%d')
     return 'unknown'
 
 
@@ -313,17 +309,3 @@ def _resolve_status(gitlog_count: int, has_data_quality_issues: bool) -> str:
 
 def _format_int(value: int) -> str:
     return f'{value:,}'
-
-
-def _format_gmt_offset(offset: str) -> str:
-    if len(offset) != 5:
-        return 'GMT+0'
-
-    sign = offset[0]
-    hours = int(offset[1:3])
-    minutes = int(offset[3:5])
-
-    if minutes == 0:
-        return f'GMT{sign}{hours}'
-
-    return f'GMT{sign}{hours}:{minutes:02d}'
