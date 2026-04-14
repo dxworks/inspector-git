@@ -1,0 +1,39 @@
+name: inspector-git
+id: inspector-git
+version: 1.6.0
+
+actions:
+  start:
+    parameters:
+      igFlags: ''
+    environment:
+      IG_IGLOG: false
+    commands:
+      extract-iglogs:
+        id: extract-iglogs
+        dir: ${instrumentPath}
+        command: >-
+          java -jar iglog.jar "${repo}" ${igFlags}
+
+  summary:
+    md-file: results/summary.md
+    html-file: results/summary.html
+    category: Git History
+    commands:
+      generate-summary:
+        id: generate-summary
+        dir: ${instrumentPath}
+        command:
+          windows: py -3 ig-summary.py "${instrumentPath}/results"
+          unix: python3 ig-summary.py "${instrumentPath}/results"
+
+  clean:
+    with:
+      locations:
+        - source: ${instrumentDir}/results
+
+  pack:
+    with:
+      locations:
+        - source: ${instrumentDir}/results
+          destination: /results
