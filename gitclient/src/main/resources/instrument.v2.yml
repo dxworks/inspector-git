@@ -37,6 +37,3 @@ actions:
       locations:
         - source: ${instrumentDir}/results
           destination: /results
-          files:
-            - summary.md
-            - summary.html
