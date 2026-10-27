@@ -194,6 +194,7 @@ def _create_summary_payload(
 
     status = _resolve_status(
         gitlog_count=len(gitlog_files),
+        iglog_count=len(iglog_files),
         has_data_quality_issues=has_data_quality_issues,
     )
 
@@ -299,8 +300,8 @@ def _to_iso_string(value: Any) -> str:
     return 'unknown'
 
 
-def _resolve_status(gitlog_count: int, has_data_quality_issues: bool) -> str:
-    if gitlog_count == 0:
+def _resolve_status(gitlog_count: int, iglog_count: int, has_data_quality_issues: bool) -> str:
+    if gitlog_count == 0 and iglog_count == 0:
         return 'failed'
     if has_data_quality_issues:
         return 'partial'
