@@ -34,11 +34,13 @@
   },
   "devDependencies": {
     "json": "^11.0.0",
-    "rimraf": "^6.0.1",
+    "rimraf": "^6.1.4",
     "sort-package-json": "^1.52.0"
   },
   "overrides": {
-    "tar": ">=7.5.11",
+    "tar": "^7.5.22",
+    "brace-expansion@1": "^1.1.16",
+    "picomatch@2": "^2.3.2",
     "yauzl": ">=3.2.1"
   },
   "dxw": {
