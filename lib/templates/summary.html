@@ -1,0 +1,82 @@
+<section class="inspector-git-summary">
+  <style>
+    .inspector-git-summary {
+      color: #1f2328;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .inspector-git-summary h3 {
+      margin-top: 0;
+    }
+
+    .inspector-git-summary table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+
+    .inspector-git-summary th,
+    .inspector-git-summary td {
+      border: 1px solid #d0d7de;
+      padding: 6px 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .inspector-git-summary .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 8px 16px;
+      margin: 4px 0;
+    }
+
+    .inspector-git-summary .summary-item {
+      padding: 6px 8px;
+      background: #f6f8fa;
+      border-radius: 6px;
+    }
+  </style>
+
+  {{#if isMissing}}
+    <p>Summary input is missing</p>
+  {{else}}
+    <div class="summary-grid">
+      <div class="summary-item"><strong>Repositories</strong><br>{{metrics.repositoriesCountFormatted}}</div>
+      <div class="summary-item"><strong>IGLOG files</strong><br>{{metrics.iglogFilesFormatted}}</div>
+      <div class="summary-item"><strong>Git log files</strong><br>{{metrics.gitlogFilesFormatted}}</div>
+      <div class="summary-item"><strong>Total commits</strong><br>{{metrics.commitsTotalFormatted}}</div>
+      <div class="summary-item"><strong>Unique authors</strong><br>{{metrics.authorsTotalFormatted}}</div>
+      <div class="summary-item"><strong>First commit</strong><br>{{metrics.firstCommitDate}}</div>
+      <div class="summary-item"><strong>Latest commit</strong><br>{{metrics.lastCommitDate}}</div>
+    </div>
+
+    <h3>Repository Breakdown</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Repository</th>
+          <th>Commits</th>
+          <th>Authors</th>
+          <th>First Commit</th>
+          <th>Latest Commit</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#if repositories}}
+          {{#each repositories}}
+            <tr>
+              <td>{{this.name}}</td>
+              <td>{{this.commitsFormatted}}</td>
+              <td>{{this.authorsFormatted}}</td>
+              <td>{{this.firstCommitDate}}</td>
+              <td>{{this.lastCommitDate}}</td>
+            </tr>
+          {{/each}}
+        {{else}}
+          <tr><td colspan="5">No repository metrics available.</td></tr>
+        {{/if}}
+      </tbody>
+    </table>
+  {{/if}}
+
+</section>

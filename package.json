@@ -21,10 +21,11 @@
   "main": "dist/index.js",
   "bin": {
     "iglog": "dist/iglog.js",
-    "ig-chr-helper": "dist/ig-chr-helper.js"
+    "ig-chr-helper": "dist/ig-chr-helper.js",
+    "ig-summary": "dist/ig-summary.js"
   },
   "scripts": {
-    "build": "npm run clean && mkdir dist && cp lib/*.js dist && cp gitclient/target/iglog.jar dist && cp chr-helper/target/ig-chr-helper.jar dist",
+    "build": "npm run clean && mkdir dist && cp lib/*.js dist && cp lib/*.py dist && mkdir dist/templates && cp lib/templates/*.html dist/templates && cp gitclient/target/iglog.jar dist && cp chr-helper/target/ig-chr-helper.jar dist",
     "clean": "rimraf dist/",
     "local": "npm run build && npm i"
   },
