@@ -11,10 +11,10 @@ permissions:
 
 jobs:
   trivy-fs:
-    uses: dxworks/pipelines/.github/workflows/trivy-fs-scan.yml@v1
+    uses: dxworks/pipelines/.github/workflows/trivy-fs-scan.yml@2a87ba006a2a2747196fd292376bda880f672c6e
 
   trivy-image:
-    uses: dxworks/pipelines/.github/workflows/trivy-image-scan.yml@v1
+    uses: dxworks/pipelines/.github/workflows/trivy-image-scan.yml@2a87ba006a2a2747196fd292376bda880f672c6e
     with:
       image-ref: inspector-git-test:latest
       build-context: '.'
