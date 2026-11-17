@@ -51,5 +51,8 @@
         "command": "igCommand"
       }
     ]
+  },
+  "engines": {
+    "node": ">=26"
   }
 }
