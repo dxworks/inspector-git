@@ -38,6 +38,7 @@ jobs:
     uses: dxworks/pipelines/.github/workflows/release-npm.yml@v1
     with:
       version: ${{ needs.parse-tag.outputs.semver }}
+      node-version: '26'
     permissions:
       contents: read
       packages: write

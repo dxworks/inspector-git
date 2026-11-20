@@ -52,7 +52,29 @@ environment:
 ## Run as dxw instrument
 Inspector git Chronos helper is also available as part of the Inspector-Git releases and as a `dxw` CLI plugin.
 
-InspectorGit exposes the `ig` command (aliased `inspector-git`), that contains 2 subcommands:
+InspectorGit exposes the `ig` command (aliased `inspector-git`), that contains 3 subcommands:
 
 * `dxw ig iglog <path/to/folder>` will run the iglog command
 * `dxw ig chr <path/to/folder/containing/iglogs>` will produce a `chr-help.json` file that can be uploaded to Chronos.
+* `dxw ig summary <path/to/results>` generates `summary.md` and `summary.html` from inspector-git outputs.
+
+## Summary Command
+
+The `summary` command reads inspector-git generated files from a results directory and creates:
+
+- `results/summary.md` (Voyager summary metadata + markdown)
+- `results/summary.html` (HTML template populated with metrics)
+
+It extracts repository metrics such as commits, authors, and first/last commit dates from `*.git` files.
+
+You can run it directly from the packaged Voyager instrument folder with Python:
+
+```bash
+python3 ig-summary.py <path/to/results>
+```
+
+On Windows, use:
+
+```bash
+py -3 ig-summary.py <path/to/results>
+```
